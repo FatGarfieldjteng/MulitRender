@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "NextGenRender.h"
+#include "ConfigParameter.h"
+#include "helper.h"
 
 #define MAX_LOADSTRING 100
 
@@ -10,6 +12,45 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+
+HWND gHWnd;
+
+// Window rectangle (used to toggle fullscreen state).
+RECT g_WindowRect;
+
+// DirectX 12 Objects
+ComPtr<ID3D12Device2> gDevice;
+ComPtr<ID3D12CommandQueue> gCommandQueue;
+ComPtr<IDXGISwapChain4> gSwapChain;
+ComPtr<ID3D12Resource> gBackBuffers[gNumFrames];
+ComPtr<ID3D12GraphicsCommandList> gCommandList;
+ComPtr<ID3D12CommandAllocator> gCommandAllocators[gNumFrames];
+ComPtr<ID3D12DescriptorHeap> gRTVDescriptorHeap;
+UINT gRTVDescriptorSize;
+UINT gCurrentBackBufferIndex;
+
+// By default, enable V-Sync.
+// Can be toggled with the V key.
+bool gVSync = true;
+bool gTearingSupported = false;
+// By default, use windowed mode.
+// Can be toggled with the Alt+Enter or F11
+bool gFullscreen = false;
+
+// Set to true once the DX12 objects have been initialized.
+bool gIsInitialized = false;
+
+void EnableDebugLayer()
+{
+#if defined(_DEBUG)
+    // Always enable the debug layer before doing anything DX12 related
+    // so all possible errors generated while creating DX12 objects
+    // are caught by the debug layer.
+    ComPtr<ID3D12Debug> debugInterface;
+    ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
+    debugInterface->EnableDebugLayer();
+#endif
+}
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -97,16 +138,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   gHWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, 1024, 768, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
+   if (!gHWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(gHWnd, nCmdShow);
+   UpdateWindow(gHWnd);
 
    return TRUE;
 }
