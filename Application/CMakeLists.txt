@@ -6,11 +6,15 @@ set(HEADER_FILES
 	ConfigParameter.h 
 	Helper.h
 	framework.h
+	Adapter.h
+	Device.h
 	NextGenRender.h
 	targetver.h
 )
 
 set(SOURCE_FILES 
+	Adapter.cpp
+	Device.cpp
 	NextGenRender.cpp
 )
 
