@@ -5,6 +5,8 @@
 #include "NextGenRender.h"
 #include "ConfigParameter.h"
 #include "helper.h"
+#include "Adapter.h"
+#include "Device.h"
 
 #define MAX_LOADSTRING 100
 
@@ -18,8 +20,9 @@ HWND gHWnd;
 // Window rectangle (used to toggle fullscreen state).
 RECT g_WindowRect;
 
+std::shared_ptr<Device> gDevice;
+
 // DirectX 12 Objects
-ComPtr<ID3D12Device2> gDevice;
 ComPtr<ID3D12CommandQueue> gCommandQueue;
 ComPtr<IDXGISwapChain4> gSwapChain;
 ComPtr<ID3D12Resource> gBackBuffers[gNumFrames];
@@ -50,6 +53,32 @@ void EnableDebugLayer()
     ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
     debugInterface->EnableDebugLayer();
 #endif
+}
+
+bool CheckTearingSupport()
+{
+    BOOL allowTearing = FALSE;
+
+    // Rather than create the DXGI 1.5 factory interface directly, we create the
+    // DXGI 1.4 interface and query for the 1.5 interface. This is to enable the 
+    // graphics debugging tools which will not support the 1.5 factory interface 
+    // until a future update.
+    ComPtr<IDXGIFactory4> factory4;
+    if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory4))))
+    {
+        ComPtr<IDXGIFactory5> factory5;
+        if (SUCCEEDED(factory4.As(&factory5)))
+        {
+            if (FAILED(factory5->CheckFeatureSupport(
+                DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+                &allowTearing, sizeof(allowTearing))))
+            {
+                allowTearing = FALSE;
+            }
+        }
+    }
+
+    return allowTearing == TRUE;
 }
 
 // Forward declarations of functions included in this code module:
@@ -140,6 +169,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    gHWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, 1024, 768, nullptr, nullptr, hInstance, nullptr);
+
+   EnableDebugLayer();
+
+   // create graphics system
+   std::shared_ptr<Adapter> adapter = Adapter::Create();
+
+   gDevice = Device::Create(adapter);
+
+   gCommandQueue = gDevice->CreateCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+
 
    if (!gHWnd)
    {
