@@ -12,9 +12,9 @@ class Device
 {
 public:
 
-    static std::shared_ptr<Device> Create( std::shared_ptr<Adapter> adapter = nullptr );
+    static std::shared_ptr<Device> create( std::shared_ptr<Adapter> adapter = nullptr );
 
-    Microsoft::WRL::ComPtr<ID3D12Device2> GetDevice() const
+    Microsoft::WRL::ComPtr<ID3D12Device2> device() const
     {
         return mDevice;
     }
@@ -26,14 +26,16 @@ public:
 public:
     // create resources
     
-    // command queue
-    ComPtr<ID3D12CommandQueue> CreateCommandQueue(D3D12_COMMAND_LIST_TYPE type);
+    // direct command queue
+    void createDirectCommandQueue();
 
-protected:
-    
-    
+    Microsoft::WRL::ComPtr<ID3D12CommandQueue> directCommandQueue()
+    {
+        return mDirectCommandQueue;
+    }
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Device2> mDevice;
+    Microsoft::WRL::ComPtr<ID3D12CommandQueue> mDirectCommandQueue;
 
 };

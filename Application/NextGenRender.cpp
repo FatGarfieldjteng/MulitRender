@@ -3,10 +3,12 @@
 
 #include "framework.h"
 #include "NextGenRender.h"
+#include "GraphicsSystem.h"
 #include "ConfigParameter.h"
 #include "helper.h"
 #include "Adapter.h"
 #include "Device.h"
+#include "SwapChain.h"
 
 #define MAX_LOADSTRING 100
 
@@ -20,17 +22,7 @@ HWND gHWnd;
 // Window rectangle (used to toggle fullscreen state).
 RECT g_WindowRect;
 
-std::shared_ptr<Device> gDevice;
-
-// DirectX 12 Objects
-ComPtr<ID3D12CommandQueue> gCommandQueue;
-ComPtr<IDXGISwapChain4> gSwapChain;
-ComPtr<ID3D12Resource> gBackBuffers[gNumFrames];
-ComPtr<ID3D12GraphicsCommandList> gCommandList;
-ComPtr<ID3D12CommandAllocator> gCommandAllocators[gNumFrames];
-ComPtr<ID3D12DescriptorHeap> gRTVDescriptorHeap;
-UINT gRTVDescriptorSize;
-UINT gCurrentBackBufferIndex;
+GraphicsSystem gs;
 
 // By default, enable V-Sync.
 // Can be toggled with the V key.
@@ -172,12 +164,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    EnableDebugLayer();
 
-   // create graphics system
-   std::shared_ptr<Adapter> adapter = Adapter::Create();
+   gs.createDevice();
 
-   gDevice = Device::Create(adapter);
-
-   gCommandQueue = gDevice->CreateCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+ 
+   gs.mDevice->createDirectCommandQueue();
 
 
    if (!gHWnd)

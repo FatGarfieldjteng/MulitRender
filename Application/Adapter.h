@@ -17,7 +17,7 @@ public:
     static std::shared_ptr<Adapter> Create( DXGI_GPU_PREFERENCE gpuPreference = DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
                                             bool                useWarp       = false );
 
-    Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter() const
+    Microsoft::WRL::ComPtr<IDXGIAdapter4> adapter() const
     {
         return mAdapter;
     }

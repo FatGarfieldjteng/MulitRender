@@ -9,6 +9,7 @@ set(HEADER_FILES
 	Adapter.h
 	Device.h
 	SwapChain.h
+	Graphicssystem.h
 	NextGenRender.h
 	targetver.h
 )
@@ -17,6 +18,7 @@ set(SOURCE_FILES
 	Adapter.cpp
 	Device.cpp
 	SwapChain.cpp
+	GraphicsSystem.cpp
 	NextGenRender.cpp
 )
 
