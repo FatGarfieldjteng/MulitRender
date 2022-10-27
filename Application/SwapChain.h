@@ -33,25 +33,7 @@ public:
         return mSwapChain;
     }
 
-    void UpdateRenderTargetViews(ComPtr<ID3D12Device2> device,
-        ComPtr<IDXGISwapChain4> swapChain, ComPtr<ID3D12DescriptorHeap> descriptorHeap)
-    {
-        auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-        for (int i = 0; i < g_NumFrames; ++i)
-        {
-            ComPtr<ID3D12Resource> backBuffer;
-            ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
-
-            device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
-
-            g_BackBuffers[i] = backBuffer;
-
-            rtvHandle.Offset(rtvDescriptorSize);
-        }
-    }
+    void UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap);
 
 public:
     // Swap chains can only be created through the Device.

@@ -76,22 +76,30 @@ ComPtr<ID3D12DescriptorHeap> Device::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_
     return descriptorHeap;
 }
 
-void UpdateRenderTargetViews(
-    ComPtr<IDXGISwapChain4> swapChain, ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+ComPtr<ID3D12CommandAllocator> Device::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type)
 {
-    auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    ComPtr<ID3D12CommandAllocator> commandAllocator;
+    ThrowIfFailed(mDevice->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator)));
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+    return commandAllocator;
+}
 
-    for (int i = 0; i < g_NumFrames; ++i)
-    {
-        ComPtr<ID3D12Resource> backBuffer;
-        ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
+ComPtr<ID3D12GraphicsCommandList> Device::CreateCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator, 
+    D3D12_COMMAND_LIST_TYPE type)
+{
+    ComPtr<ID3D12GraphicsCommandList> commandList;
+    ThrowIfFailed(mDevice->CreateCommandList(0, type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
-        device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
+    ThrowIfFailed(commandList->Close());
 
-        g_BackBuffers[i] = backBuffer;
+    return commandList;
+}
 
-        rtvHandle.Offset(rtvDescriptorSize);
-    }
+ComPtr<ID3D12Fence> Device::CreateFence()
+{
+    ComPtr<ID3D12Fence> fence;
+
+    ThrowIfFailed(mDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+
+    return fence;
 }

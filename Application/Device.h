@@ -37,6 +37,13 @@ public:
     ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
         uint32_t numDescriptors);
 
+    ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type);
+
+    ComPtr<ID3D12GraphicsCommandList> CreateCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
+        D3D12_COMMAND_LIST_TYPE type);
+
+    ComPtr<ID3D12Fence> Device::CreateFence();
+
 private:
     Microsoft::WRL::ComPtr<ID3D12Device2> mDevice;
     Microsoft::WRL::ComPtr<ID3D12CommandQueue> mDirectCommandQueue;

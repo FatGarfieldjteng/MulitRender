@@ -91,3 +91,24 @@ SwapChain::~SwapChain()
 {
 
 }
+
+void SwapChain::UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+{
+    auto dxDevice = mDevice->device();
+
+    auto rtvDescriptorSize = dxDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+    for (int i = 0; i < BufferCount; ++i)
+    {
+        ComPtr<ID3D12Resource> backBuffer;
+        ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
+
+        dxDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
+
+        mBackBuffers[i] = backBuffer;
+
+        rtvHandle.Offset(rtvDescriptorSize);
+    }
+}
