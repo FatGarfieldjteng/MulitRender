@@ -61,3 +61,37 @@ void Device::createDirectCommandQueue()
 
     ThrowIfFailed(mDevice->CreateCommandQueue(&desc, IID_PPV_ARGS(&mDirectCommandQueue)));
 }
+
+ComPtr<ID3D12DescriptorHeap> Device::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
+    uint32_t numDescriptors)
+{
+    ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+
+    D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+    desc.NumDescriptors = numDescriptors;
+    desc.Type = type;
+
+    ThrowIfFailed(mDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
+
+    return descriptorHeap;
+}
+
+void UpdateRenderTargetViews(
+    ComPtr<IDXGISwapChain4> swapChain, ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+{
+    auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+    for (int i = 0; i < g_NumFrames; ++i)
+    {
+        ComPtr<ID3D12Resource> backBuffer;
+        ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
+
+        device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
+
+        g_BackBuffers[i] = backBuffer;
+
+        rtvHandle.Offset(rtvDescriptorSize);
+    }
+}

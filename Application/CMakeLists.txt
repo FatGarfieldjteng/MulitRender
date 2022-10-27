@@ -11,6 +11,7 @@ set(HEADER_FILES
 	SwapChain.h
 	Graphicssystem.h
 	NextGenRender.h
+	d3dx12.h
 	targetver.h
 )
 
