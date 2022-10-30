@@ -35,6 +35,8 @@ public:
 
     void UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap);
 
+    
+
 public:
     // Swap chains can only be created through the Device.
     SwapChain(HWND hWnd,
@@ -56,5 +58,6 @@ private:
     HANDLE mHFrameLatencyWaitableObject = 0;
 
     ComPtr<ID3D12Resource> mBackBuffers[BufferCount];
+    
     
 };

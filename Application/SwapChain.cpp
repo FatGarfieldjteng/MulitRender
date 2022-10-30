@@ -112,3 +112,4 @@ void SwapChain::UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorH
         rtvHandle.Offset(rtvDescriptorSize);
     }
 }
+
