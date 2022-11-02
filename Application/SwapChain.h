@@ -28,14 +28,19 @@ public:
         return mTearingSupported;
     }
 
-    Microsoft::WRL::ComPtr<IDXGISwapChain4> GetDXGISwapChain() const
+    Microsoft::WRL::ComPtr<IDXGISwapChain4> getDXGISwapChain() const
     {
         return mSwapChain;
     }
 
-    void UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap);
+    void updateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap);
 
-    
+    ComPtr<ID3D12Resource> backBuffer(UINT index)
+    {
+        return mBackBuffers[index];
+    }
+
+    void present();
 
 public:
     // Swap chains can only be created through the Device.
@@ -59,5 +64,6 @@ private:
 
     ComPtr<ID3D12Resource> mBackBuffers[BufferCount];
     
+    bool mVSync = false;
     
 };

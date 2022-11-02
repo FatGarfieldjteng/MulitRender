@@ -35,7 +35,7 @@ public:
 	
 	uint64_t signal();
 
-	void waitForFenceValue(std::chrono::milliseconds duration = std::chrono::milliseconds::max());
+	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
 
 	void flush(uint64_t& fenceValue);
 
@@ -50,11 +50,17 @@ public:
 	std::shared_ptr<SwapChain> mSwapChain;
 
 	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
+	ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;
 	uint64_t mFenceValue;
 
+	ComPtr<ID3D12DescriptorHeap> mRTVDescriptorHeap;
+	UINT mRTVDescriptorSize;
+	UINT mCurrentBackBufferIndex;
+
+	uint64_t mFrameFenceValues[BufferCount] = {};
 
 	HANDLE mFenceEvent;
 };

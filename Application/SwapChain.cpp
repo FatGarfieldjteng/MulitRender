@@ -92,7 +92,7 @@ SwapChain::~SwapChain()
 
 }
 
-void SwapChain::UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+void SwapChain::updateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap)
 {
     auto dxDevice = mDevice->device();
 
@@ -113,3 +113,9 @@ void SwapChain::UpdateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorH
     }
 }
 
+void SwapChain::present()
+{
+    UINT syncInterval = mVSync ? 1 : 0;
+    UINT presentFlags = mTearingSupported && !mVSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
+    ThrowIfFailed(mSwapChain->Present(syncInterval, presentFlags));
+}

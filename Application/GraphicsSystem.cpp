@@ -66,11 +66,11 @@ uint64_t GraphicsSystem::signal()
 	return fenceValueForSignal;
 }
 
-void GraphicsSystem::waitForFenceValue(std::chrono::milliseconds duration)
+void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
 {
-	if (mFence->GetCompletedValue() < mFenceValue)
+	if (mFence->GetCompletedValue() < fenceValue)
 	{
-		ThrowIfFailed(mFence->SetEventOnCompletion(mFenceValue, mFenceEvent));
+		ThrowIfFailed(mFence->SetEventOnCompletion(fenceValue, mFenceEvent));
 		::WaitForSingleObject(mFenceEvent, static_cast<DWORD>(duration.count()));
 	}
 }
@@ -112,11 +112,11 @@ void GraphicsSystem::Update()
 
 void GraphicsSystem::Render()
 {
-	auto commandAllocator = g_CommandAllocators[g_CurrentBackBufferIndex];
-	auto backBuffer = g_BackBuffers[g_CurrentBackBufferIndex];
+	auto commandAllocator = mCommandAllocators[mCurrentBackBufferIndex];
+	auto backBuffer = mSwapChain->backBuffer(mCurrentBackBufferIndex);
 
 	commandAllocator->Reset();
-	g_CommandList->Reset(commandAllocator.Get(), nullptr);
+	mCommandList->Reset(commandAllocator.Get(), nullptr);
 
 	// Clear the render target.
 	{
@@ -124,14 +124,14 @@ void GraphicsSystem::Render()
 			backBuffer.Get(),
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-		g_CommandList->ResourceBarrier(1, &barrier);
+		mCommandList->ResourceBarrier(1, &barrier);
 
 
 		FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(g_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			g_CurrentBackBufferIndex, g_RTVDescriptorSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			mCurrentBackBufferIndex, mRTVDescriptorSize);
 
-		g_CommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		mCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
 
 
@@ -140,23 +140,22 @@ void GraphicsSystem::Render()
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 			backBuffer.Get(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		g_CommandList->ResourceBarrier(1, &barrier);
+		mCommandList->ResourceBarrier(1, &barrier);
 
-		ThrowIfFailed(g_CommandList->Close());
+		ThrowIfFailed(mCommandList->Close());
 
 		ID3D12CommandList* const commandLists[] = {
-			g_CommandList.Get()
+			mCommandList.Get()
 		};
-		g_CommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+		mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
-		UINT syncInterval = g_VSync ? 1 : 0;
-		UINT presentFlags = g_TearingSupported && !g_VSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
-		ThrowIfFailed(g_SwapChain->Present(syncInterval, presentFlags));
 
-		g_FrameFenceValues[g_CurrentBackBufferIndex] = Signal(g_CommandQueue, g_Fence, g_FenceValue);
+		mSwapChain->present();
 
-		g_CurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
+		mFrameFenceValues[mCurrentBackBufferIndex] = Signal(g_FenceValue);
 
-		waitForFenceValue(g_Fence, g_FrameFenceValues[g_CurrentBackBufferIndex], g_FenceEvent);
+		mCurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
+
+		waitForFenceValue(mFrameFenceValues[mCurrentBackBufferIndex]);
 	}
 }
