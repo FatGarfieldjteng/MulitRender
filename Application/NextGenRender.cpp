@@ -6,9 +6,6 @@
 #include "GraphicsSystem.h"
 #include "ConfigParameter.h"
 #include "helper.h"
-#include "Adapter.h"
-#include "Device.h"
-#include "SwapChain.h"
 
 #define MAX_LOADSTRING 100
 
@@ -19,10 +16,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 HWND gHWnd;
 
-// Window rectangle (used to toggle fullscreen state).
-RECT g_WindowRect;
-
-GraphicsSystem gs;
+GraphicsSystem g_GS;
 
 // By default, enable V-Sync.
 // Can be toggled with the V key.
@@ -164,10 +158,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    EnableDebugLayer();
 
-   gs.createDevice();
 
- 
-   gs.mDevice->createDirectCommandQueue();
+   g_GS.initGraphicsSystem(gHWnd, 1024, 768);
 
 
    if (!gHWnd)

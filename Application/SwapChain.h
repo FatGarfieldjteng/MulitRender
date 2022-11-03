@@ -40,6 +40,11 @@ public:
         return mBackBuffers[index];
     }
 
+    UINT getCurrentBackBufferIndex()
+    {
+        return mSwapChain->GetCurrentBackBufferIndex();
+    }
+
     void present();
 
 public:

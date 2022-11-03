@@ -78,7 +78,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 void GraphicsSystem::flush(uint64_t& fenceValue)
 {
 	uint64_t fenceValueForSignal = signal();
-	waitForFenceValue();
+	waitForFenceValue(fenceValueForSignal);
 }
 
 
@@ -152,9 +152,9 @@ void GraphicsSystem::Render()
 
 		mSwapChain->present();
 
-		mFrameFenceValues[mCurrentBackBufferIndex] = Signal(g_FenceValue);
+		mFrameFenceValues[mCurrentBackBufferIndex] = signal();
 
-		mCurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
+		mCurrentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
 		waitForFenceValue(mFrameFenceValues[mCurrentBackBufferIndex]);
 	}

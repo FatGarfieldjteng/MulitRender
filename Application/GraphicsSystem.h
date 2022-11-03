@@ -54,8 +54,9 @@ public:
 
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;
-	uint64_t mFenceValue;
+	uint64_t mFenceValue = 0;
 
+	// TODO: Move the following to SwapChain class
 	ComPtr<ID3D12DescriptorHeap> mRTVDescriptorHeap;
 	UINT mRTVDescriptorSize;
 	UINT mCurrentBackBufferIndex;
