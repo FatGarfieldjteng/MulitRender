@@ -51,18 +51,22 @@ Device::~Device()
 {
 }
 
-void Device::createDirectCommandQueue()
+ComPtr<ID3D12CommandQueue> Device::createDirectCommandQueue()
 {
+    ComPtr<ID3D12CommandQueue> commandQueue;
+
     D3D12_COMMAND_QUEUE_DESC desc = {};
     desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
     desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
     desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     desc.NodeMask = 0;
 
-    ThrowIfFailed(mDevice->CreateCommandQueue(&desc, IID_PPV_ARGS(&mDirectCommandQueue)));
+    ThrowIfFailed(mDevice->CreateCommandQueue(&desc, IID_PPV_ARGS(&commandQueue)));
+
+    return commandQueue;
 }
 
-ComPtr<ID3D12DescriptorHeap> Device::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
+ComPtr<ID3D12DescriptorHeap> Device::createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
     uint32_t numDescriptors)
 {
     ComPtr<ID3D12DescriptorHeap> descriptorHeap;
@@ -76,7 +80,12 @@ ComPtr<ID3D12DescriptorHeap> Device::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_
     return descriptorHeap;
 }
 
-ComPtr<ID3D12CommandAllocator> Device::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type)
+UINT Device::getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type)
+{
+    return mDevice->GetDescriptorHandleIncrementSize(type);
+}
+
+ComPtr<ID3D12CommandAllocator> Device::createCommandAllocator(D3D12_COMMAND_LIST_TYPE type)
 {
     ComPtr<ID3D12CommandAllocator> commandAllocator;
     ThrowIfFailed(mDevice->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator)));
@@ -84,7 +93,7 @@ ComPtr<ID3D12CommandAllocator> Device::CreateCommandAllocator(D3D12_COMMAND_LIST
     return commandAllocator;
 }
 
-ComPtr<ID3D12GraphicsCommandList> Device::CreateCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator, 
+ComPtr<ID3D12GraphicsCommandList> Device::createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator, 
     D3D12_COMMAND_LIST_TYPE type)
 {
     ComPtr<ID3D12GraphicsCommandList> commandList;
@@ -95,7 +104,7 @@ ComPtr<ID3D12GraphicsCommandList> Device::CreateCommandList(ComPtr<ID3D12Command
     return commandList;
 }
 
-ComPtr<ID3D12Fence> Device::CreateFence()
+ComPtr<ID3D12Fence> Device::createFence()
 {
     ComPtr<ID3D12Fence> fence;
 

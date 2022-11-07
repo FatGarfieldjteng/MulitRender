@@ -31,7 +31,13 @@ public:
 		uint32_t width, uint32_t height,
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
 
+	void createCommandAllocators();
+
+	void createCommandList();
+
 	void createEventHandle();
+
+	void createFence();
 	
 	uint64_t signal();
 
@@ -39,9 +45,9 @@ public:
 
 	void flush(uint64_t& fenceValue);
 
-	void Update();
+	void update();
 
-	void Render();
+	void render();
 
 
 public:
@@ -55,11 +61,6 @@ public:
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;
 	uint64_t mFenceValue = 0;
-
-	// TODO: Move the following to SwapChain class
-	ComPtr<ID3D12DescriptorHeap> mRTVDescriptorHeap;
-	UINT mRTVDescriptorSize;
-	UINT mCurrentBackBufferIndex;
 
 	uint64_t mFrameFenceValues[BufferCount] = {};
 

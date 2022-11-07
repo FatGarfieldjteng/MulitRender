@@ -25,6 +25,14 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 		width,
 		height,
 		renderTargetFormat);
+
+	createCommandAllocators();
+
+	createCommandList();
+
+	createEventHandle();
+
+	createFence();
 }
 
 void GraphicsSystem::createDevice()
@@ -37,7 +45,7 @@ void GraphicsSystem::createDevice()
 
 void GraphicsSystem::createDirectCommandQueue()
 {
-	mDevice->createDirectCommandQueue();
+	mCommandQueue = mDevice->createDirectCommandQueue();
 }
 
 void GraphicsSystem::createSwapChain(HWND hWnd,
@@ -47,15 +55,33 @@ void GraphicsSystem::createSwapChain(HWND hWnd,
 	mSwapChain = SwapChain::create(hWnd,
 		mAdapter,
 		mDevice,
-		mDevice->directCommandQueue(), 
+		mCommandQueue,
 		width, height, 
 		renderTargetFormat);
+}
+
+void GraphicsSystem::createCommandAllocators()
+{
+	for (int i = 0; i < BufferCount; ++i)
+	{
+		mCommandAllocators[i] = mDevice->createCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	}
+}
+
+void GraphicsSystem::createCommandList()
+{
+	mCommandList = mDevice->createCommandList(mCommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
 }
 
 void GraphicsSystem::createEventHandle()
 {
 	mFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(mFenceEvent && "Failed to create fence event.");
+}
+
+void GraphicsSystem::createFence()
+{
+	mFence = mDevice->createFence();
 }
 
 uint64_t GraphicsSystem::signal()
@@ -82,7 +108,7 @@ void GraphicsSystem::flush(uint64_t& fenceValue)
 }
 
 
-void GraphicsSystem::Update()
+void GraphicsSystem::update()
 {
 	static uint64_t frameCounter = 0;
 	static double elapsedSeconds = 0.0;
@@ -110,33 +136,29 @@ void GraphicsSystem::Update()
 	}
 }
 
-void GraphicsSystem::Render()
+void GraphicsSystem::render()
 {
-	auto commandAllocator = mCommandAllocators[mCurrentBackBufferIndex];
-	auto backBuffer = mSwapChain->backBuffer(mCurrentBackBufferIndex);
+	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+	auto commandAllocator = mCommandAllocators[currentBackBufferIndex];
 
 	commandAllocator->Reset();
 	mCommandList->Reset(commandAllocator.Get(), nullptr);
 
-	// Clear the render target.
+	auto backBuffer = mSwapChain->getCurrentBackBuffer();
+
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		backBuffer.Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	mCommandList->ResourceBarrier(1, &barrier);
+
+
+	mSwapChain->clearRTV(mCommandList);
+	
+	// present
 	{
-		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			backBuffer.Get(),
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-		mCommandList->ResourceBarrier(1, &barrier);
-
-
-		FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			mCurrentBackBufferIndex, mRTVDescriptorSize);
-
-		mCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-	}
-
-
-	// Present
-	{
+		
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 			backBuffer.Get(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -144,6 +166,7 @@ void GraphicsSystem::Render()
 
 		ThrowIfFailed(mCommandList->Close());
 
+		// execute
 		ID3D12CommandList* const commandLists[] = {
 			mCommandList.Get()
 		};
@@ -152,10 +175,10 @@ void GraphicsSystem::Render()
 
 		mSwapChain->present();
 
-		mFrameFenceValues[mCurrentBackBufferIndex] = signal();
+		mFrameFenceValues[currentBackBufferIndex] = signal();
 
-		mCurrentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
-		waitForFenceValue(mFrameFenceValues[mCurrentBackBufferIndex]);
+		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
 	}
 }

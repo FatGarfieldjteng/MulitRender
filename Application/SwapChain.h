@@ -33,17 +33,19 @@ public:
         return mSwapChain;
     }
 
-    void updateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap);
-
-    ComPtr<ID3D12Resource> backBuffer(UINT index)
-    {
-        return mBackBuffers[index];
-    }
+    void updateRenderTargetViews();
 
     UINT getCurrentBackBufferIndex()
     {
-        return mSwapChain->GetCurrentBackBufferIndex();
+        return mCurrentBackBufferIndex;
     }
+
+    ComPtr<ID3D12Resource> getCurrentBackBuffer()
+    {
+        return mBackBuffers[mCurrentBackBufferIndex];
+    }
+
+    void clearRTV(ComPtr<ID3D12GraphicsCommandList> commandList);
 
     void present();
 
@@ -52,6 +54,7 @@ public:
     SwapChain(HWND hWnd,
         std::shared_ptr<Adapter> adapter,
         std::shared_ptr<Device> device,
+        Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue,
         uint32_t width, uint32_t height, 
         DXGI_FORMAT mBackBufferFormat);
     virtual ~SwapChain();
@@ -68,6 +71,12 @@ private:
     HANDLE mHFrameLatencyWaitableObject = 0;
 
     ComPtr<ID3D12Resource> mBackBuffers[BufferCount];
+
+    ComPtr<ID3D12DescriptorHeap> mRTVDescriptorHeap;
+    UINT mRTVDescriptorSize;
+
+
+    uint64_t mFrameFenceValues[BufferCount] = {};
     
     bool mVSync = false;
     

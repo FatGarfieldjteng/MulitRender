@@ -12,6 +12,7 @@ std::shared_ptr<SwapChain> SwapChain::create(HWND hWnd,
     return std::make_shared<SwapChain>(hWnd,
         adapter,
         device,
+        commandQueue,
         width, height,
         backBufferFormat);
 }
@@ -19,6 +20,7 @@ std::shared_ptr<SwapChain> SwapChain::create(HWND hWnd,
 SwapChain::SwapChain(HWND hWnd,
     std::shared_ptr<Adapter> adapter,
     std::shared_ptr<Device> device,
+    Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue,
     uint32_t width, uint32_t height,
     DXGI_FORMAT backBufferFormat)
 : mDevice(device)
@@ -27,8 +29,6 @@ SwapChain::SwapChain(HWND hWnd,
 , mHeight(height)
 , mBackBufferFormat(backBufferFormat)
 {
-    auto d3d12CommandQueue = mDevice->directCommandQueue();
-
     // Query the factory from the adapter that was used to create the device.
     auto dxDevice     = mDevice->device();
     auto dxAdapter = adapter->adapter();
@@ -65,7 +65,7 @@ SwapChain::SwapChain(HWND hWnd,
 
     // Now create the swap chain.
     ComPtr<IDXGISwapChain1> dxgiSwapChain1;
-    ThrowIfFailed( dxgiFactory5->CreateSwapChainForHwnd( d3d12CommandQueue.Get(), mHWnd, &swapChainDesc, nullptr,
+    ThrowIfFailed( dxgiFactory5->CreateSwapChainForHwnd(commandQueue.Get(), mHWnd, &swapChainDesc, nullptr,
                                                          nullptr, &dxgiSwapChain1 ) );
 
     // Cast to swapchain4
@@ -84,7 +84,10 @@ SwapChain::SwapChain(HWND hWnd,
     // Get the SwapChain's waitable object.
     mHFrameLatencyWaitableObject = mSwapChain->GetFrameLatencyWaitableObject();
 
-    //UpdateRenderTargetViews();
+    // create descriptor
+    mRTVDescriptorHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, BufferCount);
+    mRTVDescriptorSize = mDevice->getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    updateRenderTargetViews();
 }
 
 SwapChain::~SwapChain()
@@ -92,13 +95,13 @@ SwapChain::~SwapChain()
 
 }
 
-void SwapChain::updateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+void SwapChain::updateRenderTargetViews()
 {
     auto dxDevice = mDevice->device();
 
     auto rtvDescriptorSize = dxDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
     for (int i = 0; i < BufferCount; ++i)
     {
@@ -113,9 +116,20 @@ void SwapChain::updateRenderTargetViews(ComPtr<ID3D12DescriptorHeap> descriptorH
     }
 }
 
+void SwapChain::clearRTV(ComPtr<ID3D12GraphicsCommandList> commandList)
+{
+    FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+        mCurrentBackBufferIndex, mRTVDescriptorSize);
+
+    commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+}
+
 void SwapChain::present()
 {
     UINT syncInterval = mVSync ? 1 : 0;
     UINT presentFlags = mTearingSupported && !mVSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
     ThrowIfFailed(mSwapChain->Present(syncInterval, presentFlags));
+
+    mCurrentBackBufferIndex = mSwapChain->GetCurrentBackBufferIndex();
 }

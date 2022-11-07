@@ -27,25 +27,20 @@ public:
     // create resources
     
     // direct command queue
-    void createDirectCommandQueue();
+    ComPtr<ID3D12CommandQueue> createDirectCommandQueue();
 
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> directCommandQueue()
-    {
-        return mDirectCommandQueue;
-    }
-
-    ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
+    ComPtr<ID3D12DescriptorHeap> createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
         uint32_t numDescriptors);
 
-    ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type);
+    UINT getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type);
 
-    ComPtr<ID3D12GraphicsCommandList> CreateCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
+    ComPtr<ID3D12CommandAllocator> createCommandAllocator(D3D12_COMMAND_LIST_TYPE type);
+
+    ComPtr<ID3D12GraphicsCommandList> createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
         D3D12_COMMAND_LIST_TYPE type);
 
-    ComPtr<ID3D12Fence> Device::CreateFence();
+    ComPtr<ID3D12Fence> Device::createFence();
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Device2> mDevice;
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> mDirectCommandQueue;
-
 };
