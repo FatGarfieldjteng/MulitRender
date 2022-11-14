@@ -45,7 +45,7 @@ void GraphicsSystem::createDevice()
 
 void GraphicsSystem::createDirectCommandQueue()
 {
-	mCommandQueue = mDevice->createDirectCommandQueue();
+	mCommandQueue = mDevice->createCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 }
 
 void GraphicsSystem::createSwapChain(HWND hWnd,

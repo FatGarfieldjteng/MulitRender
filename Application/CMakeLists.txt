@@ -11,6 +11,7 @@ set(HEADER_FILES
 	SwapChain.h
 	Graphicssystem.h
 	NextGenRender.h
+	CommandQueue.h
 	d3dx12.h
 	targetver.h
 )
@@ -21,6 +22,7 @@ set(SOURCE_FILES
 	SwapChain.cpp
 	GraphicsSystem.cpp
 	NextGenRender.cpp
+	CommandQueue.cpp
 )
 
 set(RESOURCE_FILES 

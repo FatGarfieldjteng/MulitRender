@@ -55,12 +55,12 @@ Device::~Device()
 {
 }
 
-ComPtr<ID3D12CommandQueue> Device::createDirectCommandQueue()
+ComPtr<ID3D12CommandQueue> Device::createCommandQueue(D3D12_COMMAND_LIST_TYPE type)
 {
     ComPtr<ID3D12CommandQueue> commandQueue;
 
     D3D12_COMMAND_QUEUE_DESC desc = {};
-    desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    desc.Type = type;
     desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
     desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     desc.NodeMask = 0;
