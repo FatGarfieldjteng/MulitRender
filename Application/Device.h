@@ -36,7 +36,7 @@ public:
 
     ComPtr<ID3D12CommandAllocator> createCommandAllocator(D3D12_COMMAND_LIST_TYPE type);
 
-    ComPtr<ID3D12GraphicsCommandList> createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
+    ComPtr<ID3D12GraphicsCommandList2> createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
         D3D12_COMMAND_LIST_TYPE type);
 
     ComPtr<ID3D12Fence> Device::createFence();

@@ -97,10 +97,10 @@ ComPtr<ID3D12CommandAllocator> Device::createCommandAllocator(D3D12_COMMAND_LIST
     return commandAllocator;
 }
 
-ComPtr<ID3D12GraphicsCommandList> Device::createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator, 
+ComPtr<ID3D12GraphicsCommandList2> Device::createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator, 
     D3D12_COMMAND_LIST_TYPE type)
 {
-    ComPtr<ID3D12GraphicsCommandList> commandList;
+    ComPtr<ID3D12GraphicsCommandList2> commandList;
     ThrowIfFailed(mDevice->CreateCommandList(0, type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
     ThrowIfFailed(commandList->Close());
