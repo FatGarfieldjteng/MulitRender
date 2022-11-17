@@ -49,11 +49,55 @@ public:
 
 	void render();
 
+private:
+	// helper functions
+	// transition a resource
+	void transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ComPtr<ID3D12Resource> resource,
+		D3D12_RESOURCE_STATES beforeState, 
+		D3D12_RESOURCE_STATES afterState);
+
+	// Clear a render target view.
+	void clearRTV(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv,
+		FLOAT* clearColor);
+
+	// clear the depth of a depth-stencil view.
+	void clearDepth(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv, 
+		FLOAT depth = 1.0f);
+
+	// create a GPU buffer.
+	void updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ID3D12Resource** pDestinationResource, 
+		ID3D12Resource** pIntermediateResource,
+		size_t numElements, 
+		size_t elementSize, 
+		const void* bufferData,
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
+	// resize the depth buffer to match the size of the client area.
+	void resizeDepthBuffer(int width, int height);
+
 
 public:
 	std::shared_ptr<Adapter> mAdapter;
 	std::shared_ptr<Device> mDevice;
 	std::shared_ptr<SwapChain> mSwapChain;
+
+	// depth buffer.
+	ComPtr<ID3D12Resource> mDepthBuffer;
+
+	ComPtr<ID3D12DescriptorHeap> mDSVHeap;
+
+	// root signature
+	ComPtr<ID3D12RootSignature> mRootSignature;
+
+	// pipeline state object.
+	ComPtr<ID3D12PipelineState> mPipelineState;
+
+	D3D12_VIEWPORT m_Viewport;
+	D3D12_RECT m_ScissorRect;
 
 	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
 	ComPtr<ID3D12GraphicsCommandList> mCommandList;
@@ -64,5 +108,5 @@ public:
 
 	uint64_t mFrameFenceValues[BufferCount] = {};
 
-	HANDLE mFenceEvent;
+	HANDLE mFenceEvent = 0;
 };

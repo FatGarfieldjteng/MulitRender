@@ -12,6 +12,8 @@ set(HEADER_FILES
 	Graphicssystem.h
 	NextGenRender.h
 	CommandQueue.h
+	Mesh.h
+      Camera.h
 	d3dx12.h
 	targetver.h
 )
@@ -23,6 +25,8 @@ set(SOURCE_FILES
 	GraphicsSystem.cpp
 	NextGenRender.cpp
 	CommandQueue.cpp
+	Mesh.cpp
+	Camera.cpp
 )
 
 set(RESOURCE_FILES 
