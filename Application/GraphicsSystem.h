@@ -96,8 +96,8 @@ public:
 	// pipeline state object.
 	ComPtr<ID3D12PipelineState> mPipelineState;
 
-	D3D12_VIEWPORT m_Viewport;
-	D3D12_RECT m_ScissorRect;
+	D3D12_VIEWPORT mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, 1.0f, 1.f);
+	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);
 
 	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
 	ComPtr<ID3D12GraphicsCommandList> mCommandList;
