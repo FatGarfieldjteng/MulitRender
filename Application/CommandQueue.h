@@ -28,7 +28,7 @@ public:
     }
     
     // CommandList functions
-    ComPtr<ID3D12GraphicsCommandList2> acquireCommandList(ComPtr<ID3D12CommandAllocator> allocator);
+    ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
     uint64_t executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
     // sync functions

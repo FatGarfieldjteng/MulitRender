@@ -102,7 +102,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 {
 	if (mFence->GetCompletedValue() < fenceValue)
 	{
-		ThrowIfFailed(mFence->SetEventOnCompletion(fenceValue, mFenceEvent));
+		ThrowIfFailed(mFence->SetEventOnCompletion(fenceValue, mFenceEvent)); 
 		::WaitForSingleObject(mFenceEvent, static_cast<DWORD>(duration.count()));
 	}
 }
@@ -116,7 +116,7 @@ void GraphicsSystem::flush(uint64_t& fenceValue)
 void GraphicsSystem::createScene()
 {
 	CubeMesh *mesh = new CubeMesh();
-	mesh->init();
+	mesh->init(mDevice, mDirectCommandQueue, mDirectCommandQueue->acquireCommandList());
 
 	mScene.push_back(mesh);
 

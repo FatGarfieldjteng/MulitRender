@@ -10,6 +10,11 @@ public:
 
     ~CubeMesh();
 
+
 public:
-    virtual void init();
+
+    virtual size_t vertexSize();
+    virtual void init(std::shared_ptr<Device> device,
+        std::shared_ptr<CommandQueue> commandQueue,
+        ComPtr<ID3D12GraphicsCommandList2>);
 };

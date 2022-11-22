@@ -1,7 +1,11 @@
 #pragma once
 #include <d3d12.h>
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include <memory>
 
 class Device;
+class CommandQueue;
 
 class Mesh
 {
@@ -12,14 +16,13 @@ public:
     ~Mesh();
 
 public:
-    virtual void init() = 0;
+    virtual size_t vertexSize() = 0;
+
+    virtual void init(std::shared_ptr<Device> device,
+        std::shared_ptr<CommandQueue> commandQueue,
+        ComPtr<ID3D12GraphicsCommandList2>) = 0;
     
 private:
-    // vertex buffer
-    ComPtr<ID3D12Resource> mVertexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW mVertexBufferView;
-
-    // index buffer
-    ComPtr<ID3D12Resource> mIndexBuffer;
-    D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+    VertexBuffer mVertexBuffer;
+    IndexBuffer mIndexBuffer;
 };

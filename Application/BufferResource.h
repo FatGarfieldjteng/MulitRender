@@ -12,4 +12,6 @@ public:
 
 public:
     virtual void init() = 0;
+
+    ComPtr<ID3D12Resource> mBuffer;
 };

@@ -46,7 +46,14 @@ CubeMesh::~CubeMesh()
 
 }
 
-void CubeMesh::init()
+size_t CubeMesh::vertexSize()
 {
+    return sizeof(VertexPosColor);
+}
 
+void CubeMesh::init(std::shared_ptr<Device> device,
+    std::shared_ptr<CommandQueue> commandQueue,
+    ComPtr<ID3D12GraphicsCommandList2>)
+{
+   // mVertexBuffer.
 }

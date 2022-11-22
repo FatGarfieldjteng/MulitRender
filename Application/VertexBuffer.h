@@ -12,4 +12,6 @@ public:
 
 public:
     virtual void init();
+
+    D3D12_VERTEX_BUFFER_VIEW mVertexBufferView;
 };

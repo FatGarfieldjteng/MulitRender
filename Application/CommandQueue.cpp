@@ -30,7 +30,7 @@ CommandQueue::~CommandQueue()
 {
 }
 
-ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList(ComPtr<ID3D12CommandAllocator> allocator)
+ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
 {
     ComPtr<ID3D12CommandAllocator> commandAllocator;
     ComPtr<ID3D12GraphicsCommandList2> commandList;
