@@ -9,4 +9,7 @@ public:
     CubeMesh();
 
     ~CubeMesh();
+
+public:
+    virtual void init();
 };

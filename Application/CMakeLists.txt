@@ -13,7 +13,11 @@ set(HEADER_FILES
 	NextGenRender.h
 	CommandQueue.h
 	Mesh.h
-      Camera.h
+	CubeMesh.h
+        Camera.h
+        BufferResource.h
+	VertexBuffer.h
+	IndexBuffer.h
 	d3dx12.h
 	targetver.h
 )
@@ -26,7 +30,11 @@ set(SOURCE_FILES
 	NextGenRender.cpp
 	CommandQueue.cpp
 	Mesh.cpp
+	CubeMesh.cpp
 	Camera.cpp
+	BufferResource.cpp
+	VertexBuffer.cpp
+	IndexBuffer.cpp
 )
 
 set(RESOURCE_FILES 

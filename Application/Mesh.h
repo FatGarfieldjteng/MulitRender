@@ -1,6 +1,8 @@
 #pragma once
 #include <d3d12.h>
 
+class Device;
+
 class Mesh
 {
 public:
@@ -8,6 +10,9 @@ public:
     Mesh();
 
     ~Mesh();
+
+public:
+    virtual void init() = 0;
     
 private:
     // vertex buffer

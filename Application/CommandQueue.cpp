@@ -4,12 +4,12 @@
 #include "Device.h"
 #include "helper.h"
 
-std::shared_ptr<CommdandQueue> CommdandQueue::create(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
+std::shared_ptr<CommandQueue> CommandQueue::create(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
 {
-    return std::make_shared<CommdandQueue>(device, type);
+    return std::make_shared<CommandQueue>(device, type);
 }
 
-CommdandQueue::CommdandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
+CommandQueue::CommandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
     :mDevice(device), mCommandListType(type)
 {
     D3D12_COMMAND_QUEUE_DESC desc = {};
@@ -26,11 +26,11 @@ CommdandQueue::CommdandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_
     assert(mFenceEvent && "Failed to create fence event.");
 }
 
-CommdandQueue::~CommdandQueue()
+CommandQueue::~CommandQueue()
 {
 }
 
-ComPtr<ID3D12GraphicsCommandList2> CommdandQueue::acquireCommandList(ComPtr<ID3D12CommandAllocator> allocator)
+ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList(ComPtr<ID3D12CommandAllocator> allocator)
 {
     ComPtr<ID3D12CommandAllocator> commandAllocator;
     ComPtr<ID3D12GraphicsCommandList2> commandList;
@@ -68,7 +68,7 @@ ComPtr<ID3D12GraphicsCommandList2> CommdandQueue::acquireCommandList(ComPtr<ID3D
     return commandList;
 }
 
-uint64_t CommdandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList)
+uint64_t CommandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
     commandList->Close();
 
@@ -93,7 +93,7 @@ uint64_t CommdandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> co
 
 
 // sync functions
-uint64_t CommdandQueue::signal()
+uint64_t CommandQueue::signal()
 {
     uint64_t fenceValueForSignal = ++mFenceValue;
     ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), fenceValueForSignal));
@@ -101,12 +101,12 @@ uint64_t CommdandQueue::signal()
     return fenceValueForSignal;
 }
 
-bool CommdandQueue::isFenceComplete(uint64_t fenceValue)
+bool CommandQueue::isFenceComplete(uint64_t fenceValue)
 {
     return (mFence->GetCompletedValue() >= fenceValue);
 }
 
-void CommdandQueue::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
+void CommandQueue::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
 {
     if (mFence->GetCompletedValue() < fenceValue)
     {
@@ -116,18 +116,18 @@ void CommdandQueue::waitForFenceValue(uint64_t fenceValue, std::chrono::millisec
 }
 
 // flush
-void CommdandQueue::flush()
+void CommandQueue::flush()
 {
     uint64_t fenceValueForSignal = signal();
     waitForFenceValue(fenceValueForSignal);
 }
 
-ComPtr<ID3D12CommandAllocator> CommdandQueue::createCommandAllocator()
+ComPtr<ID3D12CommandAllocator> CommandQueue::createCommandAllocator()
 {
     return mDevice->createCommandAllocator(mCommandListType);
 }
 
-ComPtr<ID3D12GraphicsCommandList2> CommdandQueue::createCommandList(ComPtr<ID3D12CommandAllocator> allocator)
+ComPtr<ID3D12GraphicsCommandList2> CommandQueue::createCommandList(ComPtr<ID3D12CommandAllocator> allocator)
 {
     return mDevice->createCommandList(allocator, mCommandListType);
 }

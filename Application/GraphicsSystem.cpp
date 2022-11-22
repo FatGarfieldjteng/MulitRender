@@ -1,5 +1,7 @@
 #include "framework.h"
 #include "GraphicsSystem.h"
+#include "CommandQueue.h"
+#include "CubeMesh.h"
 #include "Adapter.h"
 #include "helper.h"
 
@@ -33,6 +35,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createEventHandle();
 
 	createFence();
+
+	
 }
 
 void GraphicsSystem::createDevice()
@@ -45,6 +49,8 @@ void GraphicsSystem::createDevice()
 
 void GraphicsSystem::createDirectCommandQueue()
 {
+	mDirectCommandQueue = CommandQueue::create(mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
+
 	mCommandQueue = mDevice->createCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 }
 
@@ -105,6 +111,15 @@ void GraphicsSystem::flush(uint64_t& fenceValue)
 {
 	uint64_t fenceValueForSignal = signal();
 	waitForFenceValue(fenceValueForSignal);
+}
+
+void GraphicsSystem::createScene()
+{
+	CubeMesh *mesh = new CubeMesh();
+	mesh->init();
+
+	mScene.push_back(mesh);
+
 }
 
 
@@ -215,7 +230,39 @@ void GraphicsSystem::updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> com
 	const void* bufferData,
 	D3D12_RESOURCE_FLAGS flags)
 {
+	size_t bufferSize = numElements * elementSize;
 
+	// create a committed resource in GPU side.
+	mDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		nullptr,
+		IID_PPV_ARGS(pDestinationResource));
+
+	// create an committed resource in CPU side and copy data from bufferData to the resouce.
+	if (bufferData)
+	{
+		mDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(pIntermediateResource));
+
+		D3D12_SUBRESOURCE_DATA subresourceData = {};
+		subresourceData.pData = bufferData;
+		subresourceData.RowPitch = bufferSize;
+		subresourceData.SlicePitch = subresourceData.RowPitch;
+
+		// upload buffer data from CPU resource to GPU resource
+		UpdateSubresources(commandList.Get(),
+			*pDestinationResource, *pIntermediateResource,
+			0, 0, 1, &subresourceData);
+	}
+	
 }
 
 // resize the depth buffer to match the size of the client area.

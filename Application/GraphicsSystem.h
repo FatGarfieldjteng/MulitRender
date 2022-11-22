@@ -8,6 +8,10 @@
 #include <memory>
 #include <string>
 
+
+class Mesh;
+class CommandQueue;
+
 class GraphicsSystem
 {
 public:
@@ -45,6 +49,8 @@ public:
 
 	void flush(uint64_t& fenceValue);
 
+	void createScene();
+
 	void update();
 
 	void render();
@@ -80,10 +86,11 @@ private:
 	void resizeDepthBuffer(int width, int height);
 
 
-public:
+private:
 	std::shared_ptr<Adapter> mAdapter;
 	std::shared_ptr<Device> mDevice;
 	std::shared_ptr<SwapChain> mSwapChain;
+	std::shared_ptr<CommandQueue> mDirectCommandQueue;
 
 	// depth buffer.
 	ComPtr<ID3D12Resource> mDepthBuffer;
@@ -109,4 +116,10 @@ public:
 	uint64_t mFrameFenceValues[BufferCount] = {};
 
 	HANDLE mFenceEvent = 0;
+
+// graphics data
+private:
+	// list of meshes
+	std::vector <Mesh*> mScene;
+
 };
