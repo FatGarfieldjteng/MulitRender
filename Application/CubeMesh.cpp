@@ -1,7 +1,9 @@
 #include "framework.h"
 #include "CubeMesh.h"
-#include <directxmath.h>
+#include "GraphicsSystem.h"
 #include "helper.h"
+
+#include <directxmath.h>
 
 typedef DirectX::XMFLOAT3 DXfloat3;
 
@@ -36,7 +38,8 @@ namespace{
     };
 }
 
-CubeMesh::CubeMesh()
+CubeMesh::CubeMesh(GraphicsSystem* GS)
+    :Mesh(GS)
 {
 
 }
@@ -46,14 +49,33 @@ CubeMesh::~CubeMesh()
 
 }
 
-size_t CubeMesh::vertexSize()
+void CubeMesh::init()
 {
-    return sizeof(VertexPosColor);
-}
+    // acquire ready to use commandList
+    ComPtr<ID3D12GraphicsCommandList2> commandList = mGS->acquireCommandList();
 
-void CubeMesh::init(std::shared_ptr<Device> device,
-    std::shared_ptr<CommandQueue> commandQueue,
-    ComPtr<ID3D12GraphicsCommandList2>)
-{
-   // mVertexBuffer.
+    // create vertex buffer
+    // upload vertex buffer data.
+    ComPtr<ID3D12Resource> intermediateVertexBuffer;
+    mGS->updateBufferResource(commandList,
+        &mVertexBuffer.mBuffer, &intermediateVertexBuffer,
+        _countof(vertices), sizeof(VertexPosColor), vertices);
+
+    // setup vertex buffer view
+    D3D12_VERTEX_BUFFER_VIEW& vbView = mVertexBuffer.mVertexBufferView;
+    vbView.BufferLocation = mVertexBuffer.mBuffer->GetGPUVirtualAddress();
+    vbView.SizeInBytes = sizeof(vertices);
+    vbView.StrideInBytes = sizeof(VertexPosColor);
+
+    // create index buffer
+    // upload index buffer data.
+    ComPtr<ID3D12Resource> intermediateIndexBuffer;
+    mGS->updateBufferResource(commandList,
+        &mIndexBuffer.mBuffer, &intermediateIndexBuffer,
+        _countof(indicies), sizeof(WORD), indicies);
+    
+    D3D12_INDEX_BUFFER_VIEW& ibView = mIndexBuffer.mIndexBufferView;
+    ibView.BufferLocation = mIndexBuffer.mBuffer->GetGPUVirtualAddress();
+    ibView.Format = DXGI_FORMAT_R16_UINT;
+    ibView.SizeInBytes = sizeof(indicies);
 }

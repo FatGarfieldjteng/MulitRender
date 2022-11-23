@@ -18,6 +18,8 @@ set(HEADER_FILES
         BufferResource.h
 	VertexBuffer.h
 	IndexBuffer.h
+	Scene.h
+	SimpleScene.h
 	d3dx12.h
 	targetver.h
 )
@@ -35,6 +37,8 @@ set(SOURCE_FILES
 	BufferResource.cpp
 	VertexBuffer.cpp
 	IndexBuffer.cpp
+	Scene.cpp
+	SimpleScene.cpp
 )
 
 set(RESOURCE_FILES 

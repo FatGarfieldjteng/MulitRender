@@ -1,15 +1,15 @@
 #include "framework.h"
-#include "Mesh.h"
+#include "Scene.h"
 #include "GraphicsSystem.h"
 #include "helper.h"
 
-Mesh::Mesh(GraphicsSystem* GS)
+Scene::Scene(GraphicsSystem* GS)
 	:mGS(GS)
 {
 
 }
 
-Mesh::~Mesh()
+Scene::~Scene()
 {
 
 }

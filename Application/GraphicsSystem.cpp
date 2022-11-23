@@ -3,6 +3,7 @@
 #include "CommandQueue.h"
 #include "CubeMesh.h"
 #include "Adapter.h"
+#include "SimpleScene.h"
 #include "helper.h"
 
 GraphicsSystem::GraphicsSystem()
@@ -12,7 +13,7 @@ GraphicsSystem::GraphicsSystem()
 
 GraphicsSystem::~GraphicsSystem()
 {
-
+	delete mScene;
 }
 
 void GraphicsSystem::initGraphicsSystem(HWND hWnd,
@@ -44,7 +45,6 @@ void GraphicsSystem::createDevice()
 	mAdapter = Adapter::Create();
 
 	mDevice = Device::create(mAdapter);
-	 
 }
 
 void GraphicsSystem::createDirectCommandQueue()
@@ -52,6 +52,11 @@ void GraphicsSystem::createDirectCommandQueue()
 	mDirectCommandQueue = CommandQueue::create(mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 	mCommandQueue = mDevice->createCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+}
+
+ComPtr<ID3D12GraphicsCommandList2> GraphicsSystem::acquireCommandList()
+{
+	return mDirectCommandQueue->acquireCommandList();
 }
 
 void GraphicsSystem::createSwapChain(HWND hWnd,
@@ -115,11 +120,7 @@ void GraphicsSystem::flush(uint64_t& fenceValue)
 
 void GraphicsSystem::createScene()
 {
-	CubeMesh *mesh = new CubeMesh();
-	mesh->init(mDevice, mDirectCommandQueue, mDirectCommandQueue->acquireCommandList());
-
-	mScene.push_back(mesh);
-
+	mScene = new SimpleScene(this);
 }
 
 

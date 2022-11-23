@@ -6,23 +6,23 @@
 
 class Device;
 class CommandQueue;
+class GraphicsSystem;
 
 class Mesh
 {
 public:
 
-    Mesh();
+    Mesh(GraphicsSystem* GS);
 
     ~Mesh();
 
 public:
-    virtual size_t vertexSize() = 0;
-
-    virtual void init(std::shared_ptr<Device> device,
-        std::shared_ptr<CommandQueue> commandQueue,
-        ComPtr<ID3D12GraphicsCommandList2>) = 0;
     
-private:
+    virtual void init() = 0;
+        
+protected:
+
+    GraphicsSystem* mGS;
     VertexBuffer mVertexBuffer;
     IndexBuffer mIndexBuffer;
 };

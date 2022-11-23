@@ -11,6 +11,7 @@
 
 class Mesh;
 class CommandQueue;
+class Scene;
 
 class GraphicsSystem
 {
@@ -31,6 +32,8 @@ public:
 
 	void createDirectCommandQueue();
 
+	ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
+	
 	void createSwapChain(HWND hWnd,
 		uint32_t width, uint32_t height,
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
@@ -55,6 +58,15 @@ public:
 
 	void render();
 
+	// create a GPU buffer.
+	void updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ID3D12Resource** pDestinationResource,
+		ID3D12Resource** pIntermediateResource,
+		size_t numElements,
+		size_t elementSize,
+		const void* bufferData,
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
 private:
 	// helper functions
 	// transition a resource
@@ -72,15 +84,6 @@ private:
 	void clearDepth(ComPtr<ID3D12GraphicsCommandList2> commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv, 
 		FLOAT depth = 1.0f);
-
-	// create a GPU buffer.
-	void updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
-		ID3D12Resource** pDestinationResource, 
-		ID3D12Resource** pIntermediateResource,
-		size_t numElements, 
-		size_t elementSize, 
-		const void* bufferData,
-		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
 	// resize the depth buffer to match the size of the client area.
 	void resizeDepthBuffer(int width, int height);
@@ -119,7 +122,6 @@ private:
 
 // graphics data
 private:
-	// list of meshes
-	std::vector <Mesh*> mScene;
-
+	// scene
+	Scene* mScene = nullptr;
 };
