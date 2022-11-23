@@ -20,6 +20,8 @@ set(HEADER_FILES
 	IndexBuffer.h
 	Scene.h
 	SimpleScene.h
+	Effect.h
+	SimpleEffect.h
 	d3dx12.h
 	targetver.h
 )
@@ -39,6 +41,8 @@ set(SOURCE_FILES
 	IndexBuffer.cpp
 	Scene.cpp
 	SimpleScene.cpp
+	Effect.cpp
+	SimpleEffect.cpp
 )
 
 set(RESOURCE_FILES 

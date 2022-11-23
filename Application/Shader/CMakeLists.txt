@@ -7,9 +7,6 @@ set_source_files_properties(SimpleVS.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(SimplePS.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_1")
 
-set(winSDK $ENV{WindowsSdkDir})
-message("Hello")
-
 foreach(FILE ${HLSL_SHADER_FILES})
   get_filename_component(FILE_WE ${FILE} NAME_WE)
   get_source_file_property(shadertype ${FILE} ShaderType)

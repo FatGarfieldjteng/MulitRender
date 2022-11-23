@@ -38,6 +38,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createEventHandle();
 
 	createFence();
+
+	createScene();
 }
 
 void GraphicsSystem::createDevice()
