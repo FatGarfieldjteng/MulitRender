@@ -9,4 +9,8 @@ public:
     SimpleEffect();
 
     ~SimpleEffect();
+
+public:
+    // init shaders
+    virtual void init();
 };
