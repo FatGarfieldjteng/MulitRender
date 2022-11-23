@@ -29,6 +29,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 		height,
 		renderTargetFormat);
 
+	createDSVHeap();
+
 	createCommandAllocators();
 
 	createCommandList();
@@ -36,8 +38,6 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createEventHandle();
 
 	createFence();
-
-	
 }
 
 void GraphicsSystem::createDevice()
@@ -69,6 +69,11 @@ void GraphicsSystem::createSwapChain(HWND hWnd,
 		mCommandQueue,
 		width, height, 
 		renderTargetFormat);
+}
+
+void GraphicsSystem::createDSVHeap()
+{
+	mDSVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
 }
 
 void GraphicsSystem::createCommandAllocators()

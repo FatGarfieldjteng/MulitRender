@@ -58,3 +58,5 @@ target_link_libraries( MultiRenderApp
     PUBLIC dxgi.lib
     PUBLIC dxguid.lib
 )
+
+add_subdirectory(Shader)

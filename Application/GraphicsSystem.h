@@ -38,6 +38,8 @@ public:
 		uint32_t width, uint32_t height,
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
 
+	void createDSVHeap();
+
 	void createCommandAllocators();
 
 	void createCommandList();

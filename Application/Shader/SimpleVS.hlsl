@@ -24,5 +24,5 @@ VSOutput main(VSInput Input)
     output.Position = mul(ModelViewProjectionCB.MVP, float4(Input.Position, 1.0f));
     output.Color = float4(Input.Color, 1.0f);
 
-    return OUT;
+    return output;
 }

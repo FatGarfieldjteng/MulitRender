@@ -12,7 +12,7 @@ Device::Device( std::shared_ptr<Adapter> adapter )
 {
     auto dxgiAdapter = adapter->adapter();
 
-    ThrowIfFailed( D3D12CreateDevice( dxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS( &mDevice) ) );
+    ThrowIfFailed( D3D12CreateDevice( dxgiAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS( &mDevice) ) );
 
     // Enable debug messages (only works if the debug layer has already been enabled).
     ComPtr<ID3D12InfoQueue> pInfoQueue;
