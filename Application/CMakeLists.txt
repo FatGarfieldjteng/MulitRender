@@ -61,6 +61,7 @@ target_link_libraries( MultiRenderApp
 	PUBLIC d3d12.lib
     PUBLIC dxgi.lib
     PUBLIC dxguid.lib
+    PUBLIC d3dcompiler.lib
 )
 
 add_subdirectory(Shader)

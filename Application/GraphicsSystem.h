@@ -28,11 +28,26 @@ public:
 		uint32_t width, uint32_t height,
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
 
+	ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
+
+	// create a GPU buffer.
+	void updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ID3D12Resource** pDestinationResource,
+		ID3D12Resource** pIntermediateResource,
+		size_t numElements,
+		size_t elementSize,
+		const void* bufferData,
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
+	void update();
+
+	void render();
+
+protected:
+
 	void createDevice();
 
 	void createDirectCommandQueue();
-
-	ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
 	
 	void createSwapChain(HWND hWnd,
 		uint32_t width, uint32_t height,
@@ -47,6 +62,10 @@ public:
 	void createEventHandle();
 
 	void createFence();
+
+	void createRootSignature();
+
+	void createPipelineStateObject();
 	
 	uint64_t signal();
 
@@ -55,19 +74,6 @@ public:
 	void flush(uint64_t& fenceValue);
 
 	void createScene();
-
-	void update();
-
-	void render();
-
-	// create a GPU buffer.
-	void updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
-		ID3D12Resource** pDestinationResource,
-		ID3D12Resource** pIntermediateResource,
-		size_t numElements,
-		size_t elementSize,
-		const void* bufferData,
-		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
 private:
 	// helper functions

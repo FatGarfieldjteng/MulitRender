@@ -117,6 +117,16 @@ ComPtr<ID3D12Fence> Device::createFence()
     return fence;
 }
 
+void Device::CreateRootSignature(const void* pBlobWithRootSignature,
+    SIZE_T     blobLengthInBytes,
+    REFIID     riid,
+    void** ppvRootSignature
+)
+{
+    ThrowIfFailed(mDevice->CreateRootSignature(0, pBlobWithRootSignature,
+        blobLengthInBytes, riid, ppvRootSignature));
+}
+
 void Device::CreateCommittedResource(
     const D3D12_HEAP_PROPERTIES* pHeapProperties,
     D3D12_HEAP_FLAGS      HeapFlags,

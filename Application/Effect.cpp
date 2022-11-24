@@ -2,7 +2,8 @@
 #include "Effect.h"
 #include "helper.h"
 
-Effect::Effect()
+Effect::Effect(std::shared_ptr<Device> device)
+	:mDevice(device)
 {
 
 }
@@ -10,4 +11,10 @@ Effect::Effect()
 Effect::~Effect()
 {
 
+}
+
+void Effect::init()
+{
+	loadShader();
+	createInputLayout();
 }

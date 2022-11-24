@@ -6,11 +6,13 @@ class SimpleEffect : public Effect
 {
 public:
 
-    SimpleEffect();
+    SimpleEffect(std::shared_ptr<Device> device);
 
     ~SimpleEffect();
 
-public:
-    // init shaders
-    virtual void init();
+protected:
+    virtual void loadShader();
+    virtual void createInputLayout();
+    
+
 };

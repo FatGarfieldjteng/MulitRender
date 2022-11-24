@@ -13,5 +13,5 @@ public:
 public:
     virtual void init();
 
-    D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+    D3D12_INDEX_BUFFER_VIEW mIndexBufferView = {};
 };
