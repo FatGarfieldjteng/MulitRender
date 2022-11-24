@@ -13,6 +13,4 @@ public:
 protected:
     virtual void loadShader();
     virtual void createInputLayout();
-    
-
 };

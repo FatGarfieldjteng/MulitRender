@@ -12,6 +12,7 @@
 class Mesh;
 class CommandQueue;
 class Scene;
+class Effect;
 
 class GraphicsSystem
 {
@@ -75,6 +76,8 @@ protected:
 
 	void createScene();
 
+	void createEffect();
+
 private:
 	// helper functions
 	// transition a resource
@@ -131,5 +134,7 @@ private:
 // graphics data
 private:
 	// scene
-	Scene* mScene = nullptr;
+	Scene *mScene = nullptr;
+	Effect* mEffect = nullptr;
+	bool mGraphicsInitialized = false;
 };

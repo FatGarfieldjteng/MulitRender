@@ -28,6 +28,7 @@ protected:
 protected:
     std::shared_ptr<Device> mDevice;
 
+public:
     // vertex shader
     ComPtr<ID3DBlob> mVertexShaderBlob;
     
