@@ -13,4 +13,6 @@ public:
 protected:
     virtual void loadShader();
     virtual void createInputLayout();
+    virtual void createRootSignature();
+    virtual void createPipelineStateObject();
 };

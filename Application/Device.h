@@ -47,6 +47,10 @@ public:
         void** ppvRootSignature
     );
 
+    void createPipelineStateObject(const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
+        REFIID riid,
+        void** ppPipelineState);
+
     void CreateCommittedResource(
         const D3D12_HEAP_PROPERTIES* pHeapProperties,
         D3D12_HEAP_FLAGS      HeapFlags,

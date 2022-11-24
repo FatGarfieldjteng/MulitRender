@@ -64,10 +64,6 @@ protected:
 
 	void createFence();
 
-	void createRootSignature();
-
-	void createPipelineStateObject();
-	
 	uint64_t signal();
 
 	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
@@ -111,11 +107,7 @@ private:
 
 	ComPtr<ID3D12DescriptorHeap> mDSVHeap;
 
-	// root signature
-	ComPtr<ID3D12RootSignature> mRootSignature;
-
-	// pipeline state object.
-	ComPtr<ID3D12PipelineState> mPipelineState;
+	
 
 	D3D12_VIEWPORT mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, 1.0f, 1.f);
 	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);

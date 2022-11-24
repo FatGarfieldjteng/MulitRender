@@ -17,4 +17,6 @@ void Effect::init()
 {
 	loadShader();
 	createInputLayout();
+	createRootSignature();
+	createPipelineStateObject();
 }

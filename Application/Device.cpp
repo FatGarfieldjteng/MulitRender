@@ -145,3 +145,10 @@ void Device::CreateCommittedResource(
         riidResource,
         ppvResource));
 }
+
+void Device::createPipelineStateObject(const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
+    REFIID riid,
+    void** ppPipelineState)
+{
+    mDevice->CreatePipelineState(pDesc, riid, ppPipelineState);
+}

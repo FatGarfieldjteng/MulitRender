@@ -24,6 +24,8 @@ public:
 protected:
     virtual void loadShader() = 0;
     virtual void createInputLayout() = 0;
+    virtual void createRootSignature() = 0;
+    virtual void createPipelineStateObject() = 0;
 
 protected:
     std::shared_ptr<Device> mDevice;
@@ -37,4 +39,10 @@ public:
     
     // input layout
     D3D12_INPUT_ELEMENT_DESC* mInputLayout = nullptr;
+
+    // root signature
+    ComPtr<ID3D12RootSignature> mRootSignature;
+
+    // pipeline state object.
+    ComPtr<ID3D12PipelineState> mPipelineState;
 };
