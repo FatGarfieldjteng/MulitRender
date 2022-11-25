@@ -9,14 +9,12 @@ class Scene
 {
 public:
 
-    Scene(GraphicsSystem* GS);
+    Scene();
 
     ~Scene();
 
 public:
 
-    virtual void init() = 0;
+    virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList) = 0;
     
-protected:
-    GraphicsSystem* mGS;
 };

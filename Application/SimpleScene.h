@@ -10,13 +10,13 @@ class SimpleScene : public Scene
 {
 public:
 
-    SimpleScene(GraphicsSystem* GS);
+    SimpleScene();
 
     ~SimpleScene();
 
 public:
 
-    virtual void init();
+    virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList);
     
 private:
     std::vector <Mesh*> mMeshes;

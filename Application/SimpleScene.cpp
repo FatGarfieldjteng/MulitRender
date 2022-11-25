@@ -3,8 +3,7 @@
 #include "CubeMesh.h"
 #include "helper.h"
 
-SimpleScene::SimpleScene(GraphicsSystem* GS)
-	:Scene(GS)
+SimpleScene::SimpleScene()
 {
 
 }
@@ -20,11 +19,11 @@ SimpleScene::~SimpleScene()
 	}
 }
 
-void SimpleScene::init()
+void SimpleScene::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
 	// create a CubeMesh, and add it to the SimpleScene
-	CubeMesh *mesh = new CubeMesh(mGS);
-	mesh->init();
+	CubeMesh *mesh = new CubeMesh();
+	mesh->build(GS, commandList);
 
 	mMeshes.push_back(mesh);
 }

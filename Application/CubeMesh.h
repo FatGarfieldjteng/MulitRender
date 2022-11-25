@@ -6,12 +6,12 @@ class CubeMesh : public Mesh
 {
 public:
 
-    CubeMesh(GraphicsSystem* GS);
+    CubeMesh();
 
     ~CubeMesh();
 
 
 public:
 
-    virtual void init();
+    virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList);
 };

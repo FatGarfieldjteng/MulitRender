@@ -12,17 +12,15 @@ class Mesh
 {
 public:
 
-    Mesh(GraphicsSystem* GS);
+    Mesh();
 
     ~Mesh();
 
 public:
     
-    virtual void init() = 0;
+    virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList) = 0;
         
 protected:
-
-    GraphicsSystem* mGS;
     VertexBuffer mVertexBuffer;
     IndexBuffer mIndexBuffer;
 };

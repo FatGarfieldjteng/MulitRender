@@ -70,7 +70,7 @@ protected:
 
 	void flush(uint64_t& fenceValue);
 
-	void createScene();
+	void createScene(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
 	void createEffect();
 

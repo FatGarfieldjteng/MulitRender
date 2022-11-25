@@ -41,13 +41,15 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createFence();
 
-	createScene();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+
+	createScene(commandList);
 
 	createEffect();
 
 	// finish upload mesh and wait until uploading finished
-	auto fenceValue = commandQueue->ExecuteCommandList(commandList);
-	commandQueue->WaitForFenceValue(fenceValue);
+	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
+	mDirectCommandQueue->waitForFenceValue(fenceValue);
 
 	mGraphicsInitialized = true;
 }
@@ -135,9 +137,10 @@ void GraphicsSystem::flush(uint64_t& fenceValue)
 	waitForFenceValue(fenceValueForSignal);
 }
 
-void GraphicsSystem::createScene()
+void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
-	mScene = new SimpleScene(this);
+	mScene = new SimpleScene();
+	mScene->build(this, commandList);
 }
 
 void GraphicsSystem::createEffect()

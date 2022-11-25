@@ -38,8 +38,7 @@ namespace{
     };
 }
 
-CubeMesh::CubeMesh(GraphicsSystem* GS)
-    :Mesh(GS)
+CubeMesh::CubeMesh()
 {
 
 }
@@ -49,15 +48,12 @@ CubeMesh::~CubeMesh()
 
 }
 
-void CubeMesh::init()
+void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
-    // acquire ready to use commandList
-    ComPtr<ID3D12GraphicsCommandList2> commandList = mGS->acquireCommandList();
-
     // create vertex buffer
     // upload vertex buffer data.
     ComPtr<ID3D12Resource> intermediateVertexBuffer;
-    mGS->updateBufferResource(commandList,
+    GS->updateBufferResource(commandList,
         &mVertexBuffer.mBuffer, &intermediateVertexBuffer,
         _countof(vertices), sizeof(VertexPosColor), vertices);
 
@@ -70,7 +66,7 @@ void CubeMesh::init()
     // create index buffer
     // upload index buffer data.
     ComPtr<ID3D12Resource> intermediateIndexBuffer;
-    mGS->updateBufferResource(commandList,
+    GS->updateBufferResource(commandList,
         &mIndexBuffer.mBuffer, &intermediateIndexBuffer,
         _countof(indicies), sizeof(WORD), indicies);
     
