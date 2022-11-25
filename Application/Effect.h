@@ -9,7 +9,7 @@ class Effect
 {
 public:
 
-    Effect(std::shared_ptr<Device> device);
+    Effect();
 
     ~Effect();
 
@@ -19,13 +19,12 @@ public:
     }
 
 public:
-    void init();
+    void build(std::shared_ptr<Device> device);
 
 protected:
     virtual void loadShader() = 0;
-    virtual void createInputLayout() = 0;
-    virtual void createRootSignature() = 0;
-    virtual void createPipelineStateObject() = 0;
+    virtual void createRootSignature(std::shared_ptr<Device> device) = 0;
+    virtual void createPipelineStateObject(std::shared_ptr<Device> device) = 0;
 
 protected:
     std::shared_ptr<Device> mDevice;

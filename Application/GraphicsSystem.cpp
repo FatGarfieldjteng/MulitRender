@@ -145,8 +145,8 @@ void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 
 void GraphicsSystem::createEffect()
 {
-	mEffect = new SimpleEffect(mDevice);
-	mEffect->init();
+	mEffect = new SimpleEffect();
+	mEffect->build(mDevice);
 }
 
 

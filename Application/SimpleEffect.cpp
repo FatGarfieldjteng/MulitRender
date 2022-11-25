@@ -5,8 +5,7 @@
 #include "helper.h"
 #include <DirectXMath.h>
 
-SimpleEffect::SimpleEffect(std::shared_ptr<Device> device)
-    :Effect(device)
+SimpleEffect::SimpleEffect()
 {
 
 }
@@ -28,28 +27,7 @@ void SimpleEffect::loadShader()
     ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &mPixelShaderBlob));
 }
 
-void SimpleEffect::createInputLayout()
-{
-    // create vertex input layout
-    mInputLayout = new D3D12_INPUT_ELEMENT_DESC[2];
-    mInputLayout[0] = { "POSITION", 
-        0, 
-        DXGI_FORMAT_R32G32B32_FLOAT, 
-        0, 
-        D3D12_APPEND_ALIGNED_ELEMENT, 
-        D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 
-        0 };
-
-    mInputLayout[1] = { "COLOR", 
-        0, 
-        DXGI_FORMAT_R32G32B32_FLOAT, 
-        0, 
-        D3D12_APPEND_ALIGNED_ELEMENT, 
-        D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 
-        0 };
-}
-
-void SimpleEffect::createRootSignature()
+void SimpleEffect::createRootSignature(std::shared_ptr<Device> device)
 {
 	// Create a root signature.
 	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
@@ -80,11 +58,11 @@ void SimpleEffect::createRootSignature()
 	ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDescription,
 		featureData.HighestVersion, &rootSignatureBlob, &errorBlob));
 	// Create the root signature.
-	mDevice->CreateRootSignature(rootSignatureBlob->GetBufferPointer(),
+	device->CreateRootSignature(rootSignatureBlob->GetBufferPointer(),
 		rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&mRootSignature));
 }
 
-void SimpleEffect::createPipelineStateObject()
+void SimpleEffect::createPipelineStateObject(std::shared_ptr<Device> device)
 {
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
 	rtvFormats.NumRenderTargets = 1;

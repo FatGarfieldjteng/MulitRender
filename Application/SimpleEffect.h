@@ -6,13 +6,12 @@ class SimpleEffect : public Effect
 {
 public:
 
-    SimpleEffect(std::shared_ptr<Device> device);
+    SimpleEffect();
 
     ~SimpleEffect();
 
 protected:
     virtual void loadShader();
-    virtual void createInputLayout();
-    virtual void createRootSignature();
-    virtual void createPipelineStateObject();
+    virtual void createRootSignature(std::shared_ptr<Device> device);
+    virtual void createPipelineStateObject(std::shared_ptr<Device> device);
 };

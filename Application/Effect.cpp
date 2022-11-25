@@ -2,8 +2,8 @@
 #include "Effect.h"
 #include "helper.h"
 
-Effect::Effect(std::shared_ptr<Device> device)
-	:mDevice(device)
+Effect::Effect()
+
 {
 
 }
@@ -13,10 +13,9 @@ Effect::~Effect()
 
 }
 
-void Effect::init()
+void Effect::build(std::shared_ptr<Device> device)
 {
 	loadShader();
-	createInputLayout();
-	createRootSignature();
-	createPipelineStateObject();
+	createRootSignature(device);
+	createPipelineStateObject(device);
 }
