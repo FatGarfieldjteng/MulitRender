@@ -13,6 +13,7 @@ class Mesh;
 class CommandQueue;
 class Scene;
 class Effect;
+class Camera;
 
 class GraphicsSystem
 {
@@ -74,6 +75,8 @@ protected:
 
 	void createEffect();
 
+	void createCamera();
+
 private:
 	// helper functions
 	// transition a resource
@@ -127,6 +130,7 @@ private:
 private:
 	// scene
 	Scene *mScene = nullptr;
-	Effect* mEffect = nullptr;
+	Effect *mEffect = nullptr;
+	Camera* mCamera = nullptr;
 	bool mGraphicsInitialized = false;
 };

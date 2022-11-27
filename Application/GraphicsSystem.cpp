@@ -5,7 +5,9 @@
 #include "Adapter.h"
 #include "SimpleScene.h"
 #include "SimpleEffect.h"
+#include "Camera.h"
 #include "helper.h"
+#include <DirectXMath.h>
 
 GraphicsSystem::GraphicsSystem()
 {
@@ -16,6 +18,7 @@ GraphicsSystem::~GraphicsSystem()
 {
 	delete mScene;
 	delete mEffect;
+	delete mCamera;
 }
 
 void GraphicsSystem::initGraphicsSystem(HWND hWnd,
@@ -149,7 +152,10 @@ void GraphicsSystem::createEffect()
 	mEffect->build(mDevice);
 }
 
-
+void GraphicsSystem::createCamera()
+{
+	mCamera = new Camera();
+}
 
 void GraphicsSystem::update()
 {
@@ -177,6 +183,12 @@ void GraphicsSystem::update()
 		frameCounter = 0;
 		elapsedSeconds = 0.0;
 	}
+
+
+	// Update the model matrix.
+	float angle = static_cast<float>(e.TotalTime * 90.0);
+	const DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(0, 1, 1, 0);
+	m_ModelMatrix = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(angle));
 }
 
 void GraphicsSystem::render()
