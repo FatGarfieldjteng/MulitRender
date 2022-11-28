@@ -43,6 +43,8 @@ public:
 
 	void update();
 
+	void updateCamera(double elapsedTime);
+
 	void render();
 
 protected:
@@ -98,8 +100,10 @@ private:
 	// resize the depth buffer to match the size of the client area.
 	void resizeDepthBuffer(int width, int height);
 
-
 private:
+	UINT mWidth = 0;
+	UINT mHeight = 0;
+
 	std::shared_ptr<Adapter> mAdapter;
 	std::shared_ptr<Device> mDevice;
 	std::shared_ptr<SwapChain> mSwapChain;
@@ -109,8 +113,6 @@ private:
 	ComPtr<ID3D12Resource> mDepthBuffer;
 
 	ComPtr<ID3D12DescriptorHeap> mDSVHeap;
-
-	
 
 	D3D12_VIEWPORT mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, 1.0f, 1.f);
 	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);

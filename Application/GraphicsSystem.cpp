@@ -25,6 +25,9 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	uint32_t width, uint32_t height,
 	DXGI_FORMAT renderTargetFormat)
 {
+	mWidth = width;
+	mHeight = height;
+
 	createDevice();
 
 	createDirectCommandQueue();
@@ -47,6 +50,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
 
 	createScene(commandList);
+
+	createCamera();
 
 	createEffect();
 
@@ -155,6 +160,16 @@ void GraphicsSystem::createEffect()
 void GraphicsSystem::createCamera()
 {
 	mCamera = new Camera();
+
+	// view matrix.
+	const DirectX::XMVECTOR eye = DirectX::XMVectorSet(0, 0, -10, 1);
+	const DirectX::XMVECTOR target = DirectX::XMVectorSet(0, 0, 0, 1);
+	const DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1, 0, 0);
+	mCamera->viewMaxtrix(eye, target, up);
+
+	// projection matrix.
+	float aspectRatio = mWidth / static_cast<float>(mHeight);
+	mCamera->projectionMaxtrix(aspectRatio, 0.1f, 100.0f);
 }
 
 void GraphicsSystem::update()
@@ -185,10 +200,18 @@ void GraphicsSystem::update()
 	}
 
 
-	// Update the model matrix.
-	float angle = static_cast<float>(e.TotalTime * 90.0);
+	updateCamera(elapsedSeconds);
+}
+
+void GraphicsSystem::updateCamera(double elapsedTime)
+{
+	// model matrix.
+	float angle = static_cast<float>(elapsedTime * 90.0);
 	const DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(0, 1, 1, 0);
-	m_ModelMatrix = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(angle));
+	DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(angle));
+
+	mCamera->modelMaxtrix(modelMatrix);
+
 }
 
 void GraphicsSystem::render()
@@ -243,7 +266,11 @@ void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> comma
 	D3D12_RESOURCE_STATES beforeState,
 	D3D12_RESOURCE_STATES afterState)
 {
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		resource.Get(),
+		beforeState, afterState);
 
+	commandList->ResourceBarrier(1, &barrier);
 }
 
 // Clear a render target view.

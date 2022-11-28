@@ -7,8 +7,57 @@ public:
 
     ~Camera();
 
+    DirectX::XMMATRIX modelMaxtrix()
+    {
+        return mModelMatrix;
+    }
+
+    void modelMaxtrix(const DirectX::XMMATRIX& value)
+    {
+        mModelMatrix = value;
+    }
+
+    DirectX::XMMATRIX viewMaxtrix()
+    {
+        return mViewMatrix;
+    }
+
+    void viewMaxtrix(const DirectX::XMMATRIX& value)
+    {
+        mViewMatrix = value;
+    }
+
+    void viewMaxtrix(const DirectX::XMVECTOR& eye, const DirectX::XMVECTOR& target, const DirectX::XMVECTOR& up)
+    {
+        mViewMatrix = DirectX::XMMatrixLookAtLH(eye, target, up);
+    }
+
+    DirectX::XMMATRIX projectionMaxtrix()
+    {
+        return mProjectionMatrix;
+    }
+
+    void projectionMaxtrix(const DirectX::XMMATRIX& value)
+    {
+        mProjectionMatrix = value;
+    }
+
+    void projectionMaxtrix(float aspectRatio, float zNear, float zFar)
+    {
+        mProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(mFoV), aspectRatio, zNear, zFar);
+    }
+
 private:
-    float m_FoV;
+    
+    // intrinsic parameters
+
+    // field of view
+    float mFoV;
+
+    // extrinsic parameters
+    DirectX::XMVECTOR mEye;
+    DirectX::XMVECTOR mTarget;
+    DirectX::XMVECTOR mUp;
 
     DirectX::XMMATRIX mModelMatrix = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX mViewMatrix = DirectX::XMMatrixIdentity();
