@@ -23,4 +23,6 @@ public:
 protected:
     VertexBuffer mVertexBuffer;
     IndexBuffer mIndexBuffer;
+    ComPtr<ID3D12Resource> mIntermediateVertexBuffer;
+    ComPtr<ID3D12Resource> mIntermediateIndexBuffer;
 };

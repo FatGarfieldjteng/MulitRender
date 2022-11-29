@@ -127,7 +127,7 @@ void Device::CreateRootSignature(const void* pBlobWithRootSignature,
         blobLengthInBytes, riid, ppvRootSignature));
 }
 
-void Device::CreateCommittedResource(
+void Device::createCommittedResource(
     const D3D12_HEAP_PROPERTIES* pHeapProperties,
     D3D12_HEAP_FLAGS      HeapFlags,
     const D3D12_RESOURCE_DESC* pDesc,
@@ -144,6 +144,17 @@ void Device::CreateCommittedResource(
         pOptimizedClearValue,
         riidResource,
         ppvResource));
+}
+
+void Device::createDepthStencilView(
+    ID3D12Resource* pResource,
+    const D3D12_DEPTH_STENCIL_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE   DestDescriptor)
+{
+    mDevice->CreateDepthStencilView(
+        pResource,
+        pDesc,
+        DestDescriptor);
 }
 
 void Device::createPipelineStateObject(const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,

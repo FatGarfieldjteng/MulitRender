@@ -51,6 +51,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createScene(commandList);
 
+	
+
 	createCamera();
 
 	createEffect();
@@ -58,6 +60,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	// finish upload mesh and wait until uploading finished
 	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
 	mDirectCommandQueue->waitForFenceValue(fenceValue);
+
+	resizeDepthBuffer(mWidth, mHeight);
 
 	mGraphicsInitialized = true;
 }
@@ -139,7 +143,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 	}
 }
 
-void GraphicsSystem::flush(uint64_t& fenceValue)
+void GraphicsSystem::flush()
 {
 	uint64_t fenceValueForSignal = signal();
 	waitForFenceValue(fenceValueForSignal);
@@ -149,6 +153,7 @@ void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
 	mScene = new SimpleScene();
 	mScene->build(this, commandList);
+	
 }
 
 void GraphicsSystem::createEffect()
@@ -216,6 +221,11 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 void GraphicsSystem::render()
 {
+	renderCube();
+}
+
+void GraphicsSystem::clearScreen()
+{
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
 	auto commandAllocator = mCommandAllocators[currentBackBufferIndex];
@@ -233,10 +243,10 @@ void GraphicsSystem::render()
 
 
 	mSwapChain->clearRTV(mCommandList);
-	
+
 	// present
 	{
-		
+
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 			backBuffer.Get(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -261,6 +271,11 @@ void GraphicsSystem::render()
 	}
 }
 
+void GraphicsSystem::renderCube()
+{
+
+}
+
 void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
 	ComPtr<ID3D12Resource> resource,
 	D3D12_RESOURCE_STATES beforeState,
@@ -278,7 +293,7 @@ void GraphicsSystem::clearRTV(ComPtr<ID3D12GraphicsCommandList2> commandList,
 	D3D12_CPU_DESCRIPTOR_HANDLE rtv, 
 	FLOAT* clearColor)
 {
-
+	commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 }
 
 // clear the depth of a depth-stencil view.
@@ -286,7 +301,7 @@ void GraphicsSystem::clearDepth(ComPtr<ID3D12GraphicsCommandList2> commandList,
 	D3D12_CPU_DESCRIPTOR_HANDLE dsv, 
 	FLOAT depth)
 {
-
+	commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 }
 
 // create a GPU buffer.
@@ -300,7 +315,7 @@ void GraphicsSystem::updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> com
 	size_t bufferSize = numElements * elementSize;
 
 	// create a committed resource in GPU side.
-	mDevice->CreateCommittedResource(
+	mDevice->createCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		&CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags),
@@ -311,7 +326,7 @@ void GraphicsSystem::updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> com
 	// create an committed resource in CPU side and copy data from bufferData to the resouce.
 	if (bufferData)
 	{
-		mDevice->CreateCommittedResource(
+		mDevice->createCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
@@ -335,5 +350,37 @@ void GraphicsSystem::updateBufferResource(ComPtr<ID3D12GraphicsCommandList2> com
 // resize the depth buffer to match the size of the client area.
 void GraphicsSystem::resizeDepthBuffer(int width, int height)
 {
+	if (mGraphicsInitialized)
+	{
+		// the depth stencil buffer can be resized only without write operation
+		flush();
 
+		width = std::max(1, width);
+		height = std::max(1, height);
+
+		// create a depth buffer.
+		D3D12_CLEAR_VALUE optimizedClearValue = {};
+		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+		optimizedClearValue.DepthStencil = { 1.0f, 0 };
+
+		mDevice->createCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height,
+				1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&optimizedClearValue,
+			IID_PPV_ARGS(&mDepthBuffer)
+		);
+
+		// Update the depth-stencil view.
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
+		dsv.Format = DXGI_FORMAT_D32_FLOAT;
+		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsv.Texture2D.MipSlice = 0;
+		dsv.Flags = D3D12_DSV_FLAG_NONE;
+
+		mDevice->createDepthStencilView(mDepthBuffer.Get(), &dsv,
+			mDSVHeap->GetCPUDescriptorHandleForHeapStart());
+	}
 }

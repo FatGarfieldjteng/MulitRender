@@ -20,11 +20,17 @@ SimpleEffect::~SimpleEffect()
 
 void SimpleEffect::loadShader()
 {
+	std::wstring path = shaderPath();
+
+	std::wstring vertexShaderPath = path + L"SimpleVS.cso";
+
+	std::wstring pixelShaderPath = path + L"SimplePS.cso";
+
     // load vertex shader.
-    ThrowIfFailed(D3DReadFileToBlob(L"VertexShader.cso", &mVertexShaderBlob));
+    ThrowIfFailed(D3DReadFileToBlob(vertexShaderPath.c_str(), &mVertexShaderBlob));
 
     // load pixel shader.
-    ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &mPixelShaderBlob));
+    ThrowIfFailed(D3DReadFileToBlob(pixelShaderPath.c_str(), &mPixelShaderBlob));
 }
 
 void SimpleEffect::createRootSignature(std::shared_ptr<Device> device)
@@ -97,6 +103,6 @@ void SimpleEffect::createPipelineStateObject(std::shared_ptr<Device> device)
 		sizeof(PipelineStateStream), &pipelineStateStream
 	};
 	
-	mDevice->createPipelineStateObject(&pipelineStateStreamDesc, IID_PPV_ARGS(&mPipelineState));
+	device->createPipelineStateObject(&pipelineStateStreamDesc, IID_PPV_ARGS(&mPipelineState));
 }
 

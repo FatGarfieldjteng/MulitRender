@@ -13,9 +13,17 @@ public:
 
     ~Effect();
 
-    static std::string shaderPath()
+    static std::wstring shaderPath()
     {
-        return std::string("Shader");
+        wchar_t buff[MAX_PATH];
+        GetModuleFileNameW(NULL, buff, MAX_PATH);
+        std::wstring::size_type position = std::wstring(buff).find(L"MulitRender");
+        
+        std::wstring path = std::wstring(buff).substr(0, position);
+
+        path += L"MulitRender\\Application\\Shader\\";
+
+        return path;
     }
 
 public:
@@ -25,9 +33,6 @@ protected:
     virtual void loadShader() = 0;
     virtual void createRootSignature(std::shared_ptr<Device> device) = 0;
     virtual void createPipelineStateObject(std::shared_ptr<Device> device) = 0;
-
-protected:
-    std::shared_ptr<Device> mDevice;
 
 public:
     // vertex shader

@@ -65,6 +65,8 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
 
     ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
 
+    commandList->Reset(commandAllocator.Get(), nullptr);
+
     return commandList;
 }
 

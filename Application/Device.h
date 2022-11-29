@@ -51,7 +51,7 @@ public:
         REFIID riid,
         void** ppPipelineState);
 
-    void CreateCommittedResource(
+    void createCommittedResource(
         const D3D12_HEAP_PROPERTIES* pHeapProperties,
         D3D12_HEAP_FLAGS      HeapFlags,
         const D3D12_RESOURCE_DESC* pDesc,
@@ -59,6 +59,11 @@ public:
         const D3D12_CLEAR_VALUE* pOptimizedClearValue,
         REFIID                riidResource,
         void** ppvResource = nullptr);
+
+    void createDepthStencilView(
+        ID3D12Resource * pResource,
+        const D3D12_DEPTH_STENCIL_VIEW_DESC * pDesc,
+        D3D12_CPU_DESCRIPTOR_HANDLE   DestDescriptor);
 
 private:
     Microsoft::WRL::ComPtr<ID3D12Device2> mDevice;

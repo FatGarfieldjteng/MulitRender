@@ -24,6 +24,14 @@ void SimpleScene::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> c
 	// create a CubeMesh, and add it to the SimpleScene
 	CubeMesh *mesh = new CubeMesh();
 	mesh->build(GS, commandList);
-
+	
 	mMeshes.push_back(mesh);
+}
+
+void SimpleScene::endBuild()
+{
+	for (auto& mesh : mMeshes)
+	{
+		
+	}
 }

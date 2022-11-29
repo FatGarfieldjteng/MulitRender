@@ -52,9 +52,8 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
 {
     // create vertex buffer
     // upload vertex buffer data.
-    ComPtr<ID3D12Resource> intermediateVertexBuffer;
     GS->updateBufferResource(commandList,
-        &mVertexBuffer.mBuffer, &intermediateVertexBuffer,
+        &mVertexBuffer.mBuffer, &mIntermediateVertexBuffer,
         _countof(vertices), sizeof(VertexPosColor), vertices);
 
     // setup vertex buffer view
@@ -65,13 +64,13 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
 
     // create index buffer
     // upload index buffer data.
-    ComPtr<ID3D12Resource> intermediateIndexBuffer;
     GS->updateBufferResource(commandList,
-        &mIndexBuffer.mBuffer, &intermediateIndexBuffer,
+        &mIndexBuffer.mBuffer, &mIntermediateIndexBuffer,
         _countof(indicies), sizeof(WORD), indicies);
     
     D3D12_INDEX_BUFFER_VIEW& ibView = mIndexBuffer.mIndexBufferView;
     ibView.BufferLocation = mIndexBuffer.mBuffer->GetGPUVirtualAddress();
     ibView.Format = DXGI_FORMAT_R16_UINT;
     ibView.SizeInBytes = sizeof(indicies);
+
 }

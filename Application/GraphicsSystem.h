@@ -43,8 +43,6 @@ public:
 
 	void update();
 
-	void updateCamera(double elapsedTime);
-
 	void render();
 
 protected:
@@ -71,13 +69,15 @@ protected:
 
 	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
 
-	void flush(uint64_t& fenceValue);
+	void flush();
 
 	void createScene(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
 	void createEffect();
 
 	void createCamera();
+
+	void updateCamera(double elapsedTime);
 
 private:
 	// helper functions
@@ -99,6 +99,10 @@ private:
 
 	// resize the depth buffer to match the size of the client area.
 	void resizeDepthBuffer(int width, int height);
+
+	void clearScreen();
+
+	void renderCube();
 
 private:
 	UINT mWidth = 0;
