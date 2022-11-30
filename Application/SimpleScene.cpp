@@ -32,6 +32,6 @@ void SimpleScene::endBuild()
 {
 	for (auto& mesh : mMeshes)
 	{
-		
+		mesh->endBuild();
 	}
 }

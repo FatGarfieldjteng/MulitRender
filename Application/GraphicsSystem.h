@@ -122,7 +122,7 @@ private:
 	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);
 
 	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
-	ComPtr<ID3D12GraphicsCommandList> mCommandList;
+	ComPtr<ID3D12GraphicsCommandList2> mCommandList;
 
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;

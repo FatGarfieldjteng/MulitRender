@@ -72,5 +72,5 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
     ibView.BufferLocation = mIndexBuffer.mBuffer->GetGPUVirtualAddress();
     ibView.Format = DXGI_FORMAT_R16_UINT;
     ibView.SizeInBytes = sizeof(indicies);
-
+       
 }

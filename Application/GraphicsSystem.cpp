@@ -39,6 +39,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createDSVHeap();
 
+	
+
 	createCommandAllocators();
 
 	createCommandList();
@@ -47,23 +49,25 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createFence();
 
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+	/*ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
 
-	createScene(commandList);
-
-	
+	createScene(commandList);*/
 
 	createCamera();
 
 	createEffect();
 
 	// finish upload mesh and wait until uploading finished
-	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
-	mDirectCommandQueue->waitForFenceValue(fenceValue);
+	//auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
+	//mDirectCommandQueue->waitForFenceValue(fenceValue);
 
-	resizeDepthBuffer(mWidth, mHeight);
+	//// scene uploaded to GPU, then release intermediate buffer
+	//mScene->endBuild();
 
 	mGraphicsInitialized = true;
+
+	resizeDepthBuffer(mWidth, mHeight);
+	
 }
 
 void GraphicsSystem::createDevice()
@@ -153,7 +157,6 @@ void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
 	mScene = new SimpleScene();
 	mScene->build(this, commandList);
-	
 }
 
 void GraphicsSystem::createEffect()
@@ -221,7 +224,8 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 void GraphicsSystem::render()
 {
-	renderCube();
+	clearScreen();
+	//renderCube();
 }
 
 void GraphicsSystem::clearScreen()
@@ -273,7 +277,45 @@ void GraphicsSystem::clearScreen()
 
 void GraphicsSystem::renderCube()
 {
+	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+	
+	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
 
+	auto commandList = mDirectCommandQueue->acquireCommandList();
+	
+	transitionResource(commandList,
+		backBuffer,
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	mDirectCommandQueue->executeCommandList(commandList);
+
+	mSwapChain->clearRTV(commandList);
+
+	if (mGraphicsInitialized)
+	{
+
+		auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
+		clearDepth(commandList, dsv);
+	}
+
+	// present
+	{
+		transitionResource(commandList,
+			backBuffer,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT);
+
+		mDirectCommandQueue->executeCommandList(commandList);
+
+		mSwapChain->present();
+
+		mFrameFenceValues[currentBackBufferIndex] = signal();
+
+		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+	}
 }
 
 void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
