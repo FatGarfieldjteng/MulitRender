@@ -239,22 +239,20 @@ void GraphicsSystem::clearScreen()
 
 	auto backBuffer = mSwapChain->getCurrentBackBuffer();
 
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		backBuffer.Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	mCommandList->ResourceBarrier(1, &barrier);
-
+	transitionResource(mCommandList,
+		backBuffer,
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	mSwapChain->clearRTV(mCommandList);
 
 	// present
 	{
 
-		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			backBuffer.Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		mCommandList->ResourceBarrier(1, &barrier);
+		transitionResource(mCommandList,
+			backBuffer,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT);
 
 		ThrowIfFailed(mCommandList->Close());
 

@@ -47,6 +47,7 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
     else
     {
         commandAllocator = createCommandAllocator();
+        ThrowIfFailed(commandAllocator->Reset());
     }
 
     // get a valie CommandList, if there is free CommandList available in mCommandListQueue.front(), use it
