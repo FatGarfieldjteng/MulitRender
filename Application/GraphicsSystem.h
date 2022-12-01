@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#define RAW_MODE
 
 class Mesh;
 class CommandQueue;
@@ -56,20 +57,22 @@ protected:
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
 
 	void createDSVHeap();
-
+#ifdef RAW_MODE
 	void createCommandAllocators();
 
 	void createCommandList();
+#endif
 
 	void createEventHandle();
 
 	void createFence();
 
+#ifdef RAW_MODE
 	uint64_t signal();
+	void flush();
+#endif
 
 	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
-
-	void flush();
 
 	void createScene(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
@@ -121,8 +124,10 @@ private:
 	D3D12_VIEWPORT mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, 1.0f, 1.f);
 	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);
 
+#ifdef RAW_MODE
 	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
 	ComPtr<ID3D12GraphicsCommandList2> mCommandList;
+#endif
 
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;

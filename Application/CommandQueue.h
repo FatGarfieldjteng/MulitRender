@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <queue>
+#include <map>
 
 class Device;
 
@@ -47,7 +48,7 @@ private:
     struct CommandAllocatorEntry
     {
         uint64_t fenceValue;
-        Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
+        ComPtr<ID3D12CommandAllocator> commandAllocator;
     };
 
     using CommandAllocatorQueue = std::queue<CommandAllocatorEntry>;
@@ -62,4 +63,6 @@ private:
 
     CommandAllocatorQueue                       mCommandAllocatorQueue;
     CommandListQueue                            mCommandListQueue;
+
+    std::map<ComPtr<ID3D12GraphicsCommandList2>, ComPtr<ID3D12CommandAllocator>> mMapListAllocator;
 };

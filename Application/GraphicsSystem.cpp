@@ -39,11 +39,11 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createDSVHeap();
 
-	
-
+#ifdef RAW_MODE
 	createCommandAllocators();
 
 	createCommandList();
+#endif
 
 	createEventHandle();
 
@@ -66,7 +66,7 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	mGraphicsInitialized = true;
 
-	resizeDepthBuffer(mWidth, mHeight);
+	//resizeDepthBuffer(mWidth, mHeight);
 	
 }
 
@@ -96,7 +96,11 @@ void GraphicsSystem::createSwapChain(HWND hWnd,
 	mSwapChain = SwapChain::create(hWnd,
 		mAdapter,
 		mDevice,
+#ifdef RAW_MODE
 		mCommandQueue,
+#else
+		mDirectCommandQueue->commandQueue(),
+#endif
 		width, height, 
 		renderTargetFormat);
 }
@@ -105,7 +109,7 @@ void GraphicsSystem::createDSVHeap()
 {
 	mDSVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
 }
-
+#ifdef RAW_MODE
 void GraphicsSystem::createCommandAllocators()
 {
 	for (int i = 0; i < BufferCount; ++i)
@@ -118,7 +122,7 @@ void GraphicsSystem::createCommandList()
 {
 	mCommandList = mDevice->createCommandList(mCommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
 }
-
+#endif
 void GraphicsSystem::createEventHandle()
 {
 	mFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -130,6 +134,7 @@ void GraphicsSystem::createFence()
 	mFence = mDevice->createFence();
 }
 
+#ifdef RAW_MODE
 uint64_t GraphicsSystem::signal()
 {
 	uint64_t fenceValueForSignal = ++mFenceValue;
@@ -137,6 +142,14 @@ uint64_t GraphicsSystem::signal()
 
 	return fenceValueForSignal;
 }
+
+void GraphicsSystem::flush()
+{
+	uint64_t fenceValueForSignal = signal();
+	waitForFenceValue(fenceValueForSignal);
+}
+
+#endif
 
 void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
 {
@@ -147,11 +160,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 	}
 }
 
-void GraphicsSystem::flush()
-{
-	uint64_t fenceValueForSignal = signal();
-	waitForFenceValue(fenceValueForSignal);
-}
+
 
 void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
@@ -224,10 +233,16 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 void GraphicsSystem::render()
 {
+
+
 	clearScreen();
+
 	//renderCube();
 }
 
+
+
+#ifdef RAW_MODE
 void GraphicsSystem::clearScreen()
 {
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
@@ -273,6 +288,43 @@ void GraphicsSystem::clearScreen()
 	}
 }
 
+#else
+void GraphicsSystem::clearScreen()
+{
+	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+	auto backBuffer = mSwapChain->getCurrentBackBuffer();
+
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+
+	transitionResource(commandList,
+		backBuffer,
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	mSwapChain->clearRTV(commandList);
+
+	// present
+	{
+
+		transitionResource(commandList,
+			backBuffer,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT);
+
+		// execute
+		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->executeCommandList(commandList);
+
+
+		mSwapChain->present();
+
+		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+	}
+}
+
+#endif
+
 void GraphicsSystem::renderCube()
 {
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
@@ -308,7 +360,7 @@ void GraphicsSystem::renderCube()
 
 		mSwapChain->present();
 
-		mFrameFenceValues[currentBackBufferIndex] = signal();
+		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->signal();
 
 		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
@@ -393,7 +445,7 @@ void GraphicsSystem::resizeDepthBuffer(int width, int height)
 	if (mGraphicsInitialized)
 	{
 		// the depth stencil buffer can be resized only without write operation
-		flush();
+		mDirectCommandQueue->flush();
 
 		width = std::max(1, width);
 		height = std::max(1, height);

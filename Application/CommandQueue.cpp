@@ -47,7 +47,6 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
     else
     {
         commandAllocator = createCommandAllocator();
-        ThrowIfFailed(commandAllocator->Reset());
     }
 
     // get a valie CommandList, if there is free CommandList available in mCommandListQueue.front(), use it
@@ -65,8 +64,13 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
         ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
     }
 
+    //mMapListAllocator[commandList] = commandAllocator;
+    
+    
+    // Associate the command allocator with the command list so that it can be
+    // retrieved when the command list is executed.
     ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
-
+    
     return commandList;
 }
 
@@ -82,7 +86,7 @@ uint64_t CommandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> com
         commandList.Get()
     };
 
-    mCommandQueue->ExecuteCommandLists(1, ppCommandLists);
+    mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
     uint64_t fenceValue = signal();
 
     mCommandAllocatorQueue.emplace(CommandAllocatorEntry{ fenceValue, commandAllocator });
