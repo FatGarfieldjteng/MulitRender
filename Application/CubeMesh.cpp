@@ -64,6 +64,8 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
 
     // create index buffer
     // upload index buffer data.
+    mIndexCount = _countof(indicies);
+
     GS->updateBufferResource(commandList,
         &mIndexBuffer.mBuffer, &mIntermediateIndexBuffer,
         _countof(indicies), sizeof(WORD), indicies);

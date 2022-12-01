@@ -19,6 +19,10 @@ public:
     virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList);
 
     virtual void endBuild();
+
+    virtual size_t mesheCount();
+
+    virtual Mesh* mesh(size_t i);
     
 private:
     std::vector <Mesh*> mMeshes;

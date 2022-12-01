@@ -27,9 +27,10 @@ public:
         mIntermediateIndexBuffer->Release();
     }
         
-protected:
+public:
     VertexBuffer mVertexBuffer;
     IndexBuffer mIndexBuffer;
+    size_t mIndexCount;
     ComPtr<ID3D12Resource> mIntermediateVertexBuffer;
     ComPtr<ID3D12Resource> mIntermediateIndexBuffer;
 };

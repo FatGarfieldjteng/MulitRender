@@ -47,6 +47,16 @@ public:
         mProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(mFoV), aspectRatio, zNear, zFar);
     }
 
+    void computeModelViewProjectionMatrix()
+    {
+        mModelViewProjectionMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixMultiply(mModelMatrix, mViewMatrix), mProjectionMatrix);
+    }
+
+    DirectX::XMMATRIX modelViewProjectionMatrix()
+    {
+        return mModelViewProjectionMatrix;
+    }
+
 private:
     
     // intrinsic parameters
@@ -62,4 +72,6 @@ private:
     DirectX::XMMATRIX mModelMatrix = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX mViewMatrix = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX mProjectionMatrix = DirectX::XMMatrixIdentity();
+
+    DirectX::XMMATRIX mModelViewProjectionMatrix = DirectX::XMMatrixIdentity();
 };

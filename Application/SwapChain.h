@@ -45,6 +45,14 @@ public:
         return mBackBuffers[mCurrentBackBufferIndex];
     }
 
+    CD3DX12_CPU_DESCRIPTOR_HANDLE getCurrentRTV()
+    {
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+            mCurrentBackBufferIndex, mRTVDescriptorSize);
+
+        return rtv;
+    }
+
     void clearRTV(ComPtr<ID3D12GraphicsCommandList> commandList);
 
     void present();

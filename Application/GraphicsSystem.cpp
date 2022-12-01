@@ -28,6 +28,9 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	mWidth = width;
 	mHeight = height;
 
+	mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f,
+		static_cast<float>(mWidth), static_cast<float>(mHeight));
+
 	createDevice();
 
 	createDirectCommandQueue();
@@ -200,6 +203,8 @@ void GraphicsSystem::update()
 	t0 = t1;
 
 	elapsedSeconds += deltaTime.count() * 1e-9;
+	mTotalElapsedSeconds += deltaTime.count() * 1e-9;
+
 	if (elapsedSeconds > 1.0)
 	{
 		char buffer[500];
@@ -215,7 +220,7 @@ void GraphicsSystem::update()
 	}
 
 
-	updateCamera(elapsedSeconds);
+	updateCamera(mTotalElapsedSeconds);
 }
 
 void GraphicsSystem::updateCamera(double elapsedTime)
@@ -227,12 +232,13 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 	mCamera->modelMaxtrix(modelMatrix);
 
+	mCamera->computeModelViewProjectionMatrix();
 }
 
 void GraphicsSystem::render()
 {
-	clearScreen();
-	//renderCube();
+	//clearScreen();
+	renderCube();
 }
 
 void GraphicsSystem::finish()
@@ -326,17 +332,14 @@ void GraphicsSystem::clearScreen()
 void GraphicsSystem::renderCube()
 {
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-	
 	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
 
-	auto commandList = mDirectCommandQueue->acquireCommandList();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
 	
 	transitionResource(commandList,
 		backBuffer,
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	mDirectCommandQueue->executeCommandList(commandList);
 
 	mSwapChain->clearRTV(commandList);
 
@@ -345,6 +348,32 @@ void GraphicsSystem::renderCube()
 
 		auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
 		clearDepth(commandList, dsv);
+
+		commandList->SetPipelineState(mEffect->mPipelineState.Get());
+		commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
+
+		commandList->RSSetViewports(1, &mViewport);
+		commandList->RSSetScissorRects(1, &mScissorRect);
+		
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
+		commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+		// Update the MVP matrix
+		DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
+		commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
+
+		size_t meshCount = mScene->mesheCount();
+
+		for (size_t i = 0; i < meshCount; ++i)
+		{
+			Mesh* mesh = mScene->mesh(i);
+			commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
+			commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
+			commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
+		}
+
 	}
 
 	// present

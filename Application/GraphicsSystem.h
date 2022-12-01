@@ -29,7 +29,7 @@ public:
 
 	void initGraphicsSystem(HWND hWnd,
 		uint32_t width, uint32_t height,
-		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
+		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
 
@@ -56,7 +56,7 @@ protected:
 	
 	void createSwapChain(HWND hWnd,
 		uint32_t width, uint32_t height,
-		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R10G10B10A2_UNORM);
+		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	void createDSVHeap();
 #ifdef RAW_MODE
@@ -145,4 +145,6 @@ private:
 	Effect *mEffect = nullptr;
 	Camera* mCamera = nullptr;
 	bool mGraphicsInitialized = false;
+
+	double mTotalElapsedSeconds = 0.0;
 };

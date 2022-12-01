@@ -26,4 +26,8 @@ public:
     {
 
     }
+
+    virtual size_t mesheCount() = 0;
+
+    virtual Mesh* mesh(size_t i) = 0;
 };

@@ -35,3 +35,13 @@ void SimpleScene::endBuild()
 		mesh->endBuild();
 	}
 }
+
+size_t SimpleScene::mesheCount()
+{
+	return mMeshes.size();
+}
+
+Mesh* SimpleScene::mesh(size_t i)
+{
+	return mMeshes[i];
+}
