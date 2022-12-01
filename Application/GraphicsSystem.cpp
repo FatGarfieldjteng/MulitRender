@@ -49,24 +49,24 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createFence();
 
-	/*ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
 
-	createScene(commandList);*/
+	createScene(commandList);
 
 	createCamera();
 
 	createEffect();
 
 	// finish upload mesh and wait until uploading finished
-	//auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
-	//mDirectCommandQueue->waitForFenceValue(fenceValue);
+	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
+	mDirectCommandQueue->waitForFenceValue(fenceValue);
 
 	//// scene uploaded to GPU, then release intermediate buffer
-	//mScene->endBuild();
+	mScene->endBuild();
 
 	mGraphicsInitialized = true;
 
-	//resizeDepthBuffer(mWidth, mHeight);
+	resizeDepthBuffer(mWidth, mHeight);
 	
 }
 
@@ -149,8 +149,6 @@ void GraphicsSystem::flush()
 	waitForFenceValue(fenceValueForSignal);
 }
 
-#endif
-
 void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
 {
 	if (mFence->GetCompletedValue() < fenceValue)
@@ -160,7 +158,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 	}
 }
 
-
+#endif
 
 void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
@@ -233,14 +231,14 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 void GraphicsSystem::render()
 {
-
-
 	clearScreen();
-
 	//renderCube();
 }
 
-
+void GraphicsSystem::finish()
+{
+	mDirectCommandQueue->flush();
+}
 
 #ifdef RAW_MODE
 void GraphicsSystem::clearScreen()
@@ -364,7 +362,7 @@ void GraphicsSystem::renderCube()
 
 		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
-		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
 	}
 }
 

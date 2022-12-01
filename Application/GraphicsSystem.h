@@ -46,6 +46,8 @@ public:
 
 	void render();
 
+	void finish();
+
 protected:
 
 	void createDevice();
@@ -70,9 +72,8 @@ protected:
 #ifdef RAW_MODE
 	uint64_t signal();
 	void flush();
-#endif
-
 	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
+#endif
 
 	void createScene(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
