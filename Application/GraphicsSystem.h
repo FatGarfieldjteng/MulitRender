@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#define RAW_MODE
+//#define RAW_MODE
 
 class Mesh;
 class CommandQueue;

@@ -319,7 +319,7 @@ void GraphicsSystem::clearScreen()
 
 		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
-		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
 	}
 }
 
