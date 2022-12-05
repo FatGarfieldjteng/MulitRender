@@ -14,14 +14,15 @@ set(HEADER_FILES
 	CommandQueue.h
 	Mesh.h
 	CubeMesh.h
-        Camera.h
-        BufferResource.h
+      Camera.h
+      BufferResource.h
 	VertexBuffer.h
 	IndexBuffer.h
 	Scene.h
 	SimpleScene.h
 	Effect.h
 	SimpleEffect.h
+	UploadBuffer.h
 	d3dx12.h
 	targetver.h
 )
@@ -43,6 +44,7 @@ set(SOURCE_FILES
 	SimpleScene.cpp
 	Effect.cpp
 	SimpleEffect.cpp
+	UploadBuffer.cpp
 )
 
 set(RESOURCE_FILES 
