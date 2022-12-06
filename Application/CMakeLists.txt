@@ -23,6 +23,9 @@ set(HEADER_FILES
 	Effect.h
 	SimpleEffect.h
 	UploadBuffer.h
+	CPUDescriptorAllocator.h
+	CPUDescriptorPage.h
+	CPUDescriptorAllocation.h
 	d3dx12.h
 	targetver.h
 )
@@ -45,6 +48,9 @@ set(SOURCE_FILES
 	Effect.cpp
 	SimpleEffect.cpp
 	UploadBuffer.cpp
+	CPUDescriptorAllocator.cpp
+	CPUDescriptorPage.cpp
+	CPUDescriptorAllocation.cpp
 )
 
 set(RESOURCE_FILES 
