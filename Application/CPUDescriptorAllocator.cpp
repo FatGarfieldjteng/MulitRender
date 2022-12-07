@@ -2,8 +2,9 @@
 #include "CPUDescriptorAllocator.h"
 #include "CPUDescriptorPage.h"
 
-CPUDescriptorAllocator::CPUDescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t descriptorsPerHeap)
-	:mHeapType(type)
+CPUDescriptorAllocator::CPUDescriptorAllocator(std::shared_ptr<Device> device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t descriptorsPerHeap)
+	: mDevice(device)
+    , mHeapType(type)
 	, mDescriptorsPerHeap(descriptorsPerHeap)
 {
 
@@ -37,9 +38,19 @@ CPUDescriptorAllocation CPUDescriptorAllocator::allocate(uint32_t numDescriptors
             break;
         }
     }
+
+    if (allocation.isNull())
+    {
+        mDescriptorsPerHeap = std::max(mDescriptorsPerHeap, numDescriptors);
+        auto newPage = createPage();
+
+        allocation = newPage->allocate(numDescriptors);
+    }
+
+    return allocation;
 }
 
-void CPUDescriptorAllocator::releaseStaleDescriptors(uint64_t frameNumber)
+void CPUDescriptorAllocator::releaseStaleDescriptors()
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
@@ -47,7 +58,7 @@ void CPUDescriptorAllocator::releaseStaleDescriptors(uint64_t frameNumber)
     {
         auto page = mHeapPool[i];
 
-        page->releaseStaleDescriptors(frameNumber);
+        page->releaseStaleDescriptors();
 
         if (page->numFreeDescriptors() > 0)
         {
@@ -58,7 +69,7 @@ void CPUDescriptorAllocator::releaseStaleDescriptors(uint64_t frameNumber)
 
 std::shared_ptr<CPUDescriptorPage> CPUDescriptorAllocator::CPUDescriptorAllocator::createPage()
 {
-	std::shared_ptr<CPUDescriptorPage> newPage = std::make_shared<CPUDescriptorPage>(mHeapType, mDescriptorsPerHeap);
+	std::shared_ptr<CPUDescriptorPage> newPage = std::make_shared<CPUDescriptorPage>(mDevice, mHeapType, mDescriptorsPerHeap);
 
 	mHeapPool.emplace_back(newPage);
 	mAvailableHeaps.insert(mHeapPool.size() - 1);

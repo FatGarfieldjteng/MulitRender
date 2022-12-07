@@ -21,18 +21,15 @@ private:
     
     struct StaleDescriptorInfo
     {
-        StaleDescriptorInfo(uint32_t offset, uint32_t size, uint64_t frame)
+        StaleDescriptorInfo(uint32_t offset, uint32_t size)
             : Offset(offset)
             , Size(size)
-            , FrameNumber(frame)
         {}
 
         // The offset within the descriptor heap.
         uint32_t Offset;
         // The number of descriptors
         uint32_t Size;
-        // The frame number that the descriptor was freed.
-        uint64_t FrameNumber;
     };
 
 public:
@@ -54,9 +51,9 @@ public:
     
     CPUDescriptorAllocation allocate(uint32_t numDescriptors);
 
-    void free(CPUDescriptorAllocation&& allocation, uint64_t frameNumber);
+    void free(CPUDescriptorAllocation&& allocation);
     
-    void releaseStaleDescriptors(uint64_t frameNumber);
+    void releaseStaleDescriptors();
 
 protected:
     

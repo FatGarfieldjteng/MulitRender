@@ -7,11 +7,6 @@ CPUDescriptorAllocation::CPUDescriptorAllocation()
 
 }
 
-CPUDescriptorAllocation::~CPUDescriptorAllocation()
-{
-
-}
-
 CPUDescriptorAllocation::CPUDescriptorAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor, 
     uint32_t numDescriptors, uint32_t descriptorHandleIncrementSize,
     std::shared_ptr<CPUDescriptorPage> page)
@@ -60,7 +55,7 @@ void CPUDescriptorAllocation::free()
 {
     if (!isNull() && mPage)
     {
-        mPage->free(std::move(*this), Application::GetFrameCount());
+        mPage->free(std::move(*this));
 
         mBaseDescriptor.ptr = 0;
         mNumDescriptors = 0;

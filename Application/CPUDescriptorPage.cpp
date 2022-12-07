@@ -95,7 +95,7 @@ CPUDescriptorAllocation CPUDescriptorPage::allocate(uint32_t numDescriptors)
         shared_from_this());
 }
 
-void CPUDescriptorPage::free(CPUDescriptorAllocation&& allocation, uint64_t frameNumber)
+void CPUDescriptorPage::free(CPUDescriptorAllocation&& allocation)
 {
     // get start of the allocation's base descriptor
     // computer its offset related to base desciptor of this page
@@ -104,7 +104,7 @@ void CPUDescriptorPage::free(CPUDescriptorAllocation&& allocation, uint64_t fram
     std::lock_guard<std::mutex> lock(mMutex);
 
     // Don't add the block directly to the free list until the frame has completed.
-    mStaleDescriptors.emplace(offset, allocation.numHandles(), frameNumber);
+    mStaleDescriptors.emplace(offset, allocation.numHandles());
 }
 
 void CPUDescriptorPage::freeBlock(uint32_t offset, uint32_t numDescriptors)
@@ -170,11 +170,11 @@ void CPUDescriptorPage::freeBlock(uint32_t offset, uint32_t numDescriptors)
     addNewBlock(offset, numDescriptors);
 }
 
-void CPUDescriptorPage::releaseStaleDescriptors(uint64_t frameNumber)
+void CPUDescriptorPage::releaseStaleDescriptors()
 {
     std::lock_guard<std::mutex> lock(mMutex);
 
-    while (!mStaleDescriptors.empty() && mStaleDescriptors.front().FrameNumber <= frameNumber)
+    while (!mStaleDescriptors.empty())
     {
         auto& staleDescriptor = mStaleDescriptors.front();
 

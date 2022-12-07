@@ -7,12 +7,13 @@
 #include <mutex>
 
 class CPUDescriptorPage;
+class Device;
 
 class CPUDescriptorAllocator
 {
 public:
 
-    CPUDescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t descriptorsPerHeap = 256);
+    CPUDescriptorAllocator(std::shared_ptr<Device> device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t descriptorsPerHeap = 256);
 
     ~CPUDescriptorAllocator();
 
@@ -20,13 +21,15 @@ public:
 
     CPUDescriptorAllocation allocate(uint32_t numDescriptors = 1);
 
-    void releaseStaleDescriptors(uint64_t frameNumber);
+    void releaseStaleDescriptors();
 
 private:
     using DescriptorHeapPool = std::vector< std::shared_ptr<CPUDescriptorPage> >;
 
     // Create a new heap with a specific number of descriptors.
     std::shared_ptr<CPUDescriptorPage> createPage();
+
+    std::shared_ptr<Device> mDevice;
 
     D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
     uint32_t mDescriptorsPerHeap = 0;
