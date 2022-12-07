@@ -11,7 +11,7 @@ public:
     CPUDescriptorAllocation();
 
     CPUDescriptorAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
-        uint32_t numHandles, uint32_t descriptorSize, 
+        uint32_t numDescriptors, uint32_t descriptorHandleIncrementSize,
         std::shared_ptr<CPUDescriptorPage> page);
 
     ~CPUDescriptorAllocation();
@@ -32,20 +32,19 @@ public:
 
     D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHandle(uint32_t offset = 0) const
     {
-        assert(offset < mNumHandles);
-        return { mBaseDescriptor.ptr + (mDescriptorSize * offset) };
+        assert(offset < mNumDescriptors);
+        return { mBaseDescriptor.ptr + (mDescriptorHandleIncrementSize * offset) };
     }
 
-    uint32_t GetNumHandles() const
+    uint32_t numHandles() const
     {
-        return mNumHandles;
+        return mNumDescriptors;
     }
 
-    std::shared_ptr<CPUDescriptorPage> GetCPUDescriptorPage() const
+    std::shared_ptr<CPUDescriptorPage> page() const
     {
         return mPage;
     }
-
 
 private:
     // Free the descriptor back to the heap it came from.
@@ -53,9 +52,9 @@ private:
 
     D3D12_CPU_DESCRIPTOR_HANDLE mBaseDescriptor;
 
-    uint32_t mNumHandles = 0;
+    uint32_t mNumDescriptors = 0;
 
-    uint32_t mDescriptorSize = 0;
+    uint32_t mDescriptorHandleIncrementSize = 0;
 
     // A pointer back to the original page where this allocation came from.
     std::shared_ptr<CPUDescriptorPage> mPage;

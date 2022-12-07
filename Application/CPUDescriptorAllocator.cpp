@@ -26,7 +26,7 @@ CPUDescriptorAllocation CPUDescriptorAllocator::allocate(uint32_t numDescriptors
 
         allocation = allocatorPage->allocate(numDescriptors);
 
-        if (allocatorPage->numFreeHandles() == 0)
+        if (allocatorPage->numFreeDescriptors() == 0)
         {
             iter = mAvailableHeaps.erase(iter);
         }
@@ -41,7 +41,19 @@ CPUDescriptorAllocation CPUDescriptorAllocator::allocate(uint32_t numDescriptors
 
 void CPUDescriptorAllocator::releaseStaleDescriptors(uint64_t frameNumber)
 {
+    std::lock_guard<std::mutex> lock(mMutex);
 
+    for (size_t i = 0; i < mHeapPool.size(); ++i)
+    {
+        auto page = mHeapPool[i];
+
+        page->releaseStaleDescriptors(frameNumber);
+
+        if (page->numFreeDescriptors() > 0)
+        {
+            mAvailableHeaps.insert(i);
+        }
+    }
 }
 
 std::shared_ptr<CPUDescriptorPage> CPUDescriptorAllocator::CPUDescriptorAllocator::createPage()
