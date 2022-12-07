@@ -26,6 +26,7 @@ set(HEADER_FILES
 	CPUDescriptorAllocator.h
 	CPUDescriptorPage.h
 	CPUDescriptorAllocation.h
+	ViewManager.h
 	d3dx12.h
 	targetver.h
 )
@@ -51,6 +52,7 @@ set(SOURCE_FILES
 	CPUDescriptorAllocator.cpp
 	CPUDescriptorPage.cpp
 	CPUDescriptorAllocation.cpp
+	ViewManager.cpp
 )
 
 set(RESOURCE_FILES 
