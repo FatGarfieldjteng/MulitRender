@@ -2,7 +2,9 @@
 #include "CPUDescriptorAllocator.h"
 #include "CPUDescriptorPage.h"
 
-CPUDescriptorAllocator::CPUDescriptorAllocator(std::shared_ptr<Device> device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t descriptorsPerHeap)
+CPUDescriptorAllocator::CPUDescriptorAllocator(std::shared_ptr<Device> device, 
+    D3D12_DESCRIPTOR_HEAP_TYPE type, 
+    uint32_t descriptorsPerHeap)
 	: mDevice(device)
     , mHeapType(type)
 	, mDescriptorsPerHeap(descriptorsPerHeap)
