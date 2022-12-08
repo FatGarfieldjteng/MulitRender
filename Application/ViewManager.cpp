@@ -8,10 +8,11 @@
 ViewManager::ViewManager(std::shared_ptr<Device> device, 
 	D3D12_DESCRIPTOR_HEAP_TYPE type,
 	uint32_t numDescriptorsPerHeap)
-	: mDescriptorHeapType(type)
+	: mDevice(device)
+	, mDescriptorHeapType(type)
 	, mNumDescriptorsPerHeap(numDescriptorsPerHeap)
 {
-	mDescriptorHandleIncrementSize = device->getDescriptorHandleIncrementSize(type);
+	mDescriptorHandleIncrementSize = mDevice->getDescriptorHandleIncrementSize(type);
 
 	// allocate empty space for staging CPU visible descriptors.
 	mCPUDescriptorHandleCache = std::make_unique<D3D12_CPU_DESCRIPTOR_HANDLE[]>(mNumDescriptorsPerHeap);
@@ -127,7 +128,36 @@ ComPtr<ID3D12DescriptorHeap> ViewManager::createDescriptorHeap()
 	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
-	mDevice->createDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	mDevice->createDescriptorHeap(&descriptorHeapDesc);
 
 	return descriptorHeap;
+}
+
+void ViewManager::commitStagedDescriptors(CommandList& commandList, 
+	std::function<void(ID3D12GraphicsCommandList*, 
+		UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc)
+{
+	// Compute the number of descriptors that need to be copied 
+	uint32_t numDescriptorsToCommit = computeStaleDescriptorCount();
+
+	if (numDescriptorsToCommit > 0)
+	{
+		auto d3d12GraphicsCommandList = commandList.GetGraphicsCommandList().Get();
+		assert(d3d12GraphicsCommandList != nullptr);
+
+		if (!mCurrentDescriptorHeap || mNumFreeHandles < numDescriptorsToCommit)
+		{
+			mCurrentDescriptorHeap = acquireDescriptorHeap();
+			mCurrentCPUDescriptorHandle = mCurrentDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+			mCurrentGPUDescriptorHandle = mCurrentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+			mNumFreeHandles = mNumDescriptorsPerHeap;
+
+			commandList.SetDescriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
+
+			// When updating the descriptor heap on the command list, all descriptor
+			// tables must be (re)recopied to the new descriptor heap (not just
+			// the stale descriptor tables).
+			m_StaleDescriptorTableBitMask = m_DescriptorTableBitMask;
+		}
+	}
 }

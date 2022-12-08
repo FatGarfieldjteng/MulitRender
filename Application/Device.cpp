@@ -84,6 +84,15 @@ ComPtr<ID3D12DescriptorHeap> Device::createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_
     return descriptorHeap;
 }
 
+ComPtr<ID3D12DescriptorHeap> Device::createDescriptorHeap(const D3D12_DESCRIPTOR_HEAP_DESC* pDescriptorHeapDesc)
+{
+    ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+    ThrowIfFailed(mDevice->CreateDescriptorHeap(pDescriptorHeapDesc, 
+        IID_PPV_ARGS(&descriptorHeap)));
+
+    return descriptorHeap;
+}
+
 UINT Device::getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type)
 {
     return mDevice->GetDescriptorHandleIncrementSize(type);

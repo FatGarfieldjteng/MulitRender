@@ -50,6 +50,8 @@ private:
     // using uint32_t bit mask limits the number of descriptor tables to be 32
     static const uint32_t MaxDescriptorTables = 32;
 
+    std::shared_ptr<Device> mDevice;
+
     struct CPUDescriptorTableCacheEntry
     {
         void reset()
