@@ -28,6 +28,7 @@ set(HEADER_FILES
 	CPUDescriptorAllocation.h
 	ViewManager.h
 	RootSignature.h
+	CommandList.h
 	d3dx12.h
 	targetver.h
 )
@@ -55,6 +56,7 @@ set(SOURCE_FILES
 	CPUDescriptorAllocation.cpp
 	ViewManager.cpp
 	RootSignature.cpp
+	CommandList.cpp
 )
 
 set(RESOURCE_FILES 

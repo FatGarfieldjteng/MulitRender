@@ -2,6 +2,7 @@
 #include "ViewManager.h"
 #include "Device.h"
 #include "RootSignature.h"
+#include "CommandList.h"
 
 #include <stdexcept>
 
@@ -133,7 +134,7 @@ ComPtr<ID3D12DescriptorHeap> ViewManager::createDescriptorHeap()
 	return descriptorHeap;
 }
 
-void ViewManager::commitStagedDescriptors(CommandList& commandList, 
+void ViewManager::commitDescriptorTables(CommandList& commandList,
 	std::function<void(ID3D12GraphicsCommandList*, 
 		UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc)
 {
@@ -142,9 +143,10 @@ void ViewManager::commitStagedDescriptors(CommandList& commandList,
 
 	if (numDescriptorsToCommit > 0)
 	{
-		auto d3d12GraphicsCommandList = commandList.GetGraphicsCommandList().Get();
-		assert(d3d12GraphicsCommandList != nullptr);
+		auto dxcommandList = commandList.commandList();
+		assert(dxcommandList != nullptr);
 
+		// if no descriptor heap can meet the requirement, acquire or create one
 		if (!mCurrentDescriptorHeap || mNumFreeHandles < numDescriptorsToCommit)
 		{
 			mCurrentDescriptorHeap = acquireDescriptorHeap();
@@ -152,12 +154,12 @@ void ViewManager::commitStagedDescriptors(CommandList& commandList,
 			mCurrentGPUDescriptorHandle = mCurrentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 			mNumFreeHandles = mNumDescriptorsPerHeap;
 
-			commandList.SetDescriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
+			commandList.descriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
 
 			// When updating the descriptor heap on the command list, all descriptor
 			// tables must be (re)recopied to the new descriptor heap (not just
 			// the stale descriptor tables).
-			m_StaleDescriptorTableBitMask = m_DescriptorTableBitMask;
+			mStaleDescriptorTableBitMask = mDescriptorTableBitMask;
 		}
 	}
 }

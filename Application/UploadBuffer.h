@@ -16,7 +16,8 @@ public:
         D3D12_GPU_VIRTUAL_ADDRESS GPUAddress = D3D12_GPU_VIRTUAL_ADDRESS(0);
     };
 
-    UploadBuffer(std::shared_ptr<Device> device, size_t pageSize);
+    // default page size is 2M
+    UploadBuffer(std::shared_ptr<Device> device, size_t pageSize = 2 * 1024 * 1024);
 
     ~UploadBuffer();
 
