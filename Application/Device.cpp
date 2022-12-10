@@ -172,3 +172,31 @@ void Device::createPipelineStateObject(const D3D12_PIPELINE_STATE_STREAM_DESC* p
 {
     mDevice->CreatePipelineState(pDesc, riid, ppPipelineState);
 }
+
+void Device::copyDescriptors(UINT numDestDescriptorRanges,
+    const D3D12_CPU_DESCRIPTOR_HANDLE* pDestDescriptorRangeStarts,
+    const UINT* pDestDescriptorRangeSizes,
+    UINT numSrcDescriptorRanges,
+    const D3D12_CPU_DESCRIPTOR_HANDLE* pSrcDescriptorRangeStarts,
+    const UINT* pSrcDescriptorRangeSizes,
+    D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapsType)
+{
+    mDevice->CopyDescriptors(numDestDescriptorRanges,
+        pDestDescriptorRangeStarts,
+        pDestDescriptorRangeSizes,
+        numSrcDescriptorRanges,
+        pSrcDescriptorRangeStarts,
+        pSrcDescriptorRangeSizes,
+        descriptorHeapsType);
+}
+
+void Device::copyDescriptorsSimple(UINT numDescriptors,
+    D3D12_CPU_DESCRIPTOR_HANDLE destDescriptorRangeStart,
+    D3D12_CPU_DESCRIPTOR_HANDLE SrcDescriptorRangeStart,
+    D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapsType)
+{
+    mDevice->CopyDescriptorsSimple(numDescriptors,
+        destDescriptorRangeStart,
+        SrcDescriptorRangeStart,
+        descriptorHeapsType);
+}

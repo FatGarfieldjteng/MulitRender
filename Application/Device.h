@@ -67,6 +67,20 @@ public:
         const D3D12_DEPTH_STENCIL_VIEW_DESC * pDesc,
         D3D12_CPU_DESCRIPTOR_HANDLE   DestDescriptor);
 
+
+    void copyDescriptors(UINT numDestDescriptorRanges,
+        const D3D12_CPU_DESCRIPTOR_HANDLE* pDestDescriptorRangeStarts,
+        const UINT* pDestDescriptorRangeSizes,
+        UINT numSrcDescriptorRanges,
+        const D3D12_CPU_DESCRIPTOR_HANDLE* pSrcDescriptorRangeStarts,
+        const UINT* pSrcDescriptorRangeSizes,
+        D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapsType);
+
+    void copyDescriptorsSimple(UINT numDescriptors,
+        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptorRangeStart,
+        D3D12_CPU_DESCRIPTOR_HANDLE SrcDescriptorRangeStart,
+        D3D12_DESCRIPTOR_HEAP_TYPE  descriptorHeapsType);
+
 private:
     Microsoft::WRL::ComPtr<ID3D12Device2> mDevice;
 };

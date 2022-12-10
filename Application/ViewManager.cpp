@@ -143,7 +143,7 @@ void ViewManager::commitDescriptorTables(CommandList& commandList,
 
 	if (numDescriptorsToCommit > 0)
 	{
-		auto dxcommandList = commandList.commandList();
+		auto dxcommandList = commandList.commandList().Get();
 		assert(dxcommandList != nullptr);
 
 		// if no descriptor heap can meet the requirement, acquire or create one
@@ -161,5 +161,89 @@ void ViewManager::commitDescriptorTables(CommandList& commandList,
 			// the stale descriptor tables).
 			mStaleDescriptorTableBitMask = mDescriptorTableBitMask;
 		}
+
+		DWORD rootIndex;
+		// Scan from LSB to MSB for a bit set in staleDescriptorsBitMask
+		while (_BitScanForward(&rootIndex, mStaleDescriptorTableBitMask))
+		{
+			UINT numSrcDescriptors = mCPUDescriptorTableCache[rootIndex].NumCPUDescriptors;
+			D3D12_CPU_DESCRIPTOR_HANDLE* pSrcDescriptorHandles = mCPUDescriptorTableCache[rootIndex].BaseCPUDescriptor;
+
+			D3D12_CPU_DESCRIPTOR_HANDLE pDestDescriptorRangeStarts[] =
+			{
+				mCurrentCPUDescriptorHandle
+			};
+			UINT pDestDescriptorRangeSizes[] =
+			{
+				numSrcDescriptors
+			};
+
+			// copy CPU handles to GPU visible heap
+			mDevice->copyDescriptors(1, pDestDescriptorRangeStarts, pDestDescriptorRangeSizes,
+				numSrcDescriptors, pSrcDescriptorHandles, nullptr, mDescriptorHeapType);
+
+			// Set the descriptors on the command list using the passed-in setter function.
+			setFunc(dxcommandList, rootIndex, mCurrentGPUDescriptorHandle);
+
+			// Offset current CPU and GPU descriptor handles.
+			mCurrentCPUDescriptorHandle.Offset(numSrcDescriptors, mDescriptorHandleIncrementSize);
+			mCurrentGPUDescriptorHandle.Offset(numSrcDescriptors, mDescriptorHandleIncrementSize);
+			mNumFreeHandles -= numSrcDescriptors;
+
+			// clear the bit to avoid _BitScanForward scan the same bit
+			mStaleDescriptorTableBitMask ^= (1 << rootIndex);
+		}
+	}
+}
+
+void ViewManager::commitStagedDescriptorsForDraw(CommandList& commandList)
+{
+	commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable);
+}
+
+void ViewManager::commitStagedDescriptorsForDispatch(CommandList& commandList)
+{
+	commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE ViewManager::copyDescriptor(CommandList& comandList, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor)
+{
+	if (!mCurrentDescriptorHeap || mNumFreeHandles < 1)
+	{
+		mCurrentDescriptorHeap = acquireDescriptorHeap();
+		mCurrentCPUDescriptorHandle = mCurrentDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		mCurrentGPUDescriptorHandle = mCurrentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+		mNumFreeHandles = mNumDescriptorsPerHeap;
+
+		comandList.descriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
+
+		mStaleDescriptorTableBitMask = mDescriptorTableBitMask;
+	}
+
+
+	D3D12_GPU_DESCRIPTOR_HANDLE hGPU = mCurrentGPUDescriptorHandle;
+	mDevice->copyDescriptorsSimple(1, mCurrentCPUDescriptorHandle, cpuDescriptor, mDescriptorHeapType);
+
+	mCurrentCPUDescriptorHandle.Offset(1, mDescriptorHandleIncrementSize);
+	mCurrentGPUDescriptorHandle.Offset(1, mDescriptorHandleIncrementSize);
+	mNumFreeHandles -= 1;
+
+	return hGPU;
+}
+
+void ViewManager::reset()
+{
+	mAvailableDescriptorHeaps = mDescriptorHeapPool;
+	mCurrentDescriptorHeap.Reset();
+	mCurrentCPUDescriptorHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(D3D12_DEFAULT);
+	mCurrentGPUDescriptorHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(D3D12_DEFAULT);
+	mNumFreeHandles = 0;
+	mDescriptorTableBitMask = 0;
+	mStaleDescriptorTableBitMask = 0;
+
+	// Reset the table cache
+	for (int i = 0; i < MaxDescriptorTables; ++i)
+	{
+		mCPUDescriptorTableCache[i].reset();
 	}
 }
