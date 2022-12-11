@@ -14,8 +14,8 @@ set(HEADER_FILES
 	CommandQueue.h
 	Mesh.h
 	CubeMesh.h
-      Camera.h
-      BufferResource.h
+    Camera.h
+    BufferResource.h
 	VertexBuffer.h
 	IndexBuffer.h
 	Scene.h
@@ -29,6 +29,7 @@ set(HEADER_FILES
 	ViewManager.h
 	RootSignature.h
 	CommandList.h
+	ResourceStateTracker.h
 	d3dx12.h
 	targetver.h
 )
@@ -57,6 +58,7 @@ set(SOURCE_FILES
 	ViewManager.cpp
 	RootSignature.cpp
 	CommandList.cpp
+	ResourceStateTracker.cpp
 )
 
 set(RESOURCE_FILES 
