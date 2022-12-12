@@ -8,6 +8,8 @@
 class Device;
 class ViewManager;
 class UploadBuffer;
+class GraphicsResource;
+class ResourceStateTracker;
 
 class CommandList
 {
@@ -29,6 +31,19 @@ public:
 
     void descriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
+public:
+    // transition barrier
+    void transitionBarrier(const GraphicsResource& resource,
+        D3D12_RESOURCE_STATES stateAfter, 
+        UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, 
+        bool flushBarriers = false);
+
+    void flushResourceBarriers();
+
+    void UAVBarrier(const GraphicsResource& resource, bool flushBarriers = false);
+   
+    void AliasingBarrier(const GraphicsResource& beforeResource, const GraphicsResource& afterResource, bool flushBarriers = false);
+
 private:
     void bindDescriptorHeaps();
 
@@ -44,6 +59,9 @@ private:
 
     std::unique_ptr<ViewManager> mViewManagers[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
     ID3D12DescriptorHeap* mDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+
+    // resource state tracker
+    std::unique_ptr<ResourceStateTracker> mResourceStateTracker;
 
 //    /**
 //     * Transition a resource to a particular state.

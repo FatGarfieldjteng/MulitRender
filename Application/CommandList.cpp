@@ -3,6 +3,8 @@
 #include "Device.h"
 #include "UploadBuffer.h"
 #include "ViewManager.h"
+#include "GraphicsResource.h"
+#include "ResourceStateTracker.h"
 
 CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
     : mDevice(device)
@@ -14,7 +16,7 @@ CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE
 
     mUploadBuffer = std::make_unique<UploadBuffer>(mDevice);
 
-    //m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
+    mResourceStateTracker = std::make_unique<ResourceStateTracker>();
 
     for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
     {
@@ -52,21 +54,54 @@ void CommandList::bindDescriptorHeaps()
     mCommandList->SetDescriptorHeaps(numDescriptorHeaps, descriptorHeaps);
 }
 
-//void CommandList::TransitionBarrier(const Resource& resource, D3D12_RESOURCE_STATES stateAfter, UINT subResource, bool flushBarriers)
-//{
-//    auto d3d12Resource = resource.GetD3D12Resource();
-//    if (d3d12Resource)
-//    {
-//        // The "before" state is not important. It will be resolved by the resource state tracker.
-//        auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON, stateAfter, subResource);
-//        m_ResourceStateTracker->ResourceBarrier(barrier);
-//    }
-//
-//    if (flushBarriers)
-//    {
-//        FlushResourceBarriers();
-//    }
-//}
+void CommandList::transitionBarrier(const GraphicsResource& resource, D3D12_RESOURCE_STATES stateAfter, UINT subResource, bool flushBarriers)
+{
+    auto dxResource = resource.mResource;
+    if (dxResource)
+    {
+        // The "before" state is not important. It will be resolved by the resource state tracker.
+        auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(dxResource.Get(), D3D12_RESOURCE_STATE_COMMON, stateAfter, subResource);
+        mResourceStateTracker->resourceBarrier(barrier);
+    }
+
+    if (flushBarriers)
+    {
+        flushResourceBarriers();
+    }
+}
+
+void CommandList::UAVBarrier(const GraphicsResource& resource, bool flushBarriers)
+{
+    auto dxResource = resource.mResource;
+    auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(dxResource.Get());
+
+    mResourceStateTracker->resourceBarrier(barrier);
+
+    if (flushBarriers)
+    {
+        flushResourceBarriers();
+    }
+}
+
+void CommandList::AliasingBarrier(const GraphicsResource& beforeResource, const GraphicsResource& afterResource, bool flushBarriers)
+{
+    auto d3d12BeforeResource = beforeResource.mResource;
+    auto d3d12AfterResource = afterResource.mResource;
+    auto barrier = CD3DX12_RESOURCE_BARRIER::Aliasing(d3d12BeforeResource.Get(), d3d12AfterResource.Get());
+
+    mResourceStateTracker->resourceBarrier(barrier);
+
+    if (flushBarriers)
+    {
+        flushResourceBarriers();
+    }
+}
+
+void CommandList::flushResourceBarriers()
+{
+    mResourceStateTracker->flushResourceBarriers(*this);
+}
+
 //
 //void CommandList::UAVBarrier(const Resource& resource, bool flushBarriers)
 //{
