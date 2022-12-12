@@ -97,9 +97,83 @@ void CommandList::AliasingBarrier(const GraphicsResource& beforeResource, const 
     }
 }
 
+void CommandList::copyResource(GraphicsResource& dstRes, const GraphicsResource& srcRes)
+{
+    transitionBarrier(dstRes, D3D12_RESOURCE_STATE_COPY_DEST);
+    transitionBarrier(srcRes, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+    flushResourceBarriers();
+
+    mCommandList->CopyResource(dstRes.mResource.Get(), srcRes.mResource.Get());
+
+    trackResource(dstRes);
+    trackResource(srcRes);
+}
+
 void CommandList::flushResourceBarriers()
 {
     mResourceStateTracker->flushResourceBarriers(*this);
+}
+
+void CommandList::trackResource(const GraphicsResource& res)
+{
+    trackObject(res.mResource);
+}
+
+void CommandList::trackObject(ComPtr<ID3D12Object> object)
+{
+    mTrackedObjects.push_back(object);
+}
+
+void CommandList::setGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex, 
+    size_t sizeInBytes, 
+    const void* bufferData)
+{
+    // Constant buffers must be 256-byte aligned.
+    UploadBuffer::Allocation allocation = mUploadBuffer->allocate(sizeInBytes, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+    memcpy(allocation.CPUAddress, bufferData, sizeInBytes);
+
+    mCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, allocation.GPUAddress);
+}
+
+void CommandList::setShaderResourceView(uint32_t rootParameterIndex,
+    uint32_t descriptorOffset,
+    const GraphicsResource& resource,
+    D3D12_RESOURCE_STATES stateAfter,
+    UINT firstSubresource,
+    UINT numSubresources,
+    const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
+{
+    if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
+    {
+        for (uint32_t i = 0; i < numSubresources; ++i)
+        {
+            transitionBarrier(resource, stateAfter, firstSubresource + i);
+        }
+    }
+    else
+    {
+        transitionBarrier(resource, stateAfter);
+    }
+
+    //mViewManagers[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->stageCPUDescriptors(rootParameterIndex, descriptorOffset, 1, resource.GetShaderResourceView(srv));
+
+    trackResource(resource);
+}
+
+void CommandList::draw(uint32_t vertexCount, 
+    uint32_t instanceCount, 
+    uint32_t startVertex, 
+    uint32_t startInstance)
+{
+    flushResourceBarriers();
+
+    for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+    {
+        mViewManagers[i]->commitStagedDescriptorsForDraw(*this);
+    }
+
+    mCommandList->DrawInstanced(vertexCount, instanceCount, startVertex, startInstance);
 }
 
 //

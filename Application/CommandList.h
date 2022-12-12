@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 #include <wrl.h>
-
+#include <vector>
 #include <memory>
 
 class Device;
@@ -44,8 +44,30 @@ public:
    
     void AliasingBarrier(const GraphicsResource& beforeResource, const GraphicsResource& afterResource, bool flushBarriers = false);
 
+    void copyResource(GraphicsResource& dstRes, const GraphicsResource& srcRes);
+
+    void setGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex,
+        size_t sizeInBytes,
+        const void* bufferData);
+
+    void setShaderResourceView(uint32_t rootParameterIndex,
+        uint32_t descriptorOffset,
+        const GraphicsResource& resource,
+        D3D12_RESOURCE_STATES stateAfter,
+        UINT firstSubresource,
+        UINT numSubresources,
+        const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);
+
+    void draw(uint32_t vertexCount,
+        uint32_t instanceCount,
+        uint32_t startVertex,
+        uint32_t startInstance);
 private:
     void bindDescriptorHeaps();
+
+    void CommandList::trackResource(const GraphicsResource& res);
+
+    void CommandList::trackObject(ComPtr<ID3D12Object> object);
 
 private:
     std::shared_ptr<Device> mDevice;
@@ -62,6 +84,8 @@ private:
 
     // resource state tracker
     std::unique_ptr<ResourceStateTracker> mResourceStateTracker;
+
+    std::vector<ComPtr<ID3D12Object>> mTrackedObjects;
 
 //    /**
 //     * Transition a resource to a particular state.
