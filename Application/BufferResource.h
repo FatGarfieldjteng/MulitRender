@@ -1,7 +1,8 @@
 #pragma once
+#include "GraphicsResource.h"
 #include <d3d12.h>
 
-class BufferResource
+class BufferResource : public GraphicsResource
 {
 public:
 
@@ -9,6 +10,4 @@ public:
 
     ~BufferResource();
 
-public:
-    ComPtr<ID3D12Resource> mBuffer;
 };

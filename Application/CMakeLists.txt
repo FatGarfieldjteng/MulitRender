@@ -15,6 +15,7 @@ set(HEADER_FILES
 	Mesh.h
 	CubeMesh.h
     Camera.h
+	GraphicsResource.h
     BufferResource.h
 	VertexBuffer.h
 	IndexBuffer.h
@@ -44,6 +45,7 @@ set(SOURCE_FILES
 	Mesh.cpp
 	CubeMesh.cpp
 	Camera.cpp
+	GraphicsResource.cpp
 	BufferResource.cpp
 	VertexBuffer.cpp
 	IndexBuffer.cpp

@@ -53,12 +53,12 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
     // create vertex buffer
     // upload vertex buffer data.
     GS->updateBufferResource(commandList,
-        &mVertexBuffer.mBuffer, &mIntermediateVertexBuffer,
+        &mVertexBuffer.mResource, &mIntermediateVertexBuffer,
         _countof(vertices), sizeof(VertexPosColor), vertices);
 
     // setup vertex buffer view
     D3D12_VERTEX_BUFFER_VIEW& vbView = mVertexBuffer.mVertexBufferView;
-    vbView.BufferLocation = mVertexBuffer.mBuffer->GetGPUVirtualAddress();
+    vbView.BufferLocation = mVertexBuffer.mResource->GetGPUVirtualAddress();
     vbView.SizeInBytes = sizeof(vertices);
     vbView.StrideInBytes = sizeof(VertexPosColor);
 
@@ -67,11 +67,11 @@ void CubeMesh::build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> comm
     mIndexCount = _countof(indicies);
 
     GS->updateBufferResource(commandList,
-        &mIndexBuffer.mBuffer, &mIntermediateIndexBuffer,
+        &mIndexBuffer.mResource, &mIntermediateIndexBuffer,
         _countof(indicies), sizeof(WORD), indicies);
     
     D3D12_INDEX_BUFFER_VIEW& ibView = mIndexBuffer.mIndexBufferView;
-    ibView.BufferLocation = mIndexBuffer.mBuffer->GetGPUVirtualAddress();
+    ibView.BufferLocation = mIndexBuffer.mResource->GetGPUVirtualAddress();
     ibView.Format = DXGI_FORMAT_R16_UINT;
     ibView.SizeInBytes = sizeof(indicies);
        
