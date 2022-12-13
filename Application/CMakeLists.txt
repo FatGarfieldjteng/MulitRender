@@ -85,4 +85,8 @@ target_link_libraries( MultiRenderApp
     PUBLIC DirectXTex
 )
 
+target_compile_features( MultiRenderApp 
+	PUBLIC cxx_std_17
+)
+
 add_subdirectory(Shader)
