@@ -7,3 +7,4 @@ if(MSVC)
 endif()
 
 add_subdirectory(application)
+add_subdirectory(ThirdParty/DirectXTex)

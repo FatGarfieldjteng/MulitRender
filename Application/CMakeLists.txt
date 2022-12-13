@@ -76,10 +76,11 @@ add_executable( ${TARGET_NAME} WIN32
 )
 
 target_link_libraries( MultiRenderApp 
-	PUBLIC d3d12.lib
+    PUBLIC d3d12.lib
     PUBLIC dxgi.lib
     PUBLIC dxguid.lib
     PUBLIC d3dcompiler.lib
+    PUBLIC DirectXTex
 )
 
 add_subdirectory(Shader)
