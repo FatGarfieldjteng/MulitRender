@@ -5,6 +5,14 @@
 #include "ViewManager.h"
 #include "GraphicsResource.h"
 #include "ResourceStateTracker.h"
+#include "helper.h"
+#include <DirectXTex.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
+std::map<std::wstring, ID3D12Resource*> CommandList::msTextureCache;
+std::mutex                              CommandList::msTextureCacheMutex;
 
 CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
     : mDevice(device)
@@ -34,6 +42,73 @@ void CommandList::descriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12Desc
     {
         mDescriptorHeaps[heapType] = heap;
         bindDescriptorHeaps();
+    }
+}
+
+std::shared_ptr<Texture> CommandList::loadTextureFromFile(const std::wstring& fileName, bool sRGB)
+{
+    std::shared_ptr<Texture> texture;
+    fs::path                 filePath(fileName);
+    if (!fs::exists(filePath))
+    {
+        throw std::exception("File not found.");
+    }
+
+    std::lock_guard<std::mutex> lock(msTextureCacheMutex);
+    auto iter = msTextureCache.find(fileName);
+    if (iter != msTextureCache.end())
+    {
+        // not in cache, create texture
+    }
+    else
+    {
+        // load image from file
+        DirectX::TexMetadata  metadata;
+        DirectX::ScratchImage scratchImage;
+
+        if (filePath.extension() == ".dds")
+        {
+            ThrowIfFailed(DirectX::LoadFromDDSFile(fileName.c_str(), DirectX::DDS_FLAGS_FORCE_RGB, &metadata, scratchImage));
+        }
+        else if (filePath.extension() == ".hdr")
+        {
+            ThrowIfFailed(DirectX::LoadFromHDRFile(fileName.c_str(), &metadata, scratchImage));
+        }
+        else if (filePath.extension() == ".tga")
+        {
+            ThrowIfFailed(DirectX::LoadFromTGAFile(fileName.c_str(), &metadata, scratchImage));
+        }
+        else
+        {
+            ThrowIfFailed(DirectX::LoadFromWICFile(fileName.c_str(), DirectX::WIC_FLAGS_FORCE_RGB, &metadata, scratchImage));
+        }
+
+        if (sRGB)
+        {
+            metadata.format = DirectX::MakeSRGB(metadata.format);
+        }
+
+        D3D12_RESOURCE_DESC textureDesc = {};
+        switch (metadata.dimension)
+        {
+        case DirectX::TEX_DIMENSION_TEXTURE1D:
+            textureDesc = CD3DX12_RESOURCE_DESC::Tex1D(metadata.format, static_cast<UINT64>(metadata.width),
+                static_cast<UINT16>(metadata.arraySize));
+            break;
+        case DirectX::TEX_DIMENSION_TEXTURE2D:
+            textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(metadata.format, static_cast<UINT64>(metadata.width),
+                static_cast<UINT>(metadata.height),
+                static_cast<UINT16>(metadata.arraySize));
+            break;
+        case DirectX::TEX_DIMENSION_TEXTURE3D:
+            textureDesc = CD3DX12_RESOURCE_DESC::Tex3D(metadata.format, static_cast<UINT64>(metadata.width),
+                static_cast<UINT>(metadata.height),
+                static_cast<UINT16>(metadata.depth));
+            break;
+        default:
+            throw std::exception("Invalid texture dimension.");
+            break;
+        }
     }
 }
 

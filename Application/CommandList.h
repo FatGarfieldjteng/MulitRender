@@ -4,12 +4,16 @@
 #include <wrl.h>
 #include <vector>
 #include <memory>
+#include <string>
+#include <mutex>
+#include <map>
 
 class Device;
 class ViewManager;
 class UploadBuffer;
 class GraphicsResource;
 class ResourceStateTracker;
+class Texture;
 
 class CommandList
 {
@@ -30,6 +34,13 @@ public:
     }
 
     void descriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
+
+public:
+    std::shared_ptr<Texture> loadTextureFromFile(const std::wstring& fileName, bool sRGB = false);
+
+private:
+    static std::map<std::wstring, ID3D12Resource*> msTextureCache;
+    static std::mutex                              msTextureCacheMutex;
 
 public:
     // transition barrier
