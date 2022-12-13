@@ -19,6 +19,7 @@ set(HEADER_FILES
     BufferResource.h
 	VertexBuffer.h
 	IndexBuffer.h
+	Texture.h
 	Scene.h
 	SimpleScene.h
 	Effect.h
@@ -49,6 +50,7 @@ set(SOURCE_FILES
 	BufferResource.cpp
 	VertexBuffer.cpp
 	IndexBuffer.cpp
+	Texture.cpp
 	Scene.cpp
 	SimpleScene.cpp
 	Effect.cpp
