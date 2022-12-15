@@ -5,6 +5,7 @@
 #include "ViewManager.h"
 #include "GraphicsResource.h"
 #include "ResourceStateTracker.h"
+#include "Texture.h"
 #include "helper.h"
 #include <DirectXTex.h>
 #include <filesystem>
@@ -83,11 +84,13 @@ std::shared_ptr<Texture> CommandList::loadTextureFromFile(const std::wstring& fi
             ThrowIfFailed(DirectX::LoadFromWICFile(fileName.c_str(), DirectX::WIC_FLAGS_FORCE_RGB, &metadata, scratchImage));
         }
 
+        // set sRGB format for linearization if necessary
         if (sRGB)
         {
             metadata.format = DirectX::MakeSRGB(metadata.format);
         }
 
+        // create D3D12_RESOURCE_DESC for generating texture
         D3D12_RESOURCE_DESC textureDesc = {};
         switch (metadata.dimension)
         {
@@ -109,6 +112,18 @@ std::shared_ptr<Texture> CommandList::loadTextureFromFile(const std::wstring& fi
             throw std::exception("Invalid texture dimension.");
             break;
         }
+                
+        ComPtr<ID3D12Resource> textureResource;
+
+        mDevice->createCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+            D3D12_HEAP_FLAG_NONE, 
+            &textureDesc,
+            D3D12_RESOURCE_STATE_COMMON, 
+            nullptr, 
+            IID_PPV_ARGS(&textureResource));
+
+        texture = mDevice->createTexture(textureResource);
+        texture->mName = fileName;
     }
 }
 

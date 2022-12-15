@@ -1,6 +1,9 @@
 #include "framework.h"
 #include "Device.h"
 #include "Adapter.h"
+#include "Texture.h"
+#include "CPUDescriptorAllocator.h"
+#include "CommandQueue.h"
 #include "helper.h"
 
 std::shared_ptr<Device> Device::create( std::shared_ptr<Adapter> adapter )
@@ -49,6 +52,11 @@ Device::Device( std::shared_ptr<Adapter> adapter )
         ThrowIfFailed( pInfoQueue->PushStorageFilter( &NewFilter ) );
     }
 
+    // create commmand queues
+    createCommandQueues();
+
+    // create GPU descriptor allocators
+    createCPUDescriptorAllocators();
 }
 
 Device::~Device() 
@@ -155,17 +163,6 @@ void Device::createCommittedResource(
         ppvResource));
 }
 
-void Device::createDepthStencilView(
-    ID3D12Resource* pResource,
-    const D3D12_DEPTH_STENCIL_VIEW_DESC* pDesc,
-    D3D12_CPU_DESCRIPTOR_HANDLE   DestDescriptor)
-{
-    mDevice->CreateDepthStencilView(
-        pResource,
-        pDesc,
-        DestDescriptor);
-}
-
 void Device::createPipelineStateObject(const D3D12_PIPELINE_STATE_STREAM_DESC* pDesc,
     REFIID riid,
     void** ppPipelineState)
@@ -199,4 +196,91 @@ void Device::copyDescriptorsSimple(UINT numDescriptors,
         destDescriptorRangeStart,
         SrcDescriptorRangeStart,
         descriptorHeapsType);
+}
+
+void Device::createConstantBufferView(const D3D12_CONSTANT_BUFFER_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateConstantBufferView(pDesc,
+        DestDescriptor);
+}
+
+void Device::createShaderResourceView(ID3D12Resource* pResource,
+    const D3D12_SHADER_RESOURCE_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateShaderResourceView(pResource,
+        pDesc,
+        DestDescriptor);
+}
+
+void Device::createUnorderedAccessView(
+    ID3D12Resource* pResource,
+    ID3D12Resource* pCounterResource,
+    const D3D12_UNORDERED_ACCESS_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateUnorderedAccessView(
+        pResource,
+        pCounterResource,
+        pDesc,
+        DestDescriptor);
+}
+
+void Device::createRenderTargetView(
+    ID3D12Resource* pResource,
+    const D3D12_RENDER_TARGET_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateRenderTargetView(
+        pResource,
+        pDesc,
+        DestDescriptor);
+}
+
+void Device::createDepthStencilView(
+    ID3D12Resource* pResource,
+    const D3D12_DEPTH_STENCIL_VIEW_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateDepthStencilView(
+        pResource,
+        pDesc,
+        DestDescriptor);
+}
+
+void Device::createSampler(
+    const D3D12_SAMPLER_DESC* pDesc,
+    D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor)
+{
+    mDevice->CreateSampler(
+        pDesc,
+        DestDescriptor);
+}
+
+void Device::createCommandQueues()
+{
+    mDirectCommandQueue = std::make_unique<CommandQueue>( make shared   *this, D3D12_COMMAND_LIST_TYPE_DIRECT);
+    mComputeCommandQueue = std::make_unique<CommandQueue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+    mCopyCommandQueue = std::make_unique<CommandQueue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
+}
+
+void Device::createCPUDescriptorAllocators()
+{
+    for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+    {
+        mCPUDescriptorAllocators[i] =
+            std::make_unique<CPUDescriptorAllocator>(*this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+    }
+}
+
+std::shared_ptr<Texture> Device::createTexture(ComPtr<ID3D12Resource> resource)
+{
+    return std::make_shared<Texture>(*this, resource);
+}
+
+//
+CPUDescriptorAllocation Device::allocateCPUDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors)
+{
+    return mCPUDescriptorAllocators[type]->allocate(numDescriptors);
 }
