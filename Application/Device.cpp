@@ -260,9 +260,9 @@ void Device::createSampler(
 
 void Device::createCommandQueues()
 {
-    mDirectCommandQueue = std::make_unique<CommandQueue>( make shared   *this, D3D12_COMMAND_LIST_TYPE_DIRECT);
-    mComputeCommandQueue = std::make_unique<CommandQueue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-    mCopyCommandQueue = std::make_unique<CommandQueue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
+    mDirectCommandQueue = std::make_unique<CommandQueue>(shared_from_this(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+    mComputeCommandQueue = std::make_unique<CommandQueue>(shared_from_this(), D3D12_COMMAND_LIST_TYPE_COMPUTE);
+    mCopyCommandQueue = std::make_unique<CommandQueue>(shared_from_this(), D3D12_COMMAND_LIST_TYPE_COPY);
 }
 
 void Device::createCPUDescriptorAllocators()
@@ -270,13 +270,13 @@ void Device::createCPUDescriptorAllocators()
     for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
     {
         mCPUDescriptorAllocators[i] =
-            std::make_unique<CPUDescriptorAllocator>(*this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+            std::make_unique<CPUDescriptorAllocator>(shared_from_this(), static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
     }
 }
 
 std::shared_ptr<Texture> Device::createTexture(ComPtr<ID3D12Resource> resource)
 {
-    return std::make_shared<Texture>(*this, resource);
+    return std::make_shared<Texture>(shared_from_this(), resource);
 }
 
 //

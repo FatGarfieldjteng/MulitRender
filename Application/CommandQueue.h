@@ -14,10 +14,8 @@ class CommandQueue
 {
 public:
 
-    static std::shared_ptr<CommandQueue> create(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type);
-
     // in constructor, command queue, fence, fence event are created 
-    explicit CommandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type);
+    CommandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type);
 
     virtual ~CommandQueue();
 

@@ -58,7 +58,7 @@ void Texture::createViews()
     }
 }
 
-D3D12_UNORDERED_ACCESS_VIEW_DESC getUAVDesc(const D3D12_RESOURCE_DESC& resDesc, 
+D3D12_UNORDERED_ACCESS_VIEW_DESC Texture::getUAVDesc(const D3D12_RESOURCE_DESC& resDesc,
     UINT mipSlice, 
     UINT arraySlice,
     UINT planeSlice)

@@ -4,11 +4,6 @@
 #include "Device.h"
 #include "helper.h"
 
-std::shared_ptr<CommandQueue> CommandQueue::create(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
-{
-    return std::make_shared<CommandQueue>(device, type);
-}
-
 CommandQueue::CommandQueue(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type)
     :mDevice(device), mCommandListType(type)
 {

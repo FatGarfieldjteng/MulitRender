@@ -82,7 +82,7 @@ void GraphicsSystem::createDevice()
 
 void GraphicsSystem::createDirectCommandQueue()
 {
-	mDirectCommandQueue = CommandQueue::create(mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
+	mDirectCommandQueue = std::make_shared<CommandQueue>(mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 	mCommandQueue = mDevice->createCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 }
