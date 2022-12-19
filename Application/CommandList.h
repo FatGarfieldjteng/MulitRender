@@ -44,9 +44,14 @@ private:
 
 public:
     // transition barrier
-    void transitionBarrier(const GraphicsResource& resource,
+    void transitionBarrier(const std::shared_ptr<GraphicsResource>& resource,
         D3D12_RESOURCE_STATES stateAfter,
         UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+        bool flushBarriers = false);
+
+    void transitionBarrier(ComPtr<ID3D12Resource> resource, 
+        D3D12_RESOURCE_STATES stateAfter,
+        UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, 
         bool flushBarriers = false);
 
     void flushResourceBarriers();
@@ -55,19 +60,20 @@ public:
 
     void AliasingBarrier(const GraphicsResource& beforeResource, const GraphicsResource& afterResource, bool flushBarriers = false);
 
-    void copyResource(GraphicsResource& dstRes, const GraphicsResource& srcRes);
+    void copyResource(ComPtr<ID3D12Resource> dstRes,
+        ComPtr<ID3D12Resource> srcRes);
 
     void setGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex,
         size_t sizeInBytes,
         const void* bufferData);
 
-    void setShaderResourceView(uint32_t rootParameterIndex,
+ /*   void setShaderResourceView(uint32_t rootParameterIndex,
         uint32_t descriptorOffset,
         const GraphicsResource& resource,
         D3D12_RESOURCE_STATES stateAfter,
         UINT firstSubresource,
         UINT numSubresources,
-        const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);
+        const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);*/
 
     void draw(uint32_t vertexCount,
         uint32_t instanceCount,
@@ -82,10 +88,13 @@ public:
 private:
     void bindDescriptorHeaps();
 
-    void CommandList::trackResource(const GraphicsResource& res);
+    void trackResource(ComPtr<ID3D12Object> object);
+    void trackResource(const std::shared_ptr<GraphicsResource>& res);
 
-    void CommandList::trackObject(ComPtr<ID3D12Object> object);
-
+    void copyTextureSubresource(const std::shared_ptr<Texture>& texture,
+        uint32_t firstSubresource,
+        uint32_t numSubresources,
+        D3D12_SUBRESOURCE_DATA* subresourceData);
 private:
     std::shared_ptr<Device> mDevice;
 
