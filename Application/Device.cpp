@@ -52,11 +52,11 @@ Device::Device( std::shared_ptr<Adapter> adapter )
         ThrowIfFailed( pInfoQueue->PushStorageFilter( &NewFilter ) );
     }
 
-    // create commmand queues
-    createCommandQueues();
+    //// create commmand queues
+    //createCommandQueues();
 
-    // create GPU descriptor allocators
-    createCPUDescriptorAllocators();
+    //// create GPU descriptor allocators
+    //createCPUDescriptorAllocators();
 }
 
 Device::~Device() 

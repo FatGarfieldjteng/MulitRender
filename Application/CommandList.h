@@ -95,6 +95,8 @@ private:
         uint32_t firstSubresource,
         uint32_t numSubresources,
         D3D12_SUBRESOURCE_DATA* subresourceData);
+
+    void generateMips(const std::shared_ptr<Texture>& texture);
 private:
     std::shared_ptr<Device> mDevice;
 
@@ -104,6 +106,9 @@ private:
     D3D12_COMMAND_LIST_TYPE mCommandListType;
     Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> mCommandList;
     Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator;
+
+    // 
+    std::shared_ptr<CommandList> mComputeCommandList;
 
     std::unique_ptr<ViewManager> mViewManagers[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
     ID3D12DescriptorHeap* mDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];

@@ -78,6 +78,10 @@ void GraphicsSystem::createDevice()
 	mAdapter = Adapter::Create();
 
 	mDevice = Device::create(mAdapter);
+
+	mDevice->createCommandQueues();
+
+	mDevice->createCPUDescriptorAllocators();
 }
 
 void GraphicsSystem::createDirectCommandQueue()
