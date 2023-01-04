@@ -73,7 +73,17 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireDXCommandList()
 std::shared_ptr<CommandList> CommandQueue::acquireCommandList()
 {
     std::shared_ptr<CommandList> commandList;
-    commandList = std::make_shared<CommandList>(mDevice, mCommandListType);
+
+    // If there is a command list on the queue.
+    if (!mAvailableCommandLists.isEmpty())
+    {
+        mAvailableCommandLists.tryPop(commandList);
+    }
+    else
+    {
+        // Otherwise create a new command list.
+        commandList = std::make_shared<CommandList>(mDevice, mCommandListType);
+    }
 
     return commandList;
 }

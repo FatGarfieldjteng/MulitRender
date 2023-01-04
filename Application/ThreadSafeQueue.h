@@ -40,21 +40,21 @@ ThreadSafeQueue<T>::ThreadSafeQueue()
 template<typename T>
 ThreadSafeQueue<T>::ThreadSafeQueue(const ThreadSafeQueue& that)
 {
-    std::lock_guard <std::mutex> lock(copy.mMutex);
+    std::lock_guard <std::mutex> lock(that.mMutex);
     mQueue = that.mQueue;
 }
 
 template<typename T>
 void ThreadSafeQueue<T>::push(T value)
 {
-    std::lock_guard <std::mutex> lock(copy.mMutex);
+    std::lock_guard <std::mutex> lock(mMutex);
     mQueue.push(std::move(value));
 }
 
 template<typename T>
 bool ThreadSafeQueue<T>::tryPop(T& value)
 {
-    std::lock_guard <std::mutex> lock(copy.mMutex);
+    std::lock_guard <std::mutex> lock(mMutex);
     if (mQueue.empty())
     {
         return false;
@@ -69,7 +69,7 @@ bool ThreadSafeQueue<T>::tryPop(T& value)
 template<typename T>
 bool ThreadSafeQueue<T>::isEmpty() const
 {
-    std::lock_guard <std::mutex> lock(copy.mMutex);
+    std::lock_guard <std::mutex> lock(mMutex);
 
     return mQueue.empty();
 }
@@ -77,7 +77,7 @@ bool ThreadSafeQueue<T>::isEmpty() const
 template<typename T>
 size_t ThreadSafeQueue<T>::size() const
 {
-    std::lock_guard<std::mutex> lock(m_Mutex);
+    std::lock_guard<std::mutex> lock(mMutex);
 
     return m_Queue.size();
 }
