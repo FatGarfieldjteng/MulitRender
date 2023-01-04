@@ -71,7 +71,7 @@ bool ThreadSafeQueue<T>::isEmpty() const
 {
     std::lock_guard <std::mutex> lock(copy.mMutex);
 
-    return mQueue.empty())
+    return mQueue.empty();
 }
 
 template<typename T>

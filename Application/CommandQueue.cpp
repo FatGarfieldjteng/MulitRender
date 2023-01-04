@@ -1,5 +1,6 @@
 #include "framework.h"
 #include "CommandQueue.h"
+#include "CommandList.h"
 #include "Adapter.h"
 #include "Device.h"
 #include "helper.h"
@@ -25,7 +26,7 @@ CommandQueue::~CommandQueue()
 {
 }
 
-ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
+ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireDXCommandList()
 {
     ComPtr<ID3D12CommandAllocator> commandAllocator;
     ComPtr<ID3D12GraphicsCommandList2> commandList;
@@ -66,6 +67,14 @@ ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireCommandList()
     // retrieved when the command list is executed.
     ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
     
+    return commandList;
+}
+
+std::shared_ptr<CommandList> CommandQueue::acquireCommandList()
+{
+    std::shared_ptr<CommandList> commandList;
+    commandList = std::make_shared<CommandList>(mDevice, mCommandListType);
+
     return commandList;
 }
 

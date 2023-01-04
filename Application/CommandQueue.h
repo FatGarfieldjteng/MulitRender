@@ -4,11 +4,14 @@
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 
+#include "ThreadSafeQueue.h"
+
 #include <memory>
 #include <queue>
 #include <map>
 
 class Device;
+class CommandList;
 
 class CommandQueue
 {
@@ -27,7 +30,8 @@ public:
     }
     
     // CommandList functions
-    ComPtr<ID3D12GraphicsCommandList2> acquireCommandList();
+    ComPtr<ID3D12GraphicsCommandList2> acquireDXCommandList();
+    std::shared_ptr<CommandList> acquireCommandList();
     uint64_t executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
     // sync functions
@@ -63,4 +67,6 @@ private:
     CommandListQueue                            mCommandListQueue;
 
     std::map<ComPtr<ID3D12GraphicsCommandList2>, ComPtr<ID3D12CommandAllocator>> mMapListAllocator;
+
+    ThreadSafeQueue<std::shared_ptr<CommandList>> mAvailableCommandLists;
 };

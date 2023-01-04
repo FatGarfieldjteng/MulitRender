@@ -52,7 +52,7 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createFence();
 
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
 
 	createScene(commandList);
 
@@ -93,7 +93,7 @@ void GraphicsSystem::createDirectCommandQueue()
 
 ComPtr<ID3D12GraphicsCommandList2> GraphicsSystem::acquireCommandList()
 {
-	return mDirectCommandQueue->acquireCommandList();
+	return mDirectCommandQueue->acquireDXCommandList();
 }
 
 void GraphicsSystem::createSwapChain(HWND hWnd,
@@ -302,7 +302,7 @@ void GraphicsSystem::clearScreen()
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 	auto backBuffer = mSwapChain->getCurrentBackBuffer();
 
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
 
 	transitionResource(commandList,
 		backBuffer,
@@ -338,7 +338,7 @@ void GraphicsSystem::renderCube()
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
 
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireCommandList();
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
 	
 	transitionResource(commandList,
 		backBuffer,
