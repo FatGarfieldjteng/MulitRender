@@ -31,6 +31,7 @@ set(HEADER_FILES
 	ViewManager.h
 	RootSignature.h
 	CommandList.h
+	ThreadSafeQueue.h
 	ResourceStateTracker.h
 	d3dx12.h
 	targetver.h
