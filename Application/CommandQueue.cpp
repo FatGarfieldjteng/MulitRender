@@ -2,6 +2,7 @@
 #include "CommandQueue.h"
 #include "CommandList.h"
 #include "Adapter.h"
+#include "ResourceStateTracker.h"
 #include "Device.h"
 #include "helper.h"
 
@@ -28,46 +29,47 @@ CommandQueue::~CommandQueue()
 
 ComPtr<ID3D12GraphicsCommandList2> CommandQueue::acquireDXCommandList()
 {
-    ComPtr<ID3D12CommandAllocator> commandAllocator;
-    ComPtr<ID3D12GraphicsCommandList2> commandList;
+    return acquireCommandList()->commandList();
+    //ComPtr<ID3D12CommandAllocator> commandAllocator;
+    //ComPtr<ID3D12GraphicsCommandList2> commandList;
 
-    // get a valid CommandAllocator, if there is free CommandAllocator available in mCommandAllocatorQueue.front(), use it
-    // otherwise, create a new one
-    if (!mCommandAllocatorQueue.empty() && isFenceComplete(mCommandAllocatorQueue.front().fenceValue))
-    {
-        commandAllocator = mCommandAllocatorQueue.front().commandAllocator;
-        mCommandAllocatorQueue.pop();
+    //// get a valid CommandAllocator, if there is free CommandAllocator available in mCommandAllocatorQueue.front(), use it
+    //// otherwise, create a new one
+    //if (!mCommandAllocatorQueue.empty() && isFenceComplete(mCommandAllocatorQueue.front().fenceValue))
+    //{
+    //    commandAllocator = mCommandAllocatorQueue.front().commandAllocator;
+    //    mCommandAllocatorQueue.pop();
 
-        ThrowIfFailed(commandAllocator->Reset());
-    }
-    else
-    {
-        commandAllocator = createCommandAllocator();
-    }
+    //    ThrowIfFailed(commandAllocator->Reset());
+    //}
+    //else
+    //{
+    //    commandAllocator = createCommandAllocator();
+    //}
 
-    // get a valie CommandList, if there is free CommandList available in mCommandListQueue.front(), use it
-    // otherwise, create a new one
-    if (!mCommandListQueue.empty())
-    {
-        commandList = mCommandListQueue.front();
-        mCommandListQueue.pop();
+    //// get a valie CommandList, if there is free CommandList available in mCommandListQueue.front(), use it
+    //// otherwise, create a new one
+    //if (!mCommandListQueue.empty())
+    //{
+    //    commandList = mCommandListQueue.front();
+    //    mCommandListQueue.pop();
 
-        ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
-    }
-    else
-    {
-        commandList = createCommandList(commandAllocator);
-        ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
-    }
+    //    ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
+    //}
+    //else
+    //{
+    //    commandList = createCommandList(commandAllocator);
+    //    ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
+    //}
 
-    //mMapListAllocator[commandList] = commandAllocator;
-    
-    
-    // Associate the command allocator with the command list so that it can be
-    // retrieved when the command list is executed.
-    ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
-    
-    return commandList;
+    ////mMapListAllocator[commandList] = commandAllocator;
+    //
+    //
+    //// Associate the command allocator with the command list so that it can be
+    //// retrieved when the command list is executed.
+    //ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
+    //
+    //return commandList;
 }
 
 std::shared_ptr<CommandList> CommandQueue::acquireCommandList()
@@ -109,6 +111,75 @@ uint64_t CommandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> com
     commandAllocator->Release();
 
     return fenceValue;
+}
+
+uint64_t CommandQueue::executeCommandList(std::shared_ptr<CommandList> commandList)
+{
+    return executeCommandLists(std::vector<std::shared_ptr<CommandList>>({ commandList }));
+}
+
+uint64_t CommandQueue::executeCommandLists(const std::vector<std::shared_ptr<CommandList>>& commandLists)
+{
+    //ResourceStateTracker::lock();
+
+    //// Command lists that need to put back on the command list queue.
+    //std::vector<std::shared_ptr<CommandList>> toBeQueued;
+    //toBeQueued.reserve(commandLists.size() * 2);  // 2x since each command list will have a pending command list.
+
+    //// Generate mips command lists.
+    //std::vector<std::shared_ptr<CommandList>> generateMipsCommandLists;
+    //generateMipsCommandLists.reserve(commandLists.size());
+
+    //// Command lists that need to be executed.
+    //std::vector<ID3D12CommandList*> d3d12CommandLists;
+    //d3d12CommandLists.reserve(commandLists.size() *
+    //    2);  // 2x since each command list will have a pending command list.
+
+    //for (auto commandList : commandLists)
+    //{
+    //    auto pendingCommandList = GetCommandList();
+    //    bool hasPendingBarriers = commandList->Close(pendingCommandList);
+    //    pendingCommandList->Close();
+    //    // If there are no pending barriers on the pending command list, there is no reason to
+    //    // execute an empty command list on the command queue.
+    //    if (hasPendingBarriers)
+    //    {
+    //        d3d12CommandLists.push_back(pendingCommandList->GetD3D12CommandList().Get());
+    //    }
+    //    d3d12CommandLists.push_back(commandList->GetD3D12CommandList().Get());
+
+    //    toBeQueued.push_back(pendingCommandList);
+    //    toBeQueued.push_back(commandList);
+
+    //    auto generateMipsCommandList = commandList->GetGenerateMipsCommandList();
+    //    if (generateMipsCommandList)
+    //    {
+    //        generateMipsCommandLists.push_back(generateMipsCommandList);
+    //    }
+    //}
+
+    //UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
+    //m_d3d12CommandQueue->ExecuteCommandLists(numCommandLists, d3d12CommandLists.data());
+    //uint64_t fenceValue = Signal();
+
+    //ResourceStateTracker::Unlock();
+
+    //// Queue command lists for reuse.
+    //for (auto commandList : toBeQueued)
+    //{
+    //    m_InFlightCommandLists.Push({ fenceValue, commandList });
+    //}
+
+    //// If there are any command lists that generate mips then execute those
+    //// after the initial resource command lists have finished.
+    //if (generateMipsCommandLists.size() > 0)
+    //{
+    //    auto& computeQueue = m_Device.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+    //    computeQueue.Wait(*this);
+    //    computeQueue.ExecuteCommandLists(generateMipsCommandLists);
+    //}
+
+    return 0;
 }
 
 

@@ -21,7 +21,7 @@ CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE
 {
     mCommandAllocator = mDevice->createCommandAllocator(mCommandListType);
 
-    mDevice->createCommandList(mCommandAllocator, mCommandListType);
+    mCommandList = mDevice->createCommandList(mCommandAllocator, mCommandListType);
 
     mUploadBuffer = std::make_unique<UploadBuffer>(mDevice);
 
