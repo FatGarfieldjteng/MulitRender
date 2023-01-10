@@ -6,12 +6,13 @@
 #include "SimpleScene.h"
 #include "SimpleEffect.h"
 #include "Camera.h"
+#include "Frame.h"
 #include "helper.h"
 #include <DirectXMath.h>
 
 GraphicsSystem::GraphicsSystem()
 {
-
+	
 }
 
 GraphicsSystem::~GraphicsSystem()
@@ -19,6 +20,7 @@ GraphicsSystem::~GraphicsSystem()
 	delete mScene;
 	delete mEffect;
 	delete mCamera;
+	delete[] mFrames;
 }
 
 void GraphicsSystem::initGraphicsSystem(HWND hWnd,
@@ -59,6 +61,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createCamera();
 
 	createEffect();
+
+	createFrames();
 
 	// finish upload mesh and wait until uploading finished
 	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
@@ -177,6 +181,19 @@ void GraphicsSystem::createEffect()
 {
 	mEffect = new SimpleEffect();
 	mEffect->build(mDevice);
+}
+
+void GraphicsSystem::createFrames()
+{
+	// create Frame objects
+	mFrames = new Frame[FrameCount];
+
+	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
+	{
+		mFrames[frameIndex].frameCount(FrameCount);
+		mFrames[frameIndex].frameIndex(frameIndex);
+		mFrames[frameIndex].init();
+	}
 }
 
 void GraphicsSystem::createCamera()

@@ -15,12 +15,13 @@ class CommandQueue;
 class Scene;
 class Effect;
 class Camera;
+class Frame;
 
 class GraphicsSystem
 {
 public:
 
-	static const UINT BufferCount = 3;
+	static const UINT FrameCount = 3;
 
 	GraphicsSystem();
 	~GraphicsSystem();
@@ -81,6 +82,8 @@ protected:
 
 	void createCamera();
 
+	void createFrames();
+
 	void updateCamera(double elapsedTime);
 
 private:
@@ -134,7 +137,7 @@ private:
 	ComPtr<ID3D12Fence> mFence;
 	uint64_t mFenceValue = 0;
 
-	uint64_t mFrameFenceValues[BufferCount] = {};
+	uint64_t mFrameFenceValues[FrameCount] = {};
 
 	HANDLE mFenceEvent = 0;
 
@@ -147,4 +150,6 @@ private:
 	bool mGraphicsInitialized = false;
 
 	double mTotalElapsedSeconds = 0.0;
+
+	Frame* mFrames = nullptr;
 };

@@ -6,7 +6,7 @@ FrameData::FrameData()
 
 }
 
-virtual FrameData::~FrameData()
+FrameData::~FrameData()
 {
 
 }

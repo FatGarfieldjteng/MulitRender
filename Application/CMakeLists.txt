@@ -23,6 +23,8 @@ set(HEADER_FILES
 	Scene.h
 	SimpleScene.h
 	Effect.h
+	Frame.h
+	FrameData
 	SimpleEffect.h
 	UploadBuffer.h
 	CPUDescriptorAllocator.h
@@ -55,6 +57,8 @@ set(SOURCE_FILES
 	Scene.cpp
 	SimpleScene.cpp
 	Effect.cpp
+	Frame.cpp
+	FrameData.cpp
 	SimpleEffect.cpp
 	UploadBuffer.cpp
 	CPUDescriptorAllocator.cpp
