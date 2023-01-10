@@ -76,13 +76,16 @@ set(RESOURCE_FILES
 	small.ico
 )
 
+
 add_executable( ${TARGET_NAME} WIN32
     ${HEADER_FILES} 
     ${SOURCE_FILES}
 	${RESOURCE_FILES}
 )
 
-target_link_libraries( MultiRenderApp 
+target_include_directories(${TARGET_NAME} PRIVATE ../ThirdParty/enkiTS/src)
+
+target_link_libraries( MultiRenderApp
     PUBLIC d3d12.lib
     PUBLIC dxgi.lib
     PUBLIC dxguid.lib
