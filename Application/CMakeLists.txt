@@ -68,6 +68,7 @@ set(SOURCE_FILES
 	RootSignature.cpp
 	CommandList.cpp
 	ResourceStateTracker.cpp
+	../ThirdParty/enkiTS/src/TaskScheduler.cpp
 )
 
 set(RESOURCE_FILES 
