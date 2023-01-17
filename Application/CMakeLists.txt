@@ -33,8 +33,14 @@ set(HEADER_FILES
 	ViewManager.h
 	RootSignature.h
 	CommandList.h
+	CommandRecorder.h
 	ThreadSafeQueue.h
 	ResourceStateTracker.h
+	RenderPass.h
+	RenderGraph.h
+	ShadowPass.h
+	BeautyPass.h
+	RenderTask.h
 	d3dx12.h
 	targetver.h
 )
@@ -67,7 +73,13 @@ set(SOURCE_FILES
 	ViewManager.cpp
 	RootSignature.cpp
 	CommandList.cpp
+	CommandRecorder.cpp
 	ResourceStateTracker.cpp
+	RenderPass.cpp
+	ShadowPass.cpp
+	BeautyPass.cpp
+	RenderGraph.cpp
+	RenderTask.cpp
 	../ThirdParty/enkiTS/src/TaskScheduler.cpp
 )
 
