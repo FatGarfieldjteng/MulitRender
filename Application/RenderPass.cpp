@@ -11,7 +11,10 @@ RenderPass::RenderPass(std::shared_ptr<Device> device)
 
 RenderPass::~RenderPass()
 {
-
+	if (mRenerTask)
+	{
+		delete mRenerTask;
+	}
 }
 
 void RenderPass::addInput(std::shared_ptr<GraphicsResource*> resource)

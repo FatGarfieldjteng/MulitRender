@@ -5,8 +5,12 @@
 
 class GraphicsResource;
 class CommandRecorder;
-
+class RenderTask;
 class Device;
+
+namespace enki {
+    class TaskScheduler;
+}
 
 class RenderPass
 {
@@ -17,6 +21,7 @@ public:
     ~RenderPass();
 
 public:
+    void setRenderData();
     void addInput(std::shared_ptr<GraphicsResource*> resource);
     void addOutput(std::shared_ptr < GraphicsResource*> resource);
 
@@ -32,4 +37,7 @@ protected:
     std::vector < std::shared_ptr<GraphicsResource*> > mOuputResources;
     std::unique_ptr< CommandRecorder> mCommandRecorder;
 
+    RenderTask* mRenerTask = nullptr;
+
+    std::shared_ptr<enki::TaskScheduler> mTaskScheduler;
 };

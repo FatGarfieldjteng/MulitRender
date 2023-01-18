@@ -21,6 +21,7 @@ set(HEADER_FILES
 	IndexBuffer.h
 	Texture.h
 	Scene.h
+	World.h
 	SimpleScene.h
 	Effect.h
 	Frame.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
 	IndexBuffer.cpp
 	Texture.cpp
 	Scene.cpp
+	World.cpp
 	SimpleScene.cpp
 	Effect.cpp
 	Frame.cpp

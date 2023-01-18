@@ -11,12 +11,14 @@ ShadowPass::ShadowPass(std::shared_ptr<Device> device)
 
 ShadowPass::~ShadowPass()
 {
-
+	
 }
 
 void ShadowPass::buildTasks()
 {
+	// compute renderTask parameters according to meshes in scene
 
+	mRenerTask = new RenderTask(100, 10);
 }
 
 void ShadowPass::preprocess()
