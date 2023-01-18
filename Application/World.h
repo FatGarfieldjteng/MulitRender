@@ -12,22 +12,22 @@ public:
     ~World();
 
 public:
-    void SetScene(Scene* scene)
+    void setScene(Scene* scene)
     {
         mScene = scene;
     }
 
-    Scene* GetScene()
+    Scene* getScene()
     {
         return mScene;
     }
 
-    void SetCamera(Camera* camera)
+    void setCamera(Camera* camera)
     {
         mCamera = camera;
     }
 
-    Camera* GetCamera()
+    Camera* getCamera()
     {
         return mCamera;
     }

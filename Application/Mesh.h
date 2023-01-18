@@ -30,7 +30,7 @@ public:
 public:
     VertexBuffer mVertexBuffer;
     IndexBuffer mIndexBuffer;
-    size_t mIndexCount;
+    size_t mIndexCount = 0;
     ComPtr<ID3D12Resource> mIntermediateVertexBuffer;
     ComPtr<ID3D12Resource> mIntermediateIndexBuffer;
 };
