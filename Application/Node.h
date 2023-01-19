@@ -25,10 +25,10 @@ public:
 
     void setWorldMatrix(DirectX::XMMATRIX worldMatrix)
     {
-        mMesh = mesh;
+        mWorldMatrix = worldMatrix;
     }
 
-    std::shared_ptr<Mesh> getWorldMatrix()
+    DirectX::XMMATRIX getWorldMatrix()
     {
         return mWorldMatrix;
     }

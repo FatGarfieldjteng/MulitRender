@@ -69,9 +69,9 @@ private:
     DirectX::XMVECTOR mTarget;
     DirectX::XMVECTOR mUp;
 
-    DirectX::XMMATRIX mModelMatrix = DirectX::XMMatrixIdentity();
-    DirectX::XMMATRIX mViewMatrix = DirectX::XMMatrixIdentity();
-    DirectX::XMMATRIX mProjectionMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX mModelMatrix;
+    DirectX::XMMATRIX mViewMatrix;
+    DirectX::XMMATRIX mProjectionMatrix;
 
-    DirectX::XMMATRIX mModelViewProjectionMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX mModelViewProjectionMatrix;
 };

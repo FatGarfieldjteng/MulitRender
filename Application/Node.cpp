@@ -1,14 +1,12 @@
 #include "framework.h"
 #include "Node.h"
-#include "GraphicsSystem.h"
-#include "helper.h"
 
-Mesh::Node()
+Node::Node()
 {
 
 }
 
-Mesh::~Node()
+Node::~Node()
 {
 
 }

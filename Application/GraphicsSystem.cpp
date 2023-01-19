@@ -7,6 +7,8 @@
 #include "SimpleEffect.h"
 #include "Camera.h"
 #include "Frame.h"
+#include "World.h"
+#include "Node.h"
 #include "helper.h"
 #include <DirectXMath.h>
 
@@ -17,9 +19,10 @@ GraphicsSystem::GraphicsSystem()
 
 GraphicsSystem::~GraphicsSystem()
 {
-	delete mScene;
 	delete mEffect;
 	delete mCamera;
+	delete mScene;
+	delete mWorld;
 	delete[] mFrames;
 }
 
@@ -56,7 +59,7 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
 
-	createScene(commandList);
+	createWorld(commandList);
 
 	createCamera();
 
@@ -67,9 +70,6 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	// finish upload mesh and wait until uploading finished
 	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
 	mDirectCommandQueue->waitForFenceValue(fenceValue);
-
-	//// scene uploaded to GPU, then release intermediate buffer
-	mScene->endBuild();
 
 	mGraphicsInitialized = true;
 
@@ -171,10 +171,51 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 
 #endif
 
-void GraphicsSystem::createScene(ComPtr<ID3D12GraphicsCommandList2> commandList)
+void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
+	mWorld = new World();
+
 	mScene = new SimpleScene();
-	mScene->build(this, commandList);
+	
+	mWorld->setScene(mScene);
+	mWorld->setCamera(mCamera);
+
+	const int meshCount = 100;
+
+	// distribute meshes uniformally in space [-500, 500]^3
+	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
+	{
+		std::shared_ptr<Mesh> mesh = std::make_shared<CubeMesh> ();
+		mesh->build(this, commandList);
+
+		Node* node = new Node();
+		node->setMesh(mesh);
+
+		DirectX::XMMATRIX worldMatrix;
+		DirectX::XMMATRIX S, R, T;
+
+		float scale = (std::rand() * 1.0f / RAND_MAX + 1.0f) * 3.0f;
+
+		S = DirectX::XMMatrixScaling(scale, scale, scale);
+
+		float rotateX, rotateY, rotateZ;
+		rotateX = std::rand() * 1.f / RAND_MAX * DirectX::XM_2PI;
+
+		float translateX, translateY, translateZ;
+
+		translateX = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
+
+		translateY = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
+
+		translateZ = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
+
+		T = DirectX::XMMatrixTranslation(translateX, translateY, translateZ);
+
+		node->setWorldMatrix(S * R * T);
+
+		mScene->addNode(node);
+	}
+
 }
 
 void GraphicsSystem::createEffect()
@@ -385,11 +426,13 @@ void GraphicsSystem::renderCube()
 		DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
 		commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
 
-		size_t meshCount = mScene->mesheCount();
+		size_t meshCount = mScene->nodeCount();
 
 		for (size_t i = 0; i < meshCount; ++i)
 		{
-			Mesh* mesh = mScene->mesh(i);
+			Node* node = mScene->node(i);
+			std::shared_ptr<Mesh> mesh = node->getMesh();
+
 			commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
 			commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
 			commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);

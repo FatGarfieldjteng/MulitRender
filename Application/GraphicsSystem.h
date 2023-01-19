@@ -16,6 +16,7 @@ class Scene;
 class Effect;
 class Camera;
 class Frame;
+class World;
 
 class GraphicsSystem
 {
@@ -76,7 +77,7 @@ protected:
 	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
 #endif
 
-	void createScene(ComPtr<ID3D12GraphicsCommandList2> commandList);
+	void createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
 	void createEffect();
 
@@ -144,6 +145,7 @@ private:
 // graphics data
 private:
 	// scene
+	World* mWorld = nullptr;
 	Scene *mScene = nullptr;
 	Effect *mEffect = nullptr;
 	Camera* mCamera = nullptr;

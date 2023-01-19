@@ -3,8 +3,7 @@
 #include <d3d12.h>
 #include <vector>
 
-class Mesh;
-class GraphicsSystem;
+class Node;
 
 class SimpleScene : public Scene
 {
@@ -16,14 +15,12 @@ public:
 
 public:
 
-    virtual void build(GraphicsSystem* GS, ComPtr<ID3D12GraphicsCommandList2> commandList);
+    virtual void addNode(Node* ndoe) override;
 
-    virtual void endBuild();
+    virtual size_t nodeCount() override;
 
-    virtual size_t mesheCount();
-
-    virtual Mesh* mesh(size_t i);
+    virtual Node* node(size_t i) override;
     
 private:
-    std::vector <Mesh*> mMeshes;
+    std::vector <Node*> mNodes;
 };

@@ -13,6 +13,7 @@ set(HEADER_FILES
 	NextGenRender.h
 	CommandQueue.h
 	Mesh.h
+	Node.h
 	CubeMesh.h
     Camera.h
 	GraphicsResource.h
@@ -33,6 +34,9 @@ set(HEADER_FILES
 	CPUDescriptorAllocation.h
 	ViewManager.h
 	RootSignature.h
+	RootSignatureManager.h
+	PipelineState.h
+	PipelineStateManager.h
 	CommandList.h
 	CommandRecorder.h
 	ThreadSafeQueue.h
@@ -54,6 +58,7 @@ set(SOURCE_FILES
 	NextGenRender.cpp
 	CommandQueue.cpp
 	Mesh.cpp
+	Node.cpp
 	CubeMesh.cpp
 	Camera.cpp
 	GraphicsResource.cpp
@@ -74,6 +79,9 @@ set(SOURCE_FILES
 	CPUDescriptorAllocation.cpp
 	ViewManager.cpp
 	RootSignature.cpp
+	RootSignatureManager.cpp
+	PipelineState.cpp
+	PipelineStateManager.cpp
 	CommandList.cpp
 	CommandRecorder.cpp
 	ResourceStateTracker.cpp
