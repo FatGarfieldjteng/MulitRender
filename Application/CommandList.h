@@ -33,6 +33,11 @@ public:
         return mCommandList;
     }
 
+    void reset() const
+    {
+        mCommandList->Reset(mCommandAllocator.Get(), nullptr);
+    }
+
     void descriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
 public:
@@ -43,6 +48,12 @@ private:
     static std::mutex                              msTextureCacheMutex;
 
 public:
+    void transitionResource(ComPtr<ID3D12Resource> resource,
+        D3D12_RESOURCE_STATES beforeState,
+        D3D12_RESOURCE_STATES afterState);
+
+    void clearRTV(FLOAT* clearValue, D3D12_CPU_DESCRIPTOR_HANDLE rtv);
+
     // transition barrier
     void transitionBarrier(const std::shared_ptr<GraphicsResource>& resource,
         D3D12_RESOURCE_STATES stateAfter,

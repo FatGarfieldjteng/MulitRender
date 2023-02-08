@@ -4,7 +4,6 @@
 #include <d3d12.h>
 #include "SwapChain.h"
 #include "Device.h"
-
 #include <memory>
 #include <string>
 
@@ -112,6 +111,8 @@ private:
 
 	void renderCube();
 
+	void renderWorld();
+
 private:
 	UINT mWidth = 0;
 	UINT mHeight = 0;
@@ -145,7 +146,7 @@ private:
 // graphics data
 private:
 	// scene
-	World* mWorld = nullptr;
+	std::shared_ptr<World> mWorld;
 	Scene *mScene = nullptr;
 	Effect *mEffect = nullptr;
 	Camera* mCamera = nullptr;

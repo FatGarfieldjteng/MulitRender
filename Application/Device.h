@@ -11,6 +11,7 @@ class Adapter;
 class CPUDescriptorAllocator;
 class CommandQueue;
 class Texture;
+class CommandList;
 
 class Device : public std::enable_shared_from_this<Device>
 {
@@ -44,6 +45,8 @@ public:
 
     ComPtr<ID3D12GraphicsCommandList2> createCommandList(ComPtr<ID3D12CommandAllocator> commandAllocator,
         D3D12_COMMAND_LIST_TYPE type);
+
+    std::unique_ptr<CommandList> createUniqueCommandList(D3D12_COMMAND_LIST_TYPE type);
 
     ComPtr<ID3D12Fence> Device::createFence();
 

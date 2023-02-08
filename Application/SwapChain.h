@@ -45,10 +45,23 @@ public:
         return mBackBuffers[mCurrentBackBufferIndex];
     }
 
+    ComPtr<ID3D12Resource> getBackBuffer(int index)
+    {
+        return mBackBuffers[index];
+    }
+
     CD3DX12_CPU_DESCRIPTOR_HANDLE getCurrentRTV()
     {
         CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
             mCurrentBackBufferIndex, mRTVDescriptorSize);
+
+        return rtv;
+    }
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE getRTV(int index)
+    {
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(mRTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+            index, mRTVDescriptorSize);
 
         return rtv;
     }

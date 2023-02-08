@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "CPUDescriptorAllocator.h"
 #include "CommandQueue.h"
+#include "CommandList.h"
 #include "helper.h"
 
 std::shared_ptr<Device> Device::create( std::shared_ptr<Adapter> adapter )
@@ -120,9 +121,14 @@ ComPtr<ID3D12GraphicsCommandList2> Device::createCommandList(ComPtr<ID3D12Comman
     ComPtr<ID3D12GraphicsCommandList2> commandList;
     ThrowIfFailed(mDevice->CreateCommandList(0, type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
-    ThrowIfFailed(commandList->Close());
+    //ThrowIfFailed(commandList->Close());
 
     return commandList;
+}
+
+std::unique_ptr<CommandList> Device::createUniqueCommandList(D3D12_COMMAND_LIST_TYPE type)
+{
+    return std::make_unique<CommandList>(shared_from_this(), type);
 }
 
 ComPtr<ID3D12Fence> Device::createFence()

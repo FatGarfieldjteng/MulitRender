@@ -344,6 +344,22 @@ void CommandList::transitionBarrier(ComPtr<ID3D12Resource> resource,
     }
 }
 
+void CommandList::transitionResource(ComPtr<ID3D12Resource> resource,
+    D3D12_RESOURCE_STATES beforeState,
+    D3D12_RESOURCE_STATES afterState)
+{
+    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+        resource.Get(),
+        beforeState, afterState);
+
+    mCommandList->ResourceBarrier(1, &barrier);
+}
+
+void CommandList::clearRTV(FLOAT* clearValue, D3D12_CPU_DESCRIPTOR_HANDLE rtv)
+{
+    mCommandList->ClearRenderTargetView(rtv, clearValue, 0, nullptr);
+}
+
 void CommandList::transitionBarrier(const std::shared_ptr<GraphicsResource>& resource,
     D3D12_RESOURCE_STATES stateAfter, 
     UINT subResource, 

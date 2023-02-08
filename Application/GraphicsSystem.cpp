@@ -10,6 +10,7 @@
 #include "World.h"
 #include "Node.h"
 #include "helper.h"
+#include "CommandList.h"
 #include <DirectXMath.h>
 
 GraphicsSystem::GraphicsSystem()
@@ -22,7 +23,6 @@ GraphicsSystem::~GraphicsSystem()
 	delete mEffect;
 	delete mCamera;
 	delete mScene;
-	delete mWorld;
 	delete[] mFrames;
 }
 
@@ -173,7 +173,7 @@ void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::millise
 
 void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
-	mWorld = new World();
+	mWorld = std::make_shared<World>();
 
 	mScene = new SimpleScene();
 	
@@ -192,15 +192,29 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 		node->setMesh(mesh);
 
 		DirectX::XMMATRIX worldMatrix;
-		DirectX::XMMATRIX S, R, T;
+		DirectX::XMMATRIX S, R, RX, RY, RZ, T;
 
+		// scale
 		float scale = (std::rand() * 1.0f / RAND_MAX + 1.0f) * 3.0f;
 
 		S = DirectX::XMMatrixScaling(scale, scale, scale);
 
+		// rotate
 		float rotateX, rotateY, rotateZ;
-		rotateX = std::rand() * 1.f / RAND_MAX * DirectX::XM_2PI;
 
+		rotateX = std::rand() * 1.f / RAND_MAX * DirectX::XM_2PI;
+		RX = DirectX::XMMatrixRotationX(rotateX);
+
+		rotateY = std::rand() * 1.f / RAND_MAX * DirectX::XM_2PI;
+		RY = DirectX::XMMatrixRotationY(rotateY);
+
+		rotateZ = std::rand() * 1.f / RAND_MAX * DirectX::XM_2PI;
+
+		RZ = DirectX::XMMatrixRotationZ(rotateZ);
+
+		R = DirectX::XMMatrixMultiply(DirectX::XMMatrixMultiply(RX, RY), RZ);
+
+		// translate
 		float translateX, translateY, translateZ;
 
 		translateX = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
@@ -231,9 +245,21 @@ void GraphicsSystem::createFrames()
 
 	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
 	{
+
 		mFrames[frameIndex].frameCount(FrameCount);
 		mFrames[frameIndex].frameIndex(frameIndex);
-		mFrames[frameIndex].init();
+
+		// setup frame data
+		mFrames[frameIndex].createCommandList(mDevice);
+		mFrames[frameIndex].setWorld(mWorld);
+		mFrames[frameIndex].setViewport(mViewport);
+		mFrames[frameIndex].setScissorRect(mScissorRect);
+		mFrames[frameIndex].setBackBufferResource(mSwapChain->getBackBuffer(frameIndex));
+		mFrames[frameIndex].setBackBufferView(mSwapChain->getRTV(frameIndex));
+		mFrames[frameIndex].setDepthStencilView(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
+		mFrames[frameIndex].setGraphicsRootSignature(mEffect->mRootSignature);
+		mFrames[frameIndex].setPipelineState(mEffect->mPipelineState);
+
 	}
 }
 
@@ -300,7 +326,8 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 void GraphicsSystem::render()
 {
 	//clearScreen();
-	renderCube();
+	//renderCube();
+	renderWorld();
 }
 
 void GraphicsSystem::finish()
@@ -457,6 +484,103 @@ void GraphicsSystem::renderCube()
 
 		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
 	}
+}
+
+void GraphicsSystem::renderWorld()
+{
+	// new  render
+	// get current buffer index
+	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+	mFrames[currentBackBufferIndex].beginFrame();
+
+	mFrames[currentBackBufferIndex].endFrame();
+	
+	std::unique_ptr<CommandList>& commandList = mFrames[currentBackBufferIndex].getCommandList();
+
+	mDirectCommandQueue->executeCommandList(commandList->commandList());
+
+	commandList->reset();
+
+	mSwapChain->present();
+
+	mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->signal();
+
+	currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+	mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+
+	//////////////////////////////////////////////////////////////////////
+
+	/*
+	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
+
+	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
+
+	transitionResource(commandList,
+		backBuffer,
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	mSwapChain->clearRTV(commandList);
+
+	if (mGraphicsInitialized)
+	{
+
+		auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
+		clearDepth(commandList, dsv);
+
+		commandList->SetPipelineState(mEffect->mPipelineState.Get());
+		commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
+
+		commandList->RSSetViewports(1, &mViewport);
+		commandList->RSSetScissorRects(1, &mScissorRect);
+
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
+		commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		// render world code goes to Frame
+
+		// Update the MVP matrix
+		DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
+		commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
+
+		size_t meshCount = mScene->nodeCount();
+
+		for (size_t i = 0; i < meshCount; ++i)
+		{
+			Node* node = mScene->node(i);
+			std::shared_ptr<Mesh> mesh = node->getMesh();
+
+			commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
+			commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
+			commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
+		}
+		//////////////////////////////////////////////////////////////////////////////////////////////
+	}
+
+	// present
+	{
+		transitionResource(commandList,
+			backBuffer,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT);
+
+		mDirectCommandQueue->executeCommandList(commandList);
+
+		mSwapChain->present();
+
+		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->signal();
+
+		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+
+		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
+	}
+	*/
 }
 
 void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
