@@ -39,9 +39,7 @@ public:
     void endFrame();
     void reset();
     
-    std::unique_ptr<CommandList>& getCommandList();
-
-    std::vector<ID3D12CommandList*>& getCommandLists();
+    std::vector<ID3D12GraphicsCommandList2*>& getCommandLists();
 
 protected:
     FrameData *mFrameData = nullptr;

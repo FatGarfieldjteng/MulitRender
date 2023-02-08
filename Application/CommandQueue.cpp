@@ -134,6 +134,20 @@ uint64_t CommandQueue::executeCommandLists(const std::vector<std::shared_ptr<Com
     return 0;
 }
 
+uint64_t CommandQueue::executeCommandLists(std::vector<ID3D12GraphicsCommandList2*>& commandLists)
+{
+    
+    for (ID3D12GraphicsCommandList2* cl : commandLists)
+    {
+        cl->Close();
+    }
+
+    mCommandQueue->ExecuteCommandLists(commandLists.size(), (ID3D12CommandList* const*)(commandLists.data()));
+    uint64_t fenceValue = signal();
+
+    return fenceValue;
+}
+
 
 // sync functions
 uint64_t CommandQueue::signal()

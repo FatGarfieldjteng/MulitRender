@@ -31,14 +31,16 @@ public:
     void endFrame();
     void reset();
 
-    std::unique_ptr<CommandList>& getCommandList();
-
-    std::vector<ID3D12CommandList*>& getCommandLists();
+    std::vector<ID3D12GraphicsCommandList2*>& getCommandLists();
 
 private:
     // This command list is single threaded
     // 
-    std::unique_ptr<CommandList>    mCommandList;
+
+    // command list group
+    std::unique_ptr<CommandList>    mclBeginFrame;
+    std::unique_ptr<CommandList>    mclEndFrame;
+
 
     std::unique_ptr<CommandList>    mRenderCommandList;
 
@@ -58,7 +60,7 @@ private:
 
     std::shared_ptr<World>          mWorld;
 
-    std::vector< ID3D12CommandList*> mDX12CommandLists;
+    std::vector< ID3D12GraphicsCommandList2*> mDX12CommandLists;
     std::vector< CommandList*>       mCommandLists;
 
 };

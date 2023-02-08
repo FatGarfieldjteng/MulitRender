@@ -95,12 +95,7 @@ void Frame::reset()
 	mFrameData->reset();
 }
 
-std::unique_ptr<CommandList>& Frame::getCommandList()
-{
-	return mFrameData->getCommandList();
-}
-
-std::vector<ID3D12CommandList*>& Frame::getCommandLists()
+std::vector<ID3D12GraphicsCommandList2*>& Frame::getCommandLists()
 {
 	return mFrameData->getCommandLists();
 }

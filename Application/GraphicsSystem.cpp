@@ -11,6 +11,7 @@
 #include "Node.h"
 #include "helper.h"
 #include "CommandList.h"
+#include <vector>
 #include <DirectXMath.h>
 
 GraphicsSystem::GraphicsSystem()
@@ -496,11 +497,11 @@ void GraphicsSystem::renderWorld()
 
 	mFrames[currentBackBufferIndex].endFrame();
 	
-	std::unique_ptr<CommandList>& commandList = mFrames[currentBackBufferIndex].getCommandList();
+	std::vector<ID3D12GraphicsCommandList2*>& commandLists = mFrames[currentBackBufferIndex].getCommandLists();
 
-	mDirectCommandQueue->executeCommandList(commandList->commandList());
+	mDirectCommandQueue->executeCommandLists(commandLists);
 
-	commandList->reset();
+	mFrames[currentBackBufferIndex].reset();
 
 	mSwapChain->present();
 
