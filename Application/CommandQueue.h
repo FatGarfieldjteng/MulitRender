@@ -33,10 +33,11 @@ public:
     ComPtr<ID3D12GraphicsCommandList2> acquireDXCommandList();
     std::shared_ptr<CommandList> acquireCommandList();
 
-    uint64_t executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList);
-    uint64_t executeCommandList(std::shared_ptr<CommandList> commandList);
-    uint64_t executeCommandLists(const std::vector<std::shared_ptr<CommandList>>& commandLists);
-    uint64_t executeCommandLists(std::vector<ID3D12GraphicsCommandList2*>& commandLists);
+    void executeCommandList(ComPtr<ID3D12GraphicsCommandList2> commandList);
+
+    uint64_t executeCommandListAndSignal(ComPtr<ID3D12GraphicsCommandList2> commandList);
+
+    uint64_t executeCommandListsAndSignal(std::vector<ID3D12GraphicsCommandList2*>& commandLists);
 
     // sync functions
     uint64_t signal();

@@ -54,6 +54,38 @@ public:
 
     void clearRTV(FLOAT* clearValue, D3D12_CPU_DESCRIPTOR_HANDLE rtv);
 
+    void clearDepth(D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 1.0f);
+
+    void setPipelineState(ID3D12PipelineState* pPipelineState);
+    void setGraphicsRootSignature(ID3D12RootSignature* pRootSignature);
+
+    void RSSetViewports(const D3D12_VIEWPORT* pViewports, UINT NumViewports = 1);
+    void RSSetScissorRects(const D3D12_RECT* pRects, UINT NumRects = 1);
+
+    void IASetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    void OMSetRenderTargets(const D3D12_CPU_DESCRIPTOR_HANDLE* pRenderTargetDescriptors,
+        const D3D12_CPU_DESCRIPTOR_HANDLE* pDepthStencilDescriptor,
+        UINT NumRenderTargetDescriptors = 1,
+        BOOL RTsSingleHandleToDescriptorRange = FALSE
+        );
+
+    void setGraphicsRoot32BitConstants(UINT RootParameterIndex,
+        UINT Num32BitValuesToSet,
+        const void* pSrcData,
+        UINT DestOffsetIn32BitValues);
+
+    void IASetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView);
+
+    void IASetVertexBuffers(UINT StartSlot,
+        UINT NumViews,
+        const D3D12_VERTEX_BUFFER_VIEW* pViews);
+
+    void drawIndexedInstanced(UINT IndexCountPerInstance,
+        UINT InstanceCount,
+        UINT StartIndexLocation,
+        INT BaseVertexLocation,
+        UINT StartInstanceLocation);
+
     // transition barrier
     void transitionBarrier(const std::shared_ptr<GraphicsResource>& resource,
         D3D12_RESOURCE_STATES stateAfter,

@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "Node.h"
 #include "Mesh.h"
+#include "Camera.h"
+#include "CommandQueue.h"
 
 FrameData::FrameData()
 {
@@ -32,16 +34,21 @@ void FrameData::createCommandList(std::shared_ptr<Device> device)
 	mCommandLists.push_back(mclEndFrame.get());
 
 	// render command list
-	/*mRenderCommandList = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	mRenderCommandList = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 	mDX12CommandLists.push_back(mRenderCommandList->commandList().Get());
-	mCommandLists.push_back(mRenderCommandList.get());*/
+	mCommandLists.push_back(mRenderCommandList.get());
 
 }
 
 void FrameData::setWorld(std::shared_ptr<World> world)
 {
 	mWorld = world;
+}
+
+void FrameData::setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue)
+{
+	mDirectCommandQueue = directCommandQueue;
 }
 
 void FrameData::setViewport(const D3D12_VIEWPORT& viewport)
@@ -89,50 +96,62 @@ void FrameData::beginFrame()
 	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
 
 	mclBeginFrame->clearRTV(clearColor, mBackBufferView);
+
+	//global settings
+	mclBeginFrame->clearDepth(mDepthBufferView);
+
+	// here, mclBeginFrame must be executed to ensure the order
+	mDirectCommandQueue->executeCommandList(mclBeginFrame->commandList().Get());
 }
 
 void FrameData::renderFrame()
 {
-	// global settings
-	//auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
-	//clearDepth(commandList, dsv);
+	mRenderCommandList->RSSetViewports(&mViewport);
+	mRenderCommandList->RSSetScissorRects(&mScissorRect);
+	mRenderCommandList->OMSetRenderTargets(&mBackBufferView, &mDepthBufferView);
 
-	//commandList->SetPipelineState(mEffect->mPipelineState.Get());
-	//commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
+	// multi-threading part
+	mRenderCommandList->setPipelineState(mPipelineState.Get());
+	mRenderCommandList->setGraphicsRootSignature(mRootSignature.Get());
+	mRenderCommandList->IASetPrimitiveTopology();
 
-	//commandList->RSSetViewports(1, &mViewport);
-	//commandList->RSSetScissorRects(1, &mScissorRect);
+	// Update the MVP matrix
+	Camera *camera = mWorld->getCamera();
+	DirectX::XMMATRIX viewProjMatrix = camera->modelViewProjectionMatrix();
+	mRenderCommandList->setGraphicsRoot32BitConstants(0, 
+		sizeof(DirectX::XMMATRIX) / 4, 
+		&viewProjMatrix,
+		0);
 
-	//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	Scene* scene = mWorld->getScene();
+	size_t meshCount = scene->nodeCount();
 
-	//CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
-	//commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	for (size_t i = 0; i < meshCount; ++i)
+	{
+		Node* node = scene->node(i);
+		DirectX::XMMATRIX worldMatrix = node->getWorldMatrix();
+		mRenderCommandList->setGraphicsRoot32BitConstants(1,
+			sizeof(DirectX::XMMATRIX) / 4,
+			&worldMatrix,
+			0);
 
-	//// multi-threading part
+		std::shared_ptr<Mesh> mesh = node->getMesh();
 
-	//// Update the MVP matrix
-	//DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
-	//commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
+		mRenderCommandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
+		mRenderCommandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
+		mRenderCommandList->drawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
+	}
 
-	//Scene* scene = mWorld->getScene();
-	//size_t meshCount = scene->nodeCount();
-
-	//for (size_t i = 0; i < meshCount; ++i)
-	//{
-	//	Node* node = scene->node(i);
-	//	std::shared_ptr<Mesh> mesh = node->getMesh();
-
-	//	commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
-	//	commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
-	//	commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
-	//}
+	mDirectCommandQueue->executeCommandList(mRenderCommandList->commandList());
 }
 
-void FrameData::endFrame()
+uint64_t FrameData::endFrame()
 {
 	mclEndFrame->transitionResource(mBackBuffer,
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT);
+
+	return mDirectCommandQueue->executeCommandListAndSignal(mclEndFrame->commandList());
 }
 
 void FrameData::reset()
@@ -141,9 +160,4 @@ void FrameData::reset()
 	{
 		commandlist->reset();
 	}
-}
-
-std::vector<ID3D12GraphicsCommandList2*>& FrameData::getCommandLists()
-{
-	return mDX12CommandLists;
 }

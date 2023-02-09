@@ -3,6 +3,7 @@
 class FrameData;
 class Device;
 class World;
+class CommandQueue;
 
 #include <vector>
 
@@ -24,6 +25,7 @@ public:
 public:
     // setup frame data
     void createCommandList(std::shared_ptr<Device> device);
+    void setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue);
     void setWorld(std::shared_ptr<World> world);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
@@ -36,10 +38,8 @@ public:
 
     void beginFrame();
     void renderFrame();
-    void endFrame();
+    uint64_t endFrame();
     void reset();
-    
-    std::vector<ID3D12GraphicsCommandList2*>& getCommandLists();
 
 protected:
     FrameData *mFrameData = nullptr;

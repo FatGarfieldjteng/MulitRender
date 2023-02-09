@@ -59,22 +59,24 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createFence();
 
 	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
+	
+	createCamera();
 
 	createWorld(commandList);
 
-	createCamera();
-
 	createEffect();
 
-	createFrames();
+	
 
 	// finish upload mesh and wait until uploading finished
-	auto fenceValue = mDirectCommandQueue->executeCommandList(commandList);
+	auto fenceValue = mDirectCommandQueue->executeCommandListAndSignal(commandList);
 	mDirectCommandQueue->waitForFenceValue(fenceValue);
 
 	mGraphicsInitialized = true;
 
 	resizeDepthBuffer(mWidth, mHeight);
+
+	createFrames();
 	
 }
 
@@ -181,7 +183,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 	mWorld->setScene(mScene);
 	mWorld->setCamera(mCamera);
 
-	const int meshCount = 100;
+	const int meshCount = 1000;
 
 	// distribute meshes uniformally in space [-500, 500]^3
 	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
@@ -196,7 +198,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 		DirectX::XMMATRIX S, R, RX, RY, RZ, T;
 
 		// scale
-		float scale = (std::rand() * 1.0f / RAND_MAX + 1.0f) * 3.0f;
+		float scale = (std::rand() * 1.0f / RAND_MAX + 1.0f) * 0.7f;
 
 		S = DirectX::XMMatrixScaling(scale, scale, scale);
 
@@ -218,15 +220,14 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 		// translate
 		float translateX, translateY, translateZ;
 
-		translateX = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
+		translateX = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
+		translateY = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
 
-		translateY = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
-
-		translateZ = std::rand() * 1.0f / RAND_MAX * 990.0f - 495.0f;
+		translateZ = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
 
 		T = DirectX::XMMatrixTranslation(translateX, translateY, translateZ);
 
-		node->setWorldMatrix(S * R * T);
+		node->setWorldMatrix(T * S * R);
 
 		mScene->addNode(node);
 	}
@@ -251,6 +252,7 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].frameIndex(frameIndex);
 
 		// setup frame data
+		mFrames[frameIndex].setDirectCommandQueue(mDirectCommandQueue);
 		mFrames[frameIndex].createCommandList(mDevice);
 		mFrames[frameIndex].setWorld(mWorld);
 		mFrames[frameIndex].setViewport(mViewport);
@@ -318,6 +320,8 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 	float angle = static_cast<float>(elapsedTime * 90.0);
 	const DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(0, 1, 1, 0);
 	DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(angle));
+
+	modelMatrix *= DirectX::XMMatrixTranslation(0.0f, 0.0f, 15.0f);
 
 	mCamera->modelMaxtrix(modelMatrix);
 
@@ -406,7 +410,7 @@ void GraphicsSystem::clearScreen()
 			D3D12_RESOURCE_STATE_PRESENT);
 
 		// execute
-		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->executeCommandList(commandList);
+		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->executeCommandListAndSignal(commandList);
 
 
 		mSwapChain->present();
@@ -475,7 +479,7 @@ void GraphicsSystem::renderCube()
 			D3D12_RESOURCE_STATE_RENDER_TARGET,
 			D3D12_RESOURCE_STATE_PRESENT);
 
-		mDirectCommandQueue->executeCommandList(commandList);
+		mDirectCommandQueue->executeCommandListAndSignal(commandList);
 
 		mSwapChain->present();
 
@@ -494,12 +498,9 @@ void GraphicsSystem::renderWorld()
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
 	mFrames[currentBackBufferIndex].beginFrame();
-
+	mFrames[currentBackBufferIndex].renderFrame();
 	mFrames[currentBackBufferIndex].endFrame();
-	
-	std::vector<ID3D12GraphicsCommandList2*>& commandLists = mFrames[currentBackBufferIndex].getCommandLists();
 
-	mDirectCommandQueue->executeCommandLists(commandLists);
 
 	mFrames[currentBackBufferIndex].reset();
 
@@ -513,59 +514,59 @@ void GraphicsSystem::renderWorld()
 
 	//////////////////////////////////////////////////////////////////////
 
-	/*
-	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
+	//
+	//UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
+	//ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
 
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
+	//ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
 
-	transitionResource(commandList,
-		backBuffer,
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//transitionResource(commandList,
+	//	backBuffer,
+	//	D3D12_RESOURCE_STATE_PRESENT,
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	mSwapChain->clearRTV(commandList);
+	//mSwapChain->clearRTV(commandList);
 
-	if (mGraphicsInitialized)
-	{
+	//if (mGraphicsInitialized)
+	//{
 
-		auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
-		clearDepth(commandList, dsv);
+	//	auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
+	//	clearDepth(commandList, dsv);
 
-		commandList->SetPipelineState(mEffect->mPipelineState.Get());
-		commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
+	//	commandList->SetPipelineState(mEffect->mPipelineState.Get());
+	//	commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
 
-		commandList->RSSetViewports(1, &mViewport);
-		commandList->RSSetScissorRects(1, &mScissorRect);
+	//	commandList->RSSetViewports(1, &mViewport);
+	//	commandList->RSSetScissorRects(1, &mScissorRect);
 
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
-		commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	//	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
+	//	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		// render world code goes to Frame
+	//	//////////////////////////////////////////////////////////////////////////////////////////
+	//	// render world code goes to Frame
 
-		// Update the MVP matrix
-		DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
-		commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
+	//	// Update the MVP matrix
+	//	DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
+	//	commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
 
-		size_t meshCount = mScene->nodeCount();
+	//	size_t meshCount = mScene->nodeCount();
 
-		for (size_t i = 0; i < meshCount; ++i)
-		{
-			Node* node = mScene->node(i);
-			std::shared_ptr<Mesh> mesh = node->getMesh();
+	//	for (size_t i = 0; i < meshCount; ++i)
+	//	{
+	//		Node* node = mScene->node(i);
+	//		std::shared_ptr<Mesh> mesh = node->getMesh();
 
-			commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
-			commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
-			commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
-		}
-		//////////////////////////////////////////////////////////////////////////////////////////////
-	}
+	//		commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
+	//		commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
+	//		commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
+	//	}
+	//	//////////////////////////////////////////////////////////////////////////////////////////
+	//}
 
 	// present
-	{
+	/*{
 		transitionResource(commandList,
 			backBuffer,
 			D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -580,8 +581,8 @@ void GraphicsSystem::renderWorld()
 		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
 		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
-	}
-	*/
+	}*/
+	
 }
 
 void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,

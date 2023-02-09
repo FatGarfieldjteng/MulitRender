@@ -360,6 +360,80 @@ void CommandList::clearRTV(FLOAT* clearValue, D3D12_CPU_DESCRIPTOR_HANDLE rtv)
     mCommandList->ClearRenderTargetView(rtv, clearValue, 0, nullptr);
 }
 
+void CommandList::clearDepth(D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth)
+{
+    mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
+}
+
+void CommandList::setPipelineState(ID3D12PipelineState* pPipelineState)
+{
+    mCommandList->SetPipelineState(pPipelineState);
+}
+
+void CommandList::setGraphicsRootSignature(ID3D12RootSignature* pRootSignature)
+{
+    mCommandList->SetGraphicsRootSignature(pRootSignature);
+}
+
+void CommandList::RSSetViewports(const D3D12_VIEWPORT* pViewports, UINT NumViewports)
+{
+    mCommandList->RSSetViewports(NumViewports, pViewports);
+}
+
+void CommandList::RSSetScissorRects(const D3D12_RECT* pRects, UINT NumRects)
+{
+    mCommandList->RSSetScissorRects(NumRects, pRects);
+}
+
+
+void CommandList::IASetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopology)
+{
+    mCommandList->IASetPrimitiveTopology(PrimitiveTopology);
+}
+
+void CommandList::OMSetRenderTargets(const D3D12_CPU_DESCRIPTOR_HANDLE* pRenderTargetDescriptors,
+    const D3D12_CPU_DESCRIPTOR_HANDLE* pDepthStencilDescriptor,
+    UINT NumRenderTargetDescriptors,
+    BOOL RTsSingleHandleToDescriptorRange)
+{
+    mCommandList->OMSetRenderTargets(NumRenderTargetDescriptors, 
+        pRenderTargetDescriptors, 
+        RTsSingleHandleToDescriptorRange, 
+        pDepthStencilDescriptor);
+}
+
+void CommandList::setGraphicsRoot32BitConstants(UINT RootParameterIndex,
+    UINT Num32BitValuesToSet,
+    const void* pSrcData,
+    UINT DestOffsetIn32BitValues)
+{
+    mCommandList->SetGraphicsRoot32BitConstants(RootParameterIndex,
+        Num32BitValuesToSet, 
+        pSrcData, 
+        DestOffsetIn32BitValues);
+}
+
+void CommandList::IASetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* pView)
+{
+    mCommandList->IASetIndexBuffer(pView);
+}
+
+void CommandList::IASetVertexBuffers(UINT StartSlot,
+    UINT NumViews,
+    const D3D12_VERTEX_BUFFER_VIEW* pViews)
+{
+    mCommandList->IASetVertexBuffers(StartSlot, NumViews, pViews);
+}
+
+void CommandList::drawIndexedInstanced(UINT IndexCountPerInstance,
+    UINT InstanceCount,
+    UINT StartIndexLocation,
+    INT BaseVertexLocation,
+    UINT StartInstanceLocation)
+{
+    mCommandList->DrawIndexedInstanced(IndexCountPerInstance, InstanceCount, StartIndexLocation, BaseVertexLocation, StartInstanceLocation);
+}
+
 void CommandList::transitionBarrier(const std::shared_ptr<GraphicsResource>& resource,
     D3D12_RESOURCE_STATES stateAfter, 
     UINT subResource, 

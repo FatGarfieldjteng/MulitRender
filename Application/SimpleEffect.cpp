@@ -51,8 +51,9 @@ void SimpleEffect::createRootSignature(std::shared_ptr<Device> device)
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
 	// A single 32-bit constant root parameter that is used by the vertex shader.
-	CD3DX12_ROOT_PARAMETER1 rootParameters[1] = {};
+	CD3DX12_ROOT_PARAMETER1 rootParameters[2] = {};
 	rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+	rootParameters[1].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	// no sampler
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;

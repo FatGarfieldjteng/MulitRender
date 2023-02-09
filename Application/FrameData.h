@@ -6,6 +6,7 @@
 class CommandList;
 class Device;
 class World;
+class CommandQueue;
 
 class FrameData
 {
@@ -15,8 +16,10 @@ public:
     virtual ~FrameData();
 
 public:
+    
     void createCommandList(std::shared_ptr<Device> device);
     void setWorld(std::shared_ptr<World> world);
+    void setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
     void setBackBufferResource(ComPtr<ID3D12Resource> backBuffer);
@@ -28,19 +31,19 @@ public:
 public:
     void beginFrame();
     void renderFrame();
-    void endFrame();
+    uint64_t endFrame();
     void reset();
 
-    std::vector<ID3D12GraphicsCommandList2*>& getCommandLists();
-
 private:
+
+    std::shared_ptr<CommandQueue> mDirectCommandQueue;
+
     // This command list is single threaded
     // 
 
     // command list group
     std::unique_ptr<CommandList>    mclBeginFrame;
     std::unique_ptr<CommandList>    mclEndFrame;
-
 
     std::unique_ptr<CommandList>    mRenderCommandList;
 

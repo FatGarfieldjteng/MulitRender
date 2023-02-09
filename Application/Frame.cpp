@@ -35,6 +35,11 @@ void Frame::createCommandList(std::shared_ptr<Device> device)
 	mFrameData->createCommandList(device);
 }
 
+void Frame::setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue)
+{
+	mFrameData->setDirectCommandQueue(directCommandQueue);
+}
+
 void Frame::setWorld(std::shared_ptr<World> world)
 {
 	mFrameData->setWorld(world);
@@ -85,17 +90,12 @@ void Frame::renderFrame()
 	mFrameData->renderFrame();
 }
 
-void Frame::endFrame()
+uint64_t Frame::endFrame()
 {
-	mFrameData->endFrame();
+	return mFrameData->endFrame();
 }
 
 void Frame::reset()
 {
 	mFrameData->reset();
-}
-
-std::vector<ID3D12GraphicsCommandList2*>& Frame::getCommandLists()
-{
-	return mFrameData->getCommandLists();
 }

@@ -1,9 +1,16 @@
-struct ModelViewProjection
+struct ViewProjection
 {
-    matrix MVP;
+    matrix VP;
 };
 
-ConstantBuffer<ModelViewProjection> ModelViewProjectionCB : register(b0);
+struct Model
+{
+    matrix M;
+};
+
+ConstantBuffer<ViewProjection> ViewProjectionCB : register(b0);
+ConstantBuffer<Model> ModelCB : register(b1);
+
 
 struct VSInput
 {
@@ -21,7 +28,10 @@ VSOutput main(VSInput Input)
 {
     VSOutput output;
 
-    output.Position = mul(ModelViewProjectionCB.MVP, float4(Input.Position, 1.0f));
+    //matrix ModelViewProjection = mul(ModelCB.M, ViewProjectionCB.VP);
+    matrix ModelViewProjection = mul(ViewProjectionCB.VP, ModelCB.M);
+
+    output.Position = mul(ModelViewProjection, float4(Input.Position, 1.0f));
     output.Color = float4(Input.Color, 1.0f);
 
     return output;
