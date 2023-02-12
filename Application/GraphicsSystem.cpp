@@ -11,8 +11,12 @@
 #include "Node.h"
 #include "helper.h"
 #include "CommandList.h"
+#include "RenderGraph.h"
+#include "ShadowPass.h"
+#include "BeautyPass.h"
 #include <vector>
 #include <DirectXMath.h>
+
 
 GraphicsSystem::GraphicsSystem()
 {
@@ -183,7 +187,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 	mWorld->setScene(mScene);
 	mWorld->setCamera(mCamera);
 
-	const int meshCount = 1000;
+	const int meshCount = 100;
 
 	// distribute meshes uniformally in space [-500, 500]^3
 	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
@@ -231,6 +235,12 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 
 		mScene->addNode(node);
 	}
+
+}
+
+void GraphicsSystem::createRenderGraph()
+{
+	BeautyPass *beautyPass = new BeautyPass(mDevice);
 
 }
 

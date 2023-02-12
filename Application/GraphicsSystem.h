@@ -16,6 +16,7 @@ class Effect;
 class Camera;
 class Frame;
 class World;
+class RenderGraph;
 
 class GraphicsSystem
 {
@@ -77,6 +78,8 @@ protected:
 #endif
 
 	void createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList);
+
+	void createRenderGraph();
 
 	void createEffect();
 
@@ -147,6 +150,7 @@ private:
 private:
 	// scene
 	std::shared_ptr<World> mWorld;
+	std::shared_ptr< RenderGraph> mRenderGraph;
 	Scene *mScene = nullptr;
 	Effect *mEffect = nullptr;
 	Camera* mCamera = nullptr;
