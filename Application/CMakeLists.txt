@@ -28,6 +28,7 @@ set(HEADER_FILES
 	Frame.h
 	FrameData
 	SimpleEffect.h
+	ShadowEffect.h
 	UploadBuffer.h
 	CPUDescriptorAllocator.h
 	CPUDescriptorPage.h
@@ -41,6 +42,11 @@ set(HEADER_FILES
 	CommandRecorder.h
 	ThreadSafeQueue.h
 	ResourceStateTracker.h
+	Managers.h
+	ShaderManager.h
+	EffectManager.h
+	RootSignatureManager.h
+	PipelineStateManager.h
 	RenderPass.h
 	RenderGraph.h
 	ShadowPass.h
@@ -73,6 +79,7 @@ set(SOURCE_FILES
 	Frame.cpp
 	FrameData.cpp
 	SimpleEffect.cpp
+	ShadowEffect.cpp
 	UploadBuffer.cpp
 	CPUDescriptorAllocator.cpp
 	CPUDescriptorPage.cpp
@@ -85,6 +92,11 @@ set(SOURCE_FILES
 	CommandList.cpp
 	CommandRecorder.cpp
 	ResourceStateTracker.cpp
+	Managers.cpp
+	ShaderManager.cpp
+	EffectManager.cpp
+	RootSignatureManager.cpp
+	PipelineStateManager.cpp
 	RenderPass.cpp
 	ShadowPass.cpp
 	BeautyPass.cpp

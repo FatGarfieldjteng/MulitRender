@@ -29,10 +29,16 @@ public:
 public:
     void build(std::shared_ptr<Device> device);
 
+    void setVS(ComPtr<ID3DBlob> VSBlob);
+    void setPS(ComPtr<ID3DBlob> PSBlob);
+
+    ComPtr<ID3DBlob> getVS();
+    ComPtr<ID3DBlob> getPS();
+
 protected:
-    virtual void loadShader() = 0;
-    virtual void createRootSignature(std::shared_ptr<Device> device) = 0;
-    virtual void createPipelineStateObject(std::shared_ptr<Device> device) = 0;
+    virtual void loadShader() {}
+    virtual void createRootSignature(std::shared_ptr<Device> device) {}
+    virtual void createPipelineStateObject(std::shared_ptr<Device> device) {}
 
 public:
     // vertex shader
