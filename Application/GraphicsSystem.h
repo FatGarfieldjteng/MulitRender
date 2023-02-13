@@ -17,6 +17,7 @@ class Camera;
 class Frame;
 class World;
 class RenderGraph;
+class Managers;
 
 class GraphicsSystem
 {
@@ -85,6 +86,8 @@ protected:
 
 	void createCamera();
 
+	void createManagers();
+
 	void createFrames();
 
 	void updateCamera(double elapsedTime);
@@ -124,6 +127,8 @@ private:
 	std::shared_ptr<Device> mDevice;
 	std::shared_ptr<SwapChain> mSwapChain;
 	std::shared_ptr<CommandQueue> mDirectCommandQueue;
+
+	std::shared_ptr<Managers> mManagers;
 
 	// depth buffer.
 	ComPtr<ID3D12Resource> mDepthBuffer;

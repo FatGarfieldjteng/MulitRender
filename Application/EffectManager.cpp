@@ -25,7 +25,7 @@ void EffectManager::createSimpleEffect()
 {
 	std::shared_ptr<Effect> simpleEffect = std::make_shared<Effect>();
 	simpleEffect->setVS(mShaderManager->getVS("SimpleVS"));
-	simpleEffect->setPS(mShaderManager->getVS("SimplePS"));
+	simpleEffect->setPS(mShaderManager->getPS("SimplePS"));
 	addEffect("SimpleEffect", simpleEffect);
 }
 

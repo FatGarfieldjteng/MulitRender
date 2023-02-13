@@ -37,7 +37,7 @@ public:
     uint64_t endFrame();
     void reset();
 
-private:
+public:
 
     std::shared_ptr<CommandQueue> mDirectCommandQueue;
 

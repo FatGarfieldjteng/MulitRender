@@ -7,6 +7,7 @@ class ShaderManager;
 class EffectManager;
 class RootSignatureManager;
 class PipelineStateManager;
+class TextureManager;
 
 class Managers
 {
@@ -40,10 +41,17 @@ public:
         return mPipelineStateManager;
     }
 
+    std::shared_ptr<TextureManager> getTextureManager()
+    {
+        return mTextureManager;
+    }
+
 private:
     std::shared_ptr<Device> mDevice;
     std::shared_ptr<ShaderManager> mShaderManager;
     std::shared_ptr<EffectManager> mEffectManager;
     std::shared_ptr<RootSignatureManager> mRootSignatureManager;
     std::shared_ptr<PipelineStateManager> mPipelineStateManager;
+    std::shared_ptr<TextureManager> mTextureManager;
+
 };

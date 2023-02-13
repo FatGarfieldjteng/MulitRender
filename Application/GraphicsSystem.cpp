@@ -14,6 +14,8 @@
 #include "RenderGraph.h"
 #include "ShadowPass.h"
 #include "BeautyPass.h"
+#include "Managers.h"
+#include "Texture.h"
 #include <vector>
 #include <DirectXMath.h>
 
@@ -70,8 +72,6 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createEffect();
 
-	
-
 	// finish upload mesh and wait until uploading finished
 	auto fenceValue = mDirectCommandQueue->executeCommandListAndSignal(commandList);
 	mDirectCommandQueue->waitForFenceValue(fenceValue);
@@ -79,6 +79,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	mGraphicsInitialized = true;
 
 	resizeDepthBuffer(mWidth, mHeight);
+
+	createManagers();
 
 	createFrames();
 
@@ -291,6 +293,11 @@ void GraphicsSystem::createCamera()
 	// projection matrix.
 	float aspectRatio = mWidth / static_cast<float>(mHeight);
 	mCamera->projectionMaxtrix(aspectRatio, 0.1f, 100.0f);
+}
+
+void GraphicsSystem::createManagers()
+{
+	mManagers = std::make_shared<Managers>(mDevice);
 }
 
 void GraphicsSystem::update()

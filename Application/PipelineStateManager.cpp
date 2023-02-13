@@ -103,7 +103,7 @@ void PipelineStateManager::createShadowPipelineState()
 	pipelineStateStream.InputLayout = { inputLayout, _countof(inputLayout) };
 	pipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(effect->getVS().Get());
-	pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(effect->getPS().Get());
+	pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE();
 	pipelineStateStream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	pipelineStateStream.RTVFormats = rtvFormats;
 
