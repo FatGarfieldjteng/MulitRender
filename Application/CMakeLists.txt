@@ -47,6 +47,7 @@ set(HEADER_FILES
 	EffectManager.h
 	RootSignatureManager.h
 	PipelineStateManager.h
+	TextureManager.h
 	RenderPass.h
 	RenderGraph.h
 	ShadowPass.h
@@ -97,6 +98,7 @@ set(SOURCE_FILES
 	EffectManager.cpp
 	RootSignatureManager.cpp
 	PipelineStateManager.cpp
+	TextureManager.cpp
 	RenderPass.cpp
 	ShadowPass.cpp
 	BeautyPass.cpp
