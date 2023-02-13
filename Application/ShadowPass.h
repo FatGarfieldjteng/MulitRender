@@ -9,14 +9,10 @@ class ShadowPass : public RenderPass
 {
 public:
 
-    ShadowPass(std::shared_ptr<Device> device);
+    ShadowPass();
 
     ~ShadowPass();
 
 public:
-    virtual void buildTasks() override;
-
-    virtual void preprocess() override;
-    virtual void execute() override;
-    virtual void postprocess() override;
+    virtual void render(std::shared_ptr<FrameData> frameData) override;
 };

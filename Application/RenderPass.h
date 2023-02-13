@@ -2,11 +2,13 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 class GraphicsResource;
-class CommandRecorder;
+class CommandList;
 class RenderTask;
 class Device;
+class FrameData;
 
 namespace enki {
     class TaskScheduler;
@@ -16,26 +18,25 @@ class RenderPass
 {
 public:
 
-    RenderPass(std::shared_ptr<Device> device);
+    RenderPass();
 
     ~RenderPass();
 
 public:
-    void setRenderData();
     void addInput(std::shared_ptr<GraphicsResource*> resource);
     void addOutput(std::shared_ptr < GraphicsResource*> resource);
 
 public:
-    virtual void buildTasks() = 0;
+    void setName(const std::string& name);
+    std::string getName() const;
 
-    virtual void preprocess() {};
-    virtual void execute() = 0;
-    virtual void postprocess() {};
+    virtual void render(std::shared_ptr<FrameData> frameData) = 0;
 
 protected:
+
+    std::string mName;
     std::vector < std::shared_ptr<GraphicsResource*> > mInputResources;
     std::vector < std::shared_ptr<GraphicsResource*> > mOuputResources;
-    std::unique_ptr< CommandRecorder> mCommandRecorder;
 
     RenderTask* mRenerTask = nullptr;
 

@@ -4,6 +4,11 @@
 #include "d3dx12.h"
 #include "helper.h"
 
+Texture::Texture()
+{
+
+}
+
 Texture::Texture(std::shared_ptr<Device>,
     ComPtr<ID3D12Resource> resource)
 {

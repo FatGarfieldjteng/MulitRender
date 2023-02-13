@@ -8,6 +8,8 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "CommandQueue.h"
+#include "RenderGraph.h"
+#include "RenderPass.h"
 
 FrameData::FrameData()
 {
@@ -23,27 +25,25 @@ void FrameData::createCommandList(std::shared_ptr<Device> device)
 {
 	// frame begin command list
 	mclBeginFrame = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	mDX12CommandLists.push_back(mclBeginFrame->commandList().Get());
 	mCommandLists.push_back(mclBeginFrame.get());
 
 	// frame end command list
 	mclEndFrame = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	mDX12CommandLists.push_back(mclEndFrame->commandList().Get());
 	mCommandLists.push_back(mclEndFrame.get());
 
 	// render command list
-	mRenderCommandList = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	mDX12CommandLists.push_back(mRenderCommandList->commandList().Get());
-	mCommandLists.push_back(mRenderCommandList.get());
-
+	mclRender = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	mCommandLists.push_back(mclRender.get());
 }
 
 void FrameData::setWorld(std::shared_ptr<World> world)
 {
 	mWorld = world;
+}
+
+void FrameData::setRenderGraph(std::shared_ptr<RenderGraph> renderGraph)
+{
+	mRenderGraph = renderGraph;
 }
 
 void FrameData::setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue)
@@ -106,19 +106,19 @@ void FrameData::beginFrame()
 
 void FrameData::renderFrame()
 {
-	mRenderCommandList->RSSetViewports(&mViewport);
-	mRenderCommandList->RSSetScissorRects(&mScissorRect);
-	mRenderCommandList->OMSetRenderTargets(&mBackBufferView, &mDepthBufferView);
+	mclRender->RSSetViewports(&mViewport);
+	mclRender->RSSetScissorRects(&mScissorRect);
+	mclRender->OMSetRenderTargets(&mBackBufferView, &mDepthBufferView);
 
 	// multi-threading part
-	mRenderCommandList->setPipelineState(mPipelineState.Get());
-	mRenderCommandList->setGraphicsRootSignature(mRootSignature.Get());
-	mRenderCommandList->IASetPrimitiveTopology();
+	mclRender->setPipelineState(mPipelineState.Get());
+	mclRender->setGraphicsRootSignature(mRootSignature.Get());
+	mclRender->IASetPrimitiveTopology();
 
 	// Update the MVP matrix
 	Camera *camera = mWorld->getCamera();
 	DirectX::XMMATRIX viewProjMatrix = camera->modelViewProjectionMatrix();
-	mRenderCommandList->setGraphicsRoot32BitConstants(0, 
+	mclRender->setGraphicsRoot32BitConstants(0,
 		sizeof(DirectX::XMMATRIX) / 4, 
 		&viewProjMatrix,
 		0);
@@ -130,19 +130,24 @@ void FrameData::renderFrame()
 	{
 		Node* node = scene->node(i);
 		DirectX::XMMATRIX worldMatrix = node->getWorldMatrix();
-		mRenderCommandList->setGraphicsRoot32BitConstants(1,
+		mclRender->setGraphicsRoot32BitConstants(1,
 			sizeof(DirectX::XMMATRIX) / 4,
 			&worldMatrix,
 			0);
 
 		std::shared_ptr<Mesh> mesh = node->getMesh();
 
-		mRenderCommandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
-		mRenderCommandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
-		mRenderCommandList->drawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
+		mclRender->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
+		mclRender->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
+		mclRender->drawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
 	}
 
-	mDirectCommandQueue->executeCommandList(mRenderCommandList->commandList());
+	mDirectCommandQueue->executeCommandList(mclRender->commandList());
+}
+
+void FrameData::renderFrameA()
+{
+	mRenderGraph->execute(shared_from_this());
 }
 
 uint64_t FrameData::endFrame()

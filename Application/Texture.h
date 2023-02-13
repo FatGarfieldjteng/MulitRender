@@ -10,10 +10,15 @@ class Texture : public GraphicsResource
 {
 public:
 
+    Texture();
+    
     Texture(std::shared_ptr<Device> device, 
         ComPtr<ID3D12Resource> resource);
 
     ~Texture();
+
+public:
+
 
 private:
     void createViews();

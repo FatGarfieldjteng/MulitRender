@@ -81,6 +81,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	resizeDepthBuffer(mWidth, mHeight);
 
 	createFrames();
+
+	createRenderGraph();
 	
 }
 
@@ -240,8 +242,8 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 
 void GraphicsSystem::createRenderGraph()
 {
-	BeautyPass *beautyPass = new BeautyPass(mDevice);
-
+	mRenderGraph = std::make_shared<RenderGraph>();
+	mRenderGraph->setName("ShadowSimple");
 }
 
 void GraphicsSystem::createEffect()

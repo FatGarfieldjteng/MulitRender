@@ -2,10 +2,9 @@
 #include "ShadowPass.h"
 #include "Device.h"
 #include "RenderTask.h"
+#include "FrameData.h"
 
-ShadowPass::ShadowPass(std::shared_ptr<Device> device)
-	:RenderPass(device)
-
+ShadowPass::ShadowPass()
 {
 }
 
@@ -14,24 +13,7 @@ ShadowPass::~ShadowPass()
 	
 }
 
-void ShadowPass::buildTasks()
-{
-	// compute renderTask parameters according to meshes in scene
-
-	mRenerTask = new RenderTask(100, 10);
-}
-
-void ShadowPass::preprocess()
-{
-
-}
-
-void ShadowPass::execute()
-{
-
-}
-
-void ShadowPass::postprocess()
+void ShadowPass::render(std::shared_ptr<FrameData> frameData)
 {
 
 }

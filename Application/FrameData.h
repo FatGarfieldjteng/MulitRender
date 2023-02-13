@@ -7,8 +7,9 @@ class CommandList;
 class Device;
 class World;
 class CommandQueue;
+class RenderGraph;
 
-class FrameData
+class FrameData : public std::enable_shared_from_this<FrameData>
 {
 public:
     FrameData();
@@ -19,6 +20,7 @@ public:
     
     void createCommandList(std::shared_ptr<Device> device);
     void setWorld(std::shared_ptr<World> world);
+    void setRenderGraph(std::shared_ptr<RenderGraph> renderGraph);
     void setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
@@ -31,6 +33,7 @@ public:
 public:
     void beginFrame();
     void renderFrame();
+    void renderFrameA();
     uint64_t endFrame();
     void reset();
 
@@ -45,7 +48,7 @@ private:
     std::unique_ptr<CommandList>    mclBeginFrame;
     std::unique_ptr<CommandList>    mclEndFrame;
 
-    std::unique_ptr<CommandList>    mRenderCommandList;
+    std::unique_ptr<CommandList>    mclRender;
 
     D3D12_VIEWPORT                  mViewport;
     D3D12_RECT                      mScissorRect;
@@ -63,7 +66,8 @@ private:
 
     std::shared_ptr<World>          mWorld;
 
-    std::vector< ID3D12GraphicsCommandList2*> mDX12CommandLists;
+    std::shared_ptr<RenderGraph>    mRenderGraph;
+
     std::vector< CommandList*>       mCommandLists;
 
 };
