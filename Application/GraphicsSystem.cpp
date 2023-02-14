@@ -15,7 +15,8 @@
 #include "ShadowPass.h"
 #include "BeautyPass.h"
 #include "Managers.h"
-#include "Texture.h"
+#include "TextureManager.h"
+#include "TextureResource.h"
 #include <vector>
 #include <DirectXMath.h>
 
@@ -298,6 +299,28 @@ void GraphicsSystem::createCamera()
 void GraphicsSystem::createManagers()
 {
 	mManagers = std::make_shared<Managers>(mDevice);
+	std::shared_ptr<TextureManager> textureMan = mManagers->getTextureManager();
+
+	std::shared_ptr<TextureResource> backBuffer0 = std::make_shared<TextureResource>();
+
+	backBuffer0->mResource = mSwapChain->getBackBuffer(0);
+	backBuffer0->mRTV = mSwapChain->getRTV(0);
+	textureMan->addTexture("BackBuffer0", backBuffer0);
+
+	std::shared_ptr<TextureResource> backBuffer1 = std::make_shared<TextureResource>();
+	backBuffer1->mResource = mSwapChain->getBackBuffer(1);
+	backBuffer1->mRTV = mSwapChain->getRTV(1);
+	textureMan->addTexture("BackBuffer1", backBuffer1);
+
+	std::shared_ptr<TextureResource> backBuffer2 = std::make_shared<TextureResource>();
+	backBuffer2->mResource = mSwapChain->getBackBuffer(2);
+	backBuffer2->mRTV = mSwapChain->getRTV(2);
+	textureMan->addTexture("BackBuffer2", backBuffer2);
+
+	std::shared_ptr<TextureResource> depthBuffer = std::make_shared<TextureResource>();
+	// only depth stencil view is needed
+	backBuffer2->mDSV = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
+	textureMan->addTexture("DepthStencil", depthBuffer);
 }
 
 void GraphicsSystem::update()

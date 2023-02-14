@@ -21,6 +21,7 @@ set(HEADER_FILES
 	VertexBuffer.h
 	IndexBuffer.h
 	Texture.h
+	TextureResource.h
 	Scene.h
 	World.h
 	SimpleScene.h
@@ -73,6 +74,7 @@ set(SOURCE_FILES
 	VertexBuffer.cpp
 	IndexBuffer.cpp
 	Texture.cpp
+	TextureResource.cpp
 	Scene.cpp
 	World.cpp
 	SimpleScene.cpp

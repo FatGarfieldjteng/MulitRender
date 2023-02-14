@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-class Texture;
+class TextureResource;
 
 class TextureManager
 {
@@ -15,10 +15,10 @@ public:
     ~TextureManager();
 
 public:
-    void addTexture(const std::string& ID, std::shared_ptr<Texture> texture);
-    std::shared_ptr<Texture> getTexture(const std::string& ID);
+    void addTexture(const std::string& ID, std::shared_ptr<TextureResource> texture);
+    std::shared_ptr<TextureResource> getTexture(const std::string& ID);
 
 
 private:
-    std::map<std::string, std::shared_ptr<Texture> > mIDToTexture;
+    std::map<std::string, std::shared_ptr<TextureResource> > mIDToTexture;
 };
