@@ -4,6 +4,8 @@
 #include "ShadowPass.h"
 #include "BeautyPass.h"
 #include "FrameData.h"
+#include "Managers.h"
+#include "TextureManager.h"
 #include <TaskScheduler.h>
 
 RenderGraph::RenderGraph()
@@ -43,6 +45,8 @@ void RenderGraph::createBeautyPass()
 {
     std::shared_ptr<RenderPass> beautyPass = std::make_shared<BeautyPass>();
     beautyPass->setName("BeautyPass");
+    beautyPass->addInput();
+    beautyPass->addOutput();
     addRenderPass(beautyPass);
 }
 
