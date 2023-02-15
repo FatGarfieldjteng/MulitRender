@@ -31,6 +31,11 @@ GraphicsSystem::~GraphicsSystem()
 	delete mEffect;
 	delete mCamera;
 	delete mScene;
+
+	// free RenderGraph array
+	delete[] mRenderGraph;
+
+	// free frame and frame data array
 	delete[] mFrames;
 }
 
@@ -192,7 +197,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 	mWorld->setScene(mScene);
 	mWorld->setCamera(mCamera);
 
-	const int meshCount = 100;
+	const int meshCount = 10000;
 
 	// distribute meshes uniformally in space [-500, 500]^3
 	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
@@ -245,8 +250,17 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 
 void GraphicsSystem::createRenderGraph()
 {
-	mRenderGraph = std::make_shared<RenderGraph>();
-	mRenderGraph->setName("ShadowSimple");
+	mRenderGraph = new RenderGraph[FrameCount];
+
+	std::string baseName("ShadowSimple");
+
+	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
+	{
+		std::string fullName = baseName + std::to_string(frameIndex);
+		mRenderGraph[frameIndex].setName(fullName);
+		mRenderGraph[frameIndex].setFrameData(mFrames[frameIndex].getFrameData());
+		mRenderGraph[frameIndex].createPasses();
+	}
 }
 
 void GraphicsSystem::createEffect()
@@ -262,9 +276,8 @@ void GraphicsSystem::createFrames()
 
 	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
 	{
-
-		mFrames[frameIndex].frameCount(FrameCount);
-		mFrames[frameIndex].frameIndex(frameIndex);
+		mFrames[frameIndex].setFrameCount(FrameCount);
+		mFrames[frameIndex].setFrameIndex(frameIndex);
 
 		// setup frame data
 		mFrames[frameIndex].setDirectCommandQueue(mDirectCommandQueue);
@@ -277,7 +290,8 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].setDepthStencilView(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
 		mFrames[frameIndex].setGraphicsRootSignature(mEffect->mRootSignature);
 		mFrames[frameIndex].setPipelineState(mEffect->mPipelineState);
-
+		mFrames[frameIndex].setRenderGraph(&(mRenderGraph[0]));
+		mFrames[frameIndex].setManagers(mManagers);
 	}
 }
 
@@ -301,25 +315,22 @@ void GraphicsSystem::createManagers()
 	mManagers = std::make_shared<Managers>(mDevice);
 	std::shared_ptr<TextureManager> textureMan = mManagers->getTextureManager();
 
-	std::shared_ptr<TextureResource> backBuffer0 = std::make_shared<TextureResource>();
+	std::string baseName("BackBuffer");
 
-	backBuffer0->mResource = mSwapChain->getBackBuffer(0);
-	backBuffer0->mRTV = mSwapChain->getRTV(0);
-	textureMan->addTexture("BackBuffer0", backBuffer0);
+	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
+	{
+		std::shared_ptr<TextureResource> backBuffer = std::make_shared<TextureResource>();
+		
+		backBuffer->mResource = mSwapChain->getBackBuffer(frameIndex);
+		backBuffer->mRTV = mSwapChain->getRTV(frameIndex);
 
-	std::shared_ptr<TextureResource> backBuffer1 = std::make_shared<TextureResource>();
-	backBuffer1->mResource = mSwapChain->getBackBuffer(1);
-	backBuffer1->mRTV = mSwapChain->getRTV(1);
-	textureMan->addTexture("BackBuffer1", backBuffer1);
-
-	std::shared_ptr<TextureResource> backBuffer2 = std::make_shared<TextureResource>();
-	backBuffer2->mResource = mSwapChain->getBackBuffer(2);
-	backBuffer2->mRTV = mSwapChain->getRTV(2);
-	textureMan->addTexture("BackBuffer2", backBuffer2);
+		std::string fullName = baseName + std::to_string(frameIndex);
+		textureMan->addTexture(fullName, backBuffer);
+	}
 
 	std::shared_ptr<TextureResource> depthBuffer = std::make_shared<TextureResource>();
 	// only depth stencil view is needed
-	backBuffer2->mDSV = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
+	depthBuffer->mDSV = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
 	textureMan->addTexture("DepthStencil", depthBuffer);
 }
 

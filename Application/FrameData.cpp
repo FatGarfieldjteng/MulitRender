@@ -10,6 +10,7 @@
 #include "CommandQueue.h"
 #include "RenderGraph.h"
 #include "RenderPass.h"
+#include "Managers.h"
 
 FrameData::FrameData()
 {
@@ -19,6 +20,11 @@ FrameData::FrameData()
 FrameData::~FrameData()
 {
 
+}
+
+void FrameData::setFrameIndex(unsigned int frameIndex)
+{
+	mFrameIndex = frameIndex;
 }
 
 void FrameData::createCommandList(std::shared_ptr<Device> device)
@@ -41,9 +47,14 @@ void FrameData::setWorld(std::shared_ptr<World> world)
 	mWorld = world;
 }
 
-void FrameData::setRenderGraph(std::shared_ptr<RenderGraph> renderGraph)
+void FrameData::setRenderGraph(RenderGraph* renderGraph)
 {
 	mRenderGraph = renderGraph;
+}
+
+void FrameData::setManagers(std::shared_ptr<Managers> managers)
+{
+	mManagers = managers;
 }
 
 void FrameData::setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue)
@@ -156,7 +167,10 @@ uint64_t FrameData::endFrame()
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT);
 
-	return mDirectCommandQueue->executeCommandListAndSignal(mclEndFrame->commandList());
+	mDirectCommandQueue->executeCommandList(mclEndFrame->commandList());
+
+	return 0;
+	//return mDirectCommandQueue->executeCommandListAndSignal(mclEndFrame->commandList());
 }
 
 void FrameData::reset()

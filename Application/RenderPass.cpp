@@ -1,8 +1,5 @@
 #include "framework.h"
 #include "RenderPass.h"
-#include "CommandRecorder.h"
-#include "Device.h"
-#include "CommandList.h"
 
 RenderPass::RenderPass()
 {
@@ -17,14 +14,16 @@ RenderPass::~RenderPass()
 	}
 }
 
-void RenderPass::addInput(std::shared_ptr<GraphicsResource*> resource)
+void RenderPass::addInput(std::shared_ptr<TextureResource> resource, ResouceType resourceType)
 {
 	mInputResources.push_back(resource);
+	mInputResourceType.push_back(resourceType);
 }
 
-void RenderPass::addOutput(std::shared_ptr < GraphicsResource*> resource)
+void RenderPass::addOutput(std::shared_ptr < TextureResource> resource, ResouceType resourceType)
 {
-	mOuputResources.push_back(resource);
+	mOutputResources.push_back(resource);
+	mOutputResourceType.push_back(resourceType);
 }
 
 void RenderPass::setName(const std::string& name)

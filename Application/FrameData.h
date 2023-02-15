@@ -8,6 +8,7 @@ class Device;
 class World;
 class CommandQueue;
 class RenderGraph;
+class Managers;
 
 class FrameData : public std::enable_shared_from_this<FrameData>
 {
@@ -16,11 +17,14 @@ public:
 
     virtual ~FrameData();
 
+    void setFrameIndex(unsigned int frameIndex);
+
 public:
     
     void createCommandList(std::shared_ptr<Device> device);
     void setWorld(std::shared_ptr<World> world);
-    void setRenderGraph(std::shared_ptr<RenderGraph> renderGraph);
+    void setRenderGraph(RenderGraph* renderGraph);
+    void setManagers(std::shared_ptr<Managers> managers);
     void setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
@@ -66,8 +70,12 @@ public:
 
     std::shared_ptr<World>          mWorld;
 
-    std::shared_ptr<RenderGraph>    mRenderGraph;
+    RenderGraph*                    mRenderGraph = nullptr;
+    std::shared_ptr<Managers>       mManagers;
+    
 
-    std::vector< CommandList*>       mCommandLists;
+    std::vector< CommandList*>      mCommandLists;
+
+    unsigned int                    mFrameIndex = 0;
 
 };

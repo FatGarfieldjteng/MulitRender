@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-class GraphicsResource;
+class TextureResource;
 class CommandList;
 class RenderTask;
 class Device;
@@ -18,13 +18,20 @@ class RenderPass
 {
 public:
 
+    enum ResouceType {
+        ResourceType_BackBuffer,
+        ResourceType_DepthStencil,
+        ResourceType_RenderTarget,
+        ResourceType_ShaderResource,
+    };
+
     RenderPass();
 
     ~RenderPass();
 
 public:
-    void addInput(std::shared_ptr<GraphicsResource*> resource);
-    void addOutput(std::shared_ptr < GraphicsResource*> resource);
+    void addInput(std::shared_ptr<TextureResource> resource, ResouceType resourceType);
+    void addOutput(std::shared_ptr < TextureResource> resource, ResouceType resourceType);
 
 public:
     void setName(const std::string& name);
@@ -35,8 +42,10 @@ public:
 protected:
 
     std::string mName;
-    std::vector < std::shared_ptr<GraphicsResource*> > mInputResources;
-    std::vector < std::shared_ptr<GraphicsResource*> > mOuputResources;
+    std::vector < std::shared_ptr<TextureResource> > mInputResources;
+    std::vector <ResouceType> mInputResourceType;
+    std::vector < std::shared_ptr<TextureResource> > mOutputResources;
+    std::vector <ResouceType> mOutputResourceType;
 
     RenderTask* mRenerTask = nullptr;
 

@@ -6,6 +6,7 @@
 #include "FrameData.h"
 #include "Managers.h"
 #include "TextureManager.h"
+#include "TextureResource.h"
 #include <TaskScheduler.h>
 
 RenderGraph::RenderGraph()
@@ -28,9 +29,14 @@ std::string RenderGraph::getName() const
     return mName;
 }
 
+void RenderGraph::setFrameData(FrameData* frameData)
+{
+    mFrameData = frameData;
+}
+
 void RenderGraph::createPasses()
 {
-    createShadowPass();
+    //createShadowPass();
     createBeautyPass();
 }
 
@@ -38,6 +44,7 @@ void RenderGraph::createShadowPass()
 {
     std::shared_ptr<RenderPass> shadowPass = std::make_shared<ShadowPass>();
     shadowPass->setName("ShadowPass");
+
     addRenderPass(shadowPass);
 }
 
@@ -45,8 +52,17 @@ void RenderGraph::createBeautyPass()
 {
     std::shared_ptr<RenderPass> beautyPass = std::make_shared<BeautyPass>();
     beautyPass->setName("BeautyPass");
-    beautyPass->addInput();
-    beautyPass->addOutput();
+
+    std::string baseName("BackBuffer");
+
+    std::string backbufferName = baseName + std::to_string(mFrameData->mFrameIndex);
+
+    // get backbuffer
+    std::shared_ptr<TextureResource> backBuffer = mFrameData->mManagers->getTextureManager()->getTexture(backbufferName);
+    std::shared_ptr<TextureResource> depthStencil = mFrameData->mManagers->getTextureManager()->getTexture("DepthStencil");
+    
+    beautyPass->addOutput(backBuffer, RenderPass::ResourceType_BackBuffer);
+    beautyPass->addOutput(depthStencil, RenderPass::ResourceType_DepthStencil);
     addRenderPass(beautyPass);
 }
 

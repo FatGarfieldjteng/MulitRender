@@ -155,7 +155,7 @@ private:
 private:
 	// scene
 	std::shared_ptr<World> mWorld;
-	std::shared_ptr< RenderGraph> mRenderGraph;
+	RenderGraph* mRenderGraph = nullptr;
 	Scene *mScene = nullptr;
 	Effect *mEffect = nullptr;
 	Camera* mCamera = nullptr;

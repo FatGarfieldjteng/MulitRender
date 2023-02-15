@@ -4,6 +4,8 @@
 #include "FrameData.h"
 #include "CommandList.h"
 #include "World.h"
+#include "RenderGraph.h"
+#include "Managers.h"
 
 Frame::Frame()
 {
@@ -15,17 +17,17 @@ Frame::~Frame()
 	delete mFrameData;
 }
 
-void Frame::frameCount(unsigned int value)
+void Frame::setFrameCount(unsigned int frameCount)
 {
-	mFrameCount = value;
+	mFrameCount = frameCount;
 }
 
-void Frame::frameIndex(unsigned int value)
+void Frame::setFrameIndex(unsigned int frameIndex)
 {
-	mFrameIndex = value;
+	mFrameIndex = frameIndex;
 }
 
-unsigned int Frame::frameIndex()
+unsigned int Frame::getFrameIndex()
 {
 	return mFrameIndex;
 }
@@ -43,6 +45,16 @@ void Frame::setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQue
 void Frame::setWorld(std::shared_ptr<World> world)
 {
 	mFrameData->setWorld(world);
+}
+
+void Frame::setRenderGraph(RenderGraph* renderGraph)
+{
+	mFrameData->setRenderGraph(renderGraph);
+}
+
+void Frame::setManagers(std::shared_ptr<Managers> managers)
+{
+	mFrameData->setManagers(managers);
 }
 
 void Frame::setViewport(const D3D12_VIEWPORT& viewport)
@@ -78,6 +90,11 @@ void Frame::setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
 void Frame::setPipelineState(ComPtr<ID3D12PipelineState> pipelineState)
 {
 	mFrameData->setPipelineState(pipelineState);
+}
+
+FrameData* Frame::getFrameData()
+{
+	return mFrameData;
 }
 
 void Frame::beginFrame()

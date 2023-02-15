@@ -27,7 +27,7 @@ set(HEADER_FILES
 	SimpleScene.h
 	Effect.h
 	Frame.h
-	FrameData
+	FrameData.h
 	SimpleEffect.h
 	ShadowEffect.h
 	UploadBuffer.h

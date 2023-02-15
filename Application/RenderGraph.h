@@ -7,6 +7,7 @@
 class RenderPass;
 class GraphicsResource;
 class FrameData;
+class Managers;
 
 class RenderGraph
 {
@@ -19,6 +20,7 @@ public:
 public:
     void setName(const std::string& name);
     std::string getName() const;
+    void setFrameData(FrameData* frameData);
     void createPasses();
     void addRenderPass(std::shared_ptr<RenderPass> renderPass);
     void linkRenerPass(std::shared_ptr <RenderPass> srcPass, 
@@ -28,9 +30,12 @@ public:
     void execute(std::shared_ptr<FrameData> frameData);
 
 private:
-    std::string mName;
     void createShadowPass();
     void createBeautyPass();
+
+private:
+    std::string mName;
+    FrameData* mFrameData = nullptr;
     std::map<std::string, std::shared_ptr<RenderPass>> mIDToRenderPass;
     std::vector< std::shared_ptr<RenderPass> > mRenderPasses;
 };
