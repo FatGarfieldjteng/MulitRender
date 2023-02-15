@@ -14,5 +14,5 @@ public:
     ~ShadowPass();
 
 public:
-    virtual void render(std::shared_ptr<FrameData> frameData) override;
+    virtual void render(FrameData* frameData) override;
 };

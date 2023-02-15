@@ -13,7 +13,7 @@ ShadowPass::~ShadowPass()
 	
 }
 
-void ShadowPass::render(std::shared_ptr<FrameData> frameData)
+void ShadowPass::render(FrameData* frameData)
 {
 
 }

@@ -20,7 +20,7 @@ BeautyPass::~BeautyPass()
 
 }
 
-void BeautyPass::render(std::shared_ptr<FrameData> frameData)
+void BeautyPass::render(FrameData* frameData)
 {
 	// begin render
 	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
@@ -54,7 +54,7 @@ void BeautyPass::render(std::shared_ptr<FrameData> frameData)
 	// render, this part should be multithreading
 	frameData->mclRender->RSSetViewports(&frameData->mViewport);
 	frameData->mclRender->RSSetScissorRects(&frameData->mScissorRect);
-	frameData->mclRender->OMSetRenderTargets(&mOutputResources[0]->mRTV, &mOutputResources[0]->mDSV);
+	frameData->mclRender->OMSetRenderTargets(&mOutputResources[0]->mRTV, &mOutputResources[1]->mDSV);
 
 	// multi-threading part
 	frameData->mclRender->setPipelineState(frameData->mPipelineState.Get());
@@ -106,7 +106,6 @@ void BeautyPass::render(std::shared_ptr<FrameData> frameData)
 			break;
 		}
 	}
-	
 
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclEndFrame->commandList());
 }

@@ -25,6 +25,7 @@ void Frame::setFrameCount(unsigned int frameCount)
 void Frame::setFrameIndex(unsigned int frameIndex)
 {
 	mFrameIndex = frameIndex;
+	mFrameData->setFrameIndex(frameIndex);
 }
 
 unsigned int Frame::getFrameIndex()
@@ -99,17 +100,19 @@ FrameData* Frame::getFrameData()
 
 void Frame::beginFrame()
 {
-	mFrameData->beginFrame();
+	//mFrameData->beginFrame();
 }
 
 void Frame::renderFrame()
 {
-	mFrameData->renderFrame();
+	//mFrameData->renderFrame();
+	mFrameData->renderFrameA();
 }
 
 uint64_t Frame::endFrame()
 {
-	return mFrameData->endFrame();
+	return 0;
+	//return mFrameData->endFrame();
 }
 
 void Frame::reset()

@@ -37,7 +37,7 @@ public:
     void setName(const std::string& name);
     std::string getName() const;
 
-    virtual void render(std::shared_ptr<FrameData> frameData) = 0;
+    virtual void render(FrameData* frameData) = 0;
 
 protected:
 

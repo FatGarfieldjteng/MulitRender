@@ -260,6 +260,9 @@ void GraphicsSystem::createRenderGraph()
 		mRenderGraph[frameIndex].setName(fullName);
 		mRenderGraph[frameIndex].setFrameData(mFrames[frameIndex].getFrameData());
 		mRenderGraph[frameIndex].createPasses();
+
+		mFrames[frameIndex].setRenderGraph(&(mRenderGraph[frameIndex]));
+
 	}
 }
 
@@ -290,7 +293,6 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].setDepthStencilView(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
 		mFrames[frameIndex].setGraphicsRootSignature(mEffect->mRootSignature);
 		mFrames[frameIndex].setPipelineState(mEffect->mPipelineState);
-		mFrames[frameIndex].setRenderGraph(&(mRenderGraph[0]));
 		mFrames[frameIndex].setManagers(mManagers);
 	}
 }

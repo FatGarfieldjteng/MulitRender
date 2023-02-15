@@ -68,7 +68,7 @@ void RenderGraph::createBeautyPass()
 
 void RenderGraph::addRenderPass(std::shared_ptr<RenderPass> renderPass)
 {
-    mIDToRenderPass[renderPass->getName()] = renderPass;
+    mRenderPasses.push_back(renderPass);
 }
 
 void RenderGraph::linkRenerPass(std::shared_ptr <RenderPass> srcPass,
@@ -85,11 +85,11 @@ void RenderGraph::compile()
     mRenderPasses.push_back(mIDToRenderPass["BeautyPass"]);
 }
 
-void RenderGraph::execute(std::shared_ptr<FrameData> frameData)
+void RenderGraph::execute()
 {
     // Run passes one by one
     for (std::shared_ptr <RenderPass> renderPass: mRenderPasses)
     {
-        renderPass->render(frameData);
+        renderPass->render(mFrameData);
     }
 }

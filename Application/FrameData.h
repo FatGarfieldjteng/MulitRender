@@ -10,7 +10,7 @@ class CommandQueue;
 class RenderGraph;
 class Managers;
 
-class FrameData : public std::enable_shared_from_this<FrameData>
+class FrameData
 {
 public:
     FrameData();

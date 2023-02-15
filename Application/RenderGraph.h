@@ -27,7 +27,7 @@ public:
         std::shared_ptr <RenderPass> dstPass, 
         std::vector<GraphicsResource> resources);
     void compile();
-    void execute(std::shared_ptr<FrameData> frameData);
+    void execute();
 
 private:
     void createShadowPass();

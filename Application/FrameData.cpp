@@ -158,7 +158,7 @@ void FrameData::renderFrame()
 
 void FrameData::renderFrameA()
 {
-	mRenderGraph->execute(shared_from_this());
+	mRenderGraph->execute();
 }
 
 uint64_t FrameData::endFrame()
