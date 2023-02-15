@@ -33,9 +33,6 @@ public:
     void setManagers(std::shared_ptr<Managers> managers);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
-    void setBackBufferResource(ComPtr<ID3D12Resource> backBuffer);
-    void setBackBufferView(const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferView);
-    void setDepthStencilView(const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilView);
     void setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature);
     void setPipelineState(ComPtr<ID3D12PipelineState> pipelineState);
 

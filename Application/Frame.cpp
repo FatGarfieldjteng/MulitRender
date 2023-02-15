@@ -68,21 +68,6 @@ void Frame::setScissorRect(const D3D12_RECT& scissorRect)
 	mFrameData->setScissorRect(scissorRect);
 }
 
-void Frame::setBackBufferResource(ComPtr<ID3D12Resource> backBuffer)
-{
-	mFrameData->setBackBufferResource(backBuffer);
-}
-
-void Frame::setBackBufferView(const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferView)
-{
-	mFrameData->setBackBufferView(backBufferView);
-}
-
-void Frame::setDepthStencilView(const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilView)
-{
-	mFrameData->setDepthStencilView(depthStencilView);
-}
-
 void Frame::setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
 {
 	mFrameData->setGraphicsRootSignature(rootSignature);
@@ -105,8 +90,7 @@ void Frame::beginFrame()
 
 void Frame::renderFrame()
 {
-	//mFrameData->renderFrame();
-	mFrameData->renderFrameA();
+	mFrameData->renderFrame();
 }
 
 uint64_t Frame::endFrame()

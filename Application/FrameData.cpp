@@ -72,21 +72,6 @@ void FrameData::setScissorRect(const D3D12_RECT& scissorRect)
 	mScissorRect = scissorRect;
 }
 
-void FrameData::setBackBufferResource(ComPtr<ID3D12Resource> backBuffer)
-{
-	mBackBuffer = backBuffer;
-}
-
-void FrameData::setBackBufferView(const D3D12_CPU_DESCRIPTOR_HANDLE& backBufferView)
-{
-	mBackBufferView = backBufferView;
-}
-
-void FrameData::setDepthStencilView(const D3D12_CPU_DESCRIPTOR_HANDLE& depthStencilView)
-{
-	mDepthBufferView = depthStencilView;
-}
-
 void FrameData::setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
 {
 	mRootSignature = rootSignature;
@@ -97,80 +82,9 @@ void FrameData::setPipelineState(ComPtr<ID3D12PipelineState> pipelineState)
 	mPipelineState = pipelineState;
 }
 
-void FrameData::beginFrame()
-{
-
-	mclBeginFrame->transitionResource(mBackBuffer,
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
-
-	mclBeginFrame->clearRTV(clearColor, mBackBufferView);
-
-	//global settings
-	mclBeginFrame->clearDepth(mDepthBufferView);
-
-	// here, mclBeginFrame must be executed to ensure the order
-	mDirectCommandQueue->executeCommandList(mclBeginFrame->commandList().Get());
-}
-
 void FrameData::renderFrame()
 {
-	mclRender->RSSetViewports(&mViewport);
-	mclRender->RSSetScissorRects(&mScissorRect);
-	mclRender->OMSetRenderTargets(&mBackBufferView, &mDepthBufferView);
-
-	// multi-threading part
-	mclRender->setPipelineState(mPipelineState.Get());
-	mclRender->setGraphicsRootSignature(mRootSignature.Get());
-	mclRender->IASetPrimitiveTopology();
-
-	// Update the MVP matrix
-	Camera *camera = mWorld->getCamera();
-	DirectX::XMMATRIX viewProjMatrix = camera->modelViewProjectionMatrix();
-	mclRender->setGraphicsRoot32BitConstants(0,
-		sizeof(DirectX::XMMATRIX) / 4, 
-		&viewProjMatrix,
-		0);
-
-	Scene* scene = mWorld->getScene();
-	size_t meshCount = scene->nodeCount();
-
-	for (size_t i = 0; i < meshCount; ++i)
-	{
-		Node* node = scene->node(i);
-		DirectX::XMMATRIX worldMatrix = node->getWorldMatrix();
-		mclRender->setGraphicsRoot32BitConstants(1,
-			sizeof(DirectX::XMMATRIX) / 4,
-			&worldMatrix,
-			0);
-
-		std::shared_ptr<Mesh> mesh = node->getMesh();
-
-		mclRender->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
-		mclRender->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
-		mclRender->drawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
-	}
-
-	mDirectCommandQueue->executeCommandList(mclRender->commandList());
-}
-
-void FrameData::renderFrameA()
-{
 	mRenderGraph->execute();
-}
-
-uint64_t FrameData::endFrame()
-{
-	mclEndFrame->transitionResource(mBackBuffer,
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT);
-
-	mDirectCommandQueue->executeCommandList(mclEndFrame->commandList());
-
-	return 0;
-	//return mDirectCommandQueue->executeCommandListAndSignal(mclEndFrame->commandList());
 }
 
 void FrameData::reset()

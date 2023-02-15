@@ -288,9 +288,6 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].setWorld(mWorld);
 		mFrames[frameIndex].setViewport(mViewport);
 		mFrames[frameIndex].setScissorRect(mScissorRect);
-		mFrames[frameIndex].setBackBufferResource(mSwapChain->getBackBuffer(frameIndex));
-		mFrames[frameIndex].setBackBufferView(mSwapChain->getRTV(frameIndex));
-		mFrames[frameIndex].setDepthStencilView(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
 		mFrames[frameIndex].setGraphicsRootSignature(mEffect->mRootSignature);
 		mFrames[frameIndex].setPipelineState(mEffect->mPipelineState);
 		mFrames[frameIndex].setManagers(mManagers);
