@@ -6,6 +6,8 @@
 #include "FrameData.h"
 #include "Managers.h"
 #include "TextureManager.h"
+#include "RootSignatureManager.h"
+#include "PipelineStateManager.h"
 #include "TextureResource.h"
 #include <TaskScheduler.h>
 
@@ -58,11 +60,13 @@ void RenderGraph::createBeautyPass()
     std::string backbufferName = baseName + std::to_string(mFrameData->mFrameIndex);
 
     // get backbuffer
-    std::shared_ptr<TextureResource> backBuffer = mFrameData->mManagers->getTextureManager()->getTexture(backbufferName);
-    std::shared_ptr<TextureResource> depthStencil = mFrameData->mManagers->getTextureManager()->getTexture("DepthStencil");
-    
-    beautyPass->addOutput(backBuffer, RenderPass::ResourceType_BackBuffer);
-    beautyPass->addOutput(depthStencil, RenderPass::ResourceType_DepthStencil);
+    beautyPass->addOutput(mFrameData->mManagers->getTextureManager()->getTexture(backbufferName), RenderPass::ResourceType_BackBuffer);
+    beautyPass->addOutput(mFrameData->mManagers->getTextureManager()->getTexture("DepthStencil"), RenderPass::ResourceType_DepthStencil);
+
+    beautyPass->setRootSignature(mFrameData->mManagers->getRootSignatureManager()->getRootSignature("SimpleRootSignature"));
+
+    beautyPass->setPipelineState(mFrameData->mManagers->getPipelineStateManager()->getPipelineState("SimplePipelineState"));
+
     addRenderPass(beautyPass);
 }
 

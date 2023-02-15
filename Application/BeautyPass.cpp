@@ -57,8 +57,8 @@ void BeautyPass::render(FrameData* frameData)
 	frameData->mclRender->OMSetRenderTargets(&mOutputResources[0]->mRTV, &mOutputResources[1]->mDSV);
 
 	// multi-threading part
-	frameData->mclRender->setPipelineState(frameData->mPipelineState.Get());
-	frameData->mclRender->setGraphicsRootSignature(frameData->mRootSignature.Get());
+	frameData->mclRender->setPipelineState(mPipelineState.Get());
+	frameData->mclRender->setGraphicsRootSignature(mRootSignature.Get());
 	frameData->mclRender->IASetPrimitiveTopology();
 
 	// Update the MVP matrix

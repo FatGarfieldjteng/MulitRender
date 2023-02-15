@@ -72,16 +72,6 @@ void FrameData::setScissorRect(const D3D12_RECT& scissorRect)
 	mScissorRect = scissorRect;
 }
 
-void FrameData::setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
-{
-	mRootSignature = rootSignature;
-}
-
-void FrameData::setPipelineState(ComPtr<ID3D12PipelineState> pipelineState)
-{
-	mPipelineState = pipelineState;
-}
-
 void FrameData::renderFrame()
 {
 	mRenderGraph->execute();

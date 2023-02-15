@@ -26,6 +26,16 @@ void RenderPass::addOutput(std::shared_ptr < TextureResource> resource, ResouceT
 	mOutputResourceType.push_back(resourceType);
 }
 
+void RenderPass::setRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
+{
+	mRootSignature = rootSignature;
+}
+
+void RenderPass::setPipelineState(ComPtr<ID3D12PipelineState> pipelineState)
+{
+	mPipelineState = pipelineState;
+}
+
 void RenderPass::setName(const std::string& name)
 {
 	mName = name;

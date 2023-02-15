@@ -288,8 +288,6 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].setWorld(mWorld);
 		mFrames[frameIndex].setViewport(mViewport);
 		mFrames[frameIndex].setScissorRect(mScissorRect);
-		mFrames[frameIndex].setGraphicsRootSignature(mEffect->mRootSignature);
-		mFrames[frameIndex].setPipelineState(mEffect->mPipelineState);
 		mFrames[frameIndex].setManagers(mManagers);
 	}
 }
@@ -549,10 +547,7 @@ void GraphicsSystem::renderWorld()
 	// get current buffer index
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
-	mFrames[currentBackBufferIndex].beginFrame();
 	mFrames[currentBackBufferIndex].renderFrame();
-	mFrames[currentBackBufferIndex].endFrame();
-
 
 	mFrames[currentBackBufferIndex].reset();
 

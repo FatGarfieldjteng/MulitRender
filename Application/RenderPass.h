@@ -33,6 +33,9 @@ public:
     void addInput(std::shared_ptr<TextureResource> resource, ResouceType resourceType);
     void addOutput(std::shared_ptr < TextureResource> resource, ResouceType resourceType);
 
+    void setRootSignature(ComPtr<ID3D12RootSignature> rootSignature);
+    void setPipelineState(ComPtr<ID3D12PipelineState> pipelineState);
+
 public:
     void setName(const std::string& name);
     std::string getName() const;
@@ -46,6 +49,10 @@ protected:
     std::vector <ResouceType> mInputResourceType;
     std::vector < std::shared_ptr<TextureResource> > mOutputResources;
     std::vector <ResouceType> mOutputResourceType;
+
+    ComPtr<ID3D12RootSignature>     mRootSignature;
+
+    ComPtr<ID3D12PipelineState>     mPipelineState;
 
     RenderTask* mRenerTask = nullptr;
 

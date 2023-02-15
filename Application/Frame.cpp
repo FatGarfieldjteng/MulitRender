@@ -68,35 +68,14 @@ void Frame::setScissorRect(const D3D12_RECT& scissorRect)
 	mFrameData->setScissorRect(scissorRect);
 }
 
-void Frame::setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature)
-{
-	mFrameData->setGraphicsRootSignature(rootSignature);
-}
-
-void Frame::setPipelineState(ComPtr<ID3D12PipelineState> pipelineState)
-{
-	mFrameData->setPipelineState(pipelineState);
-}
-
 FrameData* Frame::getFrameData()
 {
 	return mFrameData;
 }
 
-void Frame::beginFrame()
-{
-	//mFrameData->beginFrame();
-}
-
 void Frame::renderFrame()
 {
 	mFrameData->renderFrame();
-}
-
-uint64_t Frame::endFrame()
-{
-	return 0;
-	//return mFrameData->endFrame();
 }
 
 void Frame::reset()

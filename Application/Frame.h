@@ -33,15 +33,11 @@ public:
     void setManagers(std::shared_ptr<Managers> managers);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
-    void setGraphicsRootSignature(ComPtr<ID3D12RootSignature> rootSignature);
-    void setPipelineState(ComPtr<ID3D12PipelineState> pipelineState);
 
     FrameData* getFrameData();
 
 public:
-    void beginFrame();
     void renderFrame();
-    uint64_t endFrame();
     void reset();
 
 protected:
