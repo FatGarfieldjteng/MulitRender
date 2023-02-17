@@ -79,14 +79,16 @@ ComPtr<ID3D12CommandQueue> Device::createCommandQueue(D3D12_COMMAND_LIST_TYPE ty
     return commandQueue;
 }
 
-ComPtr<ID3D12DescriptorHeap> Device::createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, 
-    uint32_t numDescriptors)
+ComPtr<ID3D12DescriptorHeap> Device::createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
+    uint32_t numDescriptors,
+    D3D12_DESCRIPTOR_HEAP_FLAGS Flags)
 {
     ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.NumDescriptors = numDescriptors;
     desc.Type = type;
+    desc.Flags = Flags;
 
     ThrowIfFailed(mDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
 

@@ -60,11 +60,7 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 
 	createDSVHeap();
 
-#ifdef RAW_MODE
-	createCommandAllocators();
-
-	createCommandList();
-#endif
+	createSRVHeap();
 
 	createEventHandle();
 
@@ -124,33 +120,25 @@ void GraphicsSystem::createSwapChain(HWND hWnd,
 	mSwapChain = SwapChain::create(hWnd,
 		mAdapter,
 		mDevice,
-#ifdef RAW_MODE
-		mCommandQueue,
-#else
 		mDirectCommandQueue->commandQueue(),
-#endif
 		width, height, 
 		renderTargetFormat);
 }
 
 void GraphicsSystem::createDSVHeap()
 {
-	mDSVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
-}
-#ifdef RAW_MODE
-void GraphicsSystem::createCommandAllocators()
-{
-	for (int i = 0; i < BufferCount; ++i)
-	{
-		mCommandAllocators[i] = mDevice->createCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	}
+	// 1 DSV view for depth stencil buffer
+	// FrameCount DSV views are for shadow map DSV views
+	mDSVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1 + FrameCount);
 }
 
-void GraphicsSystem::createCommandList()
+void GraphicsSystem::createSRVHeap()
 {
-	mCommandList = mDevice->createCommandList(mCommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
+	mSRVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		FrameCount,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 }
-#endif
+
 void GraphicsSystem::createEventHandle()
 {
 	mFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -162,32 +150,6 @@ void GraphicsSystem::createFence()
 	mFence = mDevice->createFence();
 }
 
-#ifdef RAW_MODE
-uint64_t GraphicsSystem::signal()
-{
-	uint64_t fenceValueForSignal = ++mFenceValue;
-	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), fenceValueForSignal));
-
-	return fenceValueForSignal;
-}
-
-void GraphicsSystem::flush()
-{
-	uint64_t fenceValueForSignal = signal();
-	waitForFenceValue(fenceValueForSignal);
-}
-
-void GraphicsSystem::waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration)
-{
-	if (mFence->GetCompletedValue() < fenceValue)
-	{
-		ThrowIfFailed(mFence->SetEventOnCompletion(fenceValue, mFenceEvent)); 
-		::WaitForSingleObject(mFenceEvent, static_cast<DWORD>(duration.count()));
-	}
-}
-
-#endif
-
 void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 {
 	mWorld = std::make_shared<World>();
@@ -197,7 +159,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 	mWorld->setScene(mScene);
 	mWorld->setCamera(mCamera);
 
-	const int meshCount = 10000;
+	const int meshCount = 10;
 
 	// distribute meshes uniformally in space [-500, 500]^3
 	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
@@ -312,23 +274,91 @@ void GraphicsSystem::createManagers()
 	mManagers = std::make_shared<Managers>(mDevice);
 	std::shared_ptr<TextureManager> textureMan = mManagers->getTextureManager();
 
-	std::string baseName("BackBuffer");
+	// set backbuffer resource and backbuffer RTV view to texture manager
+	std::string backBufferBaseName("BackBuffer");
 
 	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
 	{
 		std::shared_ptr<TextureResource> backBuffer = std::make_shared<TextureResource>();
-		
+
 		backBuffer->mResource = mSwapChain->getBackBuffer(frameIndex);
 		backBuffer->mRTV = mSwapChain->getRTV(frameIndex);
 
-		std::string fullName = baseName + std::to_string(frameIndex);
-		textureMan->addTexture(fullName, backBuffer);
+		std::string backBufferFullName = backBufferBaseName + std::to_string(frameIndex);
+		textureMan->addTexture(backBufferFullName, backBuffer);
 	}
 
+
+	// set depth stencil buffer RTV view
 	std::shared_ptr<TextureResource> depthBuffer = std::make_shared<TextureResource>();
 	// only depth stencil view is needed
 	depthBuffer->mDSV = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
 	textureMan->addTexture("DepthStencil", depthBuffer);
+
+	// create depth resource as shadow map
+	CD3DX12_RESOURCE_DESC shadowTextureDesc(
+		D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+		0,
+		static_cast<UINT>(mWidth),
+		static_cast<UINT>(mHeight),
+		1,
+		1,
+		DXGI_FORMAT_R32_TYPELESS,
+		1,
+		0,
+		D3D12_TEXTURE_LAYOUT_UNKNOWN,
+		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+
+
+	D3D12_CLEAR_VALUE optimizedClearValue = {};
+	optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+	optimizedClearValue.DepthStencil = { 1.0f, 0 };
+
+
+	std::string shadowBaseName("shadowMap");
+	// descriptor size is vendor specific, thus it must be queried
+	const UINT dsvDescriptorSize = mDevice->getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
+	{
+		std::shared_ptr<TextureResource> shadowMap = std::make_shared<TextureResource>();
+
+		// create shadow map resource
+		mDevice->createCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&shadowTextureDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&optimizedClearValue,
+			IID_PPV_ARGS(&shadowMap->mResource));
+
+		// create DSV view
+		// offset by 1, skip depth stencil RTV view
+		CD3DX12_CPU_DESCRIPTOR_HANDLE shadowDSV(mDSVHeap->GetCPUDescriptorHandleForHeapStart(), 1 + frameIndex, dsvDescriptorSize);
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC shadowDSVDesc = {};
+		shadowDSVDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		shadowDSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		shadowDSVDesc.Texture2D.MipSlice = 0;
+		mDevice->createDepthStencilView(shadowMap->mResource.Get(), &shadowDSVDesc, shadowDSV);
+		shadowMap->mDSV = shadowDSV;
+
+		// create SRV view
+		CD3DX12_CPU_DESCRIPTOR_HANDLE SRVCPUView(mSRVHeap->GetCPUDescriptorHandleForHeapStart());
+		CD3DX12_GPU_DESCRIPTOR_HANDLE SRVGPUView(mSRVHeap->GetGPUDescriptorHandleForHeapStart());
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC shadowSRVDesc = {};
+		shadowSRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		shadowSRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		shadowSRVDesc.Texture2D.MipLevels = 1;
+		shadowSRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		mDevice->createShaderResourceView(shadowMap->mResource.Get(), &shadowSRVDesc, SRVCPUView);
+
+		shadowMap->mSRV = SRVGPUView;
+
+		std::string shadowFullName = shadowBaseName + std::to_string(frameIndex);
+		textureMan->addTexture(shadowFullName, shadowMap);
+	}
 }
 
 void GraphicsSystem::update()
@@ -380,165 +410,12 @@ void GraphicsSystem::updateCamera(double elapsedTime)
 
 void GraphicsSystem::render()
 {
-	//clearScreen();
-	//renderCube();
 	renderWorld();
 }
 
 void GraphicsSystem::finish()
 {
 	mDirectCommandQueue->flush();
-}
-
-#ifdef RAW_MODE
-void GraphicsSystem::clearScreen()
-{
-	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-
-	auto commandAllocator = mCommandAllocators[currentBackBufferIndex];
-
-	commandAllocator->Reset();
-	mCommandList->Reset(commandAllocator.Get(), nullptr);
-
-	auto backBuffer = mSwapChain->getCurrentBackBuffer();
-
-	transitionResource(mCommandList,
-		backBuffer,
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	mSwapChain->clearRTV(mCommandList);
-
-	// present
-	{
-
-		transitionResource(mCommandList,
-			backBuffer,
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PRESENT);
-
-		ThrowIfFailed(mCommandList->Close());
-
-		// execute
-		ID3D12CommandList* const commandLists[] = {
-			mCommandList.Get()
-		};
-		mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
-
-
-		mSwapChain->present();
-
-		mFrameFenceValues[currentBackBufferIndex] = signal();
-
-		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-
-		waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
-	}
-}
-
-#else
-void GraphicsSystem::clearScreen()
-{
-	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-	auto backBuffer = mSwapChain->getCurrentBackBuffer();
-
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
-
-	transitionResource(commandList,
-		backBuffer,
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	mSwapChain->clearRTV(commandList);
-
-	// present
-	{
-
-		transitionResource(commandList,
-			backBuffer,
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PRESENT);
-
-		// execute
-		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->executeCommandListAndSignal(commandList);
-
-
-		mSwapChain->present();
-
-		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-
-		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
-	}
-}
-
-#endif
-
-void GraphicsSystem::renderCube()
-{
-	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-	ComPtr<ID3D12Resource> backBuffer = mSwapChain->getCurrentBackBuffer();
-
-	ComPtr<ID3D12GraphicsCommandList2> commandList = mDirectCommandQueue->acquireDXCommandList();
-	
-	transitionResource(commandList,
-		backBuffer,
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	mSwapChain->clearRTV(commandList);
-
-	if (mGraphicsInitialized)
-	{
-
-		auto dsv = mDSVHeap->GetCPUDescriptorHandleForHeapStart();
-		clearDepth(commandList, dsv);
-
-		commandList->SetPipelineState(mEffect->mPipelineState.Get());
-		commandList->SetGraphicsRootSignature(mEffect->mRootSignature.Get());
-
-		commandList->RSSetViewports(1, &mViewport);
-		commandList->RSSetScissorRects(1, &mScissorRect);
-		
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mSwapChain->getCurrentRTV();
-		commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-
-		// Update the MVP matrix
-		DirectX::XMMATRIX mvpMatrix = mCamera->modelViewProjectionMatrix();
-		commandList->SetGraphicsRoot32BitConstants(0, sizeof(DirectX::XMMATRIX) / 4, &mvpMatrix, 0);
-
-		size_t meshCount = mScene->nodeCount();
-
-		for (size_t i = 0; i < meshCount; ++i)
-		{
-			Node* node = mScene->node(i);
-			std::shared_ptr<Mesh> mesh = node->getMesh();
-
-			commandList->IASetVertexBuffers(0, 1, &(mesh->mVertexBuffer.mVertexBufferView));
-			commandList->IASetIndexBuffer(&(mesh->mIndexBuffer.mIndexBufferView));
-			commandList->DrawIndexedInstanced(mesh->mIndexCount, 1, 0, 0, 0);
-		}
-
-	}
-
-	// present
-	{
-		transitionResource(commandList,
-			backBuffer,
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PRESENT);
-
-		mDirectCommandQueue->executeCommandListAndSignal(commandList);
-
-		mSwapChain->present();
-
-		mFrameFenceValues[currentBackBufferIndex] = mDirectCommandQueue->signal();
-
-		currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
-
-		mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
-	}
 }
 
 void GraphicsSystem::renderWorld()
@@ -559,34 +436,6 @@ void GraphicsSystem::renderWorld()
 
 	mDirectCommandQueue->waitForFenceValue(mFrameFenceValues[currentBackBufferIndex]);
 
-}
-
-void GraphicsSystem::transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
-	ComPtr<ID3D12Resource> resource,
-	D3D12_RESOURCE_STATES beforeState,
-	D3D12_RESOURCE_STATES afterState)
-{
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		resource.Get(),
-		beforeState, afterState);
-
-	commandList->ResourceBarrier(1, &barrier);
-}
-
-// Clear a render target view.
-void GraphicsSystem::clearRTV(ComPtr<ID3D12GraphicsCommandList2> commandList,
-	D3D12_CPU_DESCRIPTOR_HANDLE rtv, 
-	FLOAT* clearColor)
-{
-	commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-}
-
-// clear the depth of a depth-stencil view.
-void GraphicsSystem::clearDepth(ComPtr<ID3D12GraphicsCommandList2> commandList,
-	D3D12_CPU_DESCRIPTOR_HANDLE dsv, 
-	FLOAT depth)
-{
-	commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 }
 
 // create a GPU buffer.

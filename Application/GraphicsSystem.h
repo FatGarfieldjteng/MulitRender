@@ -7,8 +7,6 @@
 #include <memory>
 #include <string>
 
-//#define RAW_MODE
-
 class Mesh;
 class CommandQueue;
 class Scene;
@@ -62,21 +60,12 @@ protected:
 		DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	void createDSVHeap();
-#ifdef RAW_MODE
-	void createCommandAllocators();
 
-	void createCommandList();
-#endif
+	void createSRVHeap();
 
 	void createEventHandle();
 
 	void createFence();
-
-#ifdef RAW_MODE
-	uint64_t signal();
-	void flush();
-	void waitForFenceValue(uint64_t fenceValue, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
-#endif
 
 	void createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList);
 
@@ -94,28 +83,8 @@ protected:
 
 private:
 	// helper functions
-	// transition a resource
-	void transitionResource(ComPtr<ID3D12GraphicsCommandList2> commandList,
-		ComPtr<ID3D12Resource> resource,
-		D3D12_RESOURCE_STATES beforeState, 
-		D3D12_RESOURCE_STATES afterState);
-
-	// Clear a render target view.
-	void clearRTV(ComPtr<ID3D12GraphicsCommandList2> commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv,
-		FLOAT* clearColor);
-
-	// clear the depth of a depth-stencil view.
-	void clearDepth(ComPtr<ID3D12GraphicsCommandList2> commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE dsv, 
-		FLOAT depth = 1.0f);
-
 	// resize the depth buffer to match the size of the client area.
 	void resizeDepthBuffer(int width, int height);
-
-	void clearScreen();
-
-	void renderCube();
 
 	void renderWorld();
 
@@ -134,14 +103,11 @@ private:
 	ComPtr<ID3D12Resource> mDepthBuffer;
 
 	ComPtr<ID3D12DescriptorHeap> mDSVHeap;
+	ComPtr<ID3D12DescriptorHeap> mSRVHeap;
+	ComPtr<ID3D12DescriptorHeap> mSamplerHeap;
 
 	D3D12_VIEWPORT mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, 1.0f, 1.f);
 	D3D12_RECT mScissorRect = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);
-
-#ifdef RAW_MODE
-	ComPtr<ID3D12CommandAllocator> mCommandAllocators[BufferCount];
-	ComPtr<ID3D12GraphicsCommandList2> mCommandList;
-#endif
 
 	ComPtr<ID3D12CommandQueue> mCommandQueue;
 	ComPtr<ID3D12Fence> mFence;
