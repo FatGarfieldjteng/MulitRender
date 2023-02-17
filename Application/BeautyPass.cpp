@@ -1,6 +1,5 @@
 #include "framework.h"
 #include "BeautyPass.h"
-#include "Device.h"
 #include "FrameData.h"
 #include "CommandList.h"
 #include "CommandQueue.h"
