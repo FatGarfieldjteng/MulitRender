@@ -25,21 +25,23 @@ void BeautyPass::render(FrameData* frameData)
 	// begin render
 	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
 
-	for (size_t resourceIndex = 0; resourceIndex < mOutputResourceType.size(); ++resourceIndex)
+	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
 	{
-		switch (mOutputResourceType[resourceIndex])
+		InOutReource &outResource = mOutputResources[resourceIndex];
+
+		switch (outResource.type)
 		{
 		case ResourceType_BackBuffer:
 		{
-			frameData->mclBeginFrame->transitionResource(mOutputResources[resourceIndex]->mResource,
+			frameData->mclBeginFrame->transitionResource(outResource.resource->mResource,
 				D3D12_RESOURCE_STATE_PRESENT,
 				D3D12_RESOURCE_STATE_RENDER_TARGET);
-			frameData->mclBeginFrame->clearRTV(clearColor, mOutputResources[resourceIndex]->mRTV);
+			frameData->mclBeginFrame->clearRTV(clearColor, outResource.resource->mRTV);
 		}
 			break;
 		case ResourceType_DepthStencil:
 		{
-			frameData->mclBeginFrame->clearDepth(mOutputResources[resourceIndex]->mDSV);
+			frameData->mclBeginFrame->clearDepth(outResource.resource->mDSV);
 		}
 			break;
 		default:
@@ -54,7 +56,11 @@ void BeautyPass::render(FrameData* frameData)
 	// render, this part should be multithreading
 	frameData->mclRender->RSSetViewports(&frameData->mViewport);
 	frameData->mclRender->RSSetScissorRects(&frameData->mScissorRect);
-	frameData->mclRender->OMSetRenderTargets(&mOutputResources[0]->mRTV, &mOutputResources[1]->mDSV);
+
+	InOutReource& backBufferResource = mOutputResources[0];
+	InOutReource& depthStencilResource = mOutputResources[1];
+
+	frameData->mclRender->OMSetRenderTargets(&backBufferResource.resource->mRTV, &depthStencilResource.resource->mDSV);
 
 	// multi-threading part
 	frameData->mclRender->setPipelineState(mPipelineState.Get());
@@ -91,13 +97,15 @@ void BeautyPass::render(FrameData* frameData)
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclRender->commandList());
 
 	// end render
-	for (size_t resourceIndex = 0; resourceIndex < mOutputResourceType.size(); ++resourceIndex)
+	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
 	{
-		switch (mOutputResourceType[resourceIndex])
+		InOutReource& outResource = mOutputResources[resourceIndex];
+
+		switch (outResource.type)
 		{
 		case ResourceType_BackBuffer:
 		{
-			frameData->mclEndFrame->transitionResource(mOutputResources[resourceIndex]->mResource,
+			frameData->mclEndFrame->transitionResource(outResource.resource->mResource,
 				D3D12_RESOURCE_STATE_RENDER_TARGET,
 				D3D12_RESOURCE_STATE_PRESENT);
 		}

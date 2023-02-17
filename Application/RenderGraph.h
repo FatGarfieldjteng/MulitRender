@@ -23,9 +23,9 @@ public:
     void setFrameData(FrameData* frameData);
     void createPasses();
     void addRenderPass(std::shared_ptr<RenderPass> renderPass);
-    void linkRenerPass(std::shared_ptr <RenderPass> srcPass, 
-        std::shared_ptr <RenderPass> dstPass, 
-        std::vector<GraphicsResource> resources);
+    void linkRenderPass(const std::string& srcPass, 
+        const std::string& dstPass,
+        const std::string& resource);
     void compile();
     void execute();
 

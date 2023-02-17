@@ -14,16 +14,28 @@ RenderPass::~RenderPass()
 	}
 }
 
-void RenderPass::addInput(std::shared_ptr<TextureResource> resource, ResouceType resourceType)
+void RenderPass::addInput(const std::string& name, 
+	std::shared_ptr<TextureResource> resource, 
+	ResouceType type)
 {
-	mInputResources.push_back(resource);
-	mInputResourceType.push_back(resourceType);
+	InOutReource inResource;
+	inResource.name = name;
+	inResource.resource = resource;
+	inResource.type = type;
+	
+	mInputResources.push_back(inResource);
 }
 
-void RenderPass::addOutput(std::shared_ptr < TextureResource> resource, ResouceType resourceType)
+void RenderPass::addOutput(const std::string& name, 
+	std::shared_ptr < TextureResource> resource, 
+	ResouceType type)
 {
-	mOutputResources.push_back(resource);
-	mOutputResourceType.push_back(resourceType);
+	InOutReource outResource;
+	outResource.name = name;
+	outResource.resource = resource;
+	outResource.type = type;
+	
+	mOutputResources.push_back(outResource);
 }
 
 void RenderPass::setRootSignature(ComPtr<ID3D12RootSignature> rootSignature)

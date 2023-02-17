@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <map>
 
 class TextureResource;
 class CommandList;
@@ -25,13 +26,24 @@ public:
         ResourceType_ShaderResource,
     };
 
+    struct InOutReource
+    {
+        std::shared_ptr < TextureResource > resource;
+        std::string name;
+        ResouceType type;
+    };
+
     RenderPass();
 
     ~RenderPass();
 
 public:
-    void addInput(std::shared_ptr<TextureResource> resource, ResouceType resourceType);
-    void addOutput(std::shared_ptr < TextureResource> resource, ResouceType resourceType);
+    void addInput(const std::string& name, 
+        std::shared_ptr<TextureResource> resource, 
+        ResouceType type);
+    void addOutput(const std::string& name, 
+        std::shared_ptr < TextureResource> resource, 
+        ResouceType type);
 
     void setRootSignature(ComPtr<ID3D12RootSignature> rootSignature);
     void setPipelineState(ComPtr<ID3D12PipelineState> pipelineState);
@@ -45,11 +57,11 @@ public:
 protected:
 
     std::string mName;
-    std::vector < std::shared_ptr<TextureResource> > mInputResources;
-    std::vector <ResouceType> mInputResourceType;
-    std::vector < std::shared_ptr<TextureResource> > mOutputResources;
-    std::vector <ResouceType> mOutputResourceType;
 
+    std::vector <InOutReource> mInputResources;
+    
+    std::vector <InOutReource> mOutputResources;
+    
     ComPtr<ID3D12RootSignature>     mRootSignature;
 
     ComPtr<ID3D12PipelineState>     mPipelineState;

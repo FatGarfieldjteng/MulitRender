@@ -1,4 +1,4 @@
-struct ViewProjection
+struct LightViewProjection
 {
     matrix VP;
 };
@@ -8,7 +8,7 @@ struct Model
     matrix M;
 };
 
-ConstantBuffer<ViewProjection> ViewProjectionCB : register(b0);
+ConstantBuffer<LightViewProjection> LightViewProjectionCB : register(b0);
 ConstantBuffer<Model> ModelCB : register(b1);
 
 
@@ -27,9 +27,9 @@ VSOutput main(VSInput Input)
     VSOutput output;
 
     //matrix ModelViewProjection = mul(ModelCB.M, ViewProjectionCB.VP);
-    matrix ModelViewProjection = mul(ViewProjectionCB.VP, ModelCB.M);
+    matrix LightModelViewProjection = mul(LightViewProjectionCB.VP, ModelCB.M);
 
-    output.Position = mul(ModelViewProjection, float4(Input.Position, 1.0f));
+    output.Position = mul(LightModelViewProjection, float4(Input.Position, 1.0f));
 
     return output;
 }
