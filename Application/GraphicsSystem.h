@@ -77,6 +77,8 @@ protected:
 
 	void createManagers();
 
+	void createLightCamera();
+
 	void createFrames();
 
 	void updateCamera(double elapsedTime);

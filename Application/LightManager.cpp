@@ -32,14 +32,14 @@ void LightManager::createSimpleLight()
 void LightManager::addLight(const std::string& ID,
 	std::shared_ptr<Light> light)
 {
-	mIDToLighht[ID] = light;
+	mIDToLight[ID] = light;
 }
 
 std::shared_ptr<Light> LightManager::getLight(const std::string& ID)
 {
-	std::map<std::string, std::shared_ptr<Light>>::iterator it = mIDToLighht.find(ID);
+	std::map<std::string, std::shared_ptr<Light>>::iterator it = mIDToLight.find(ID);
 
-	if (it != mIDToLighht.end())
+	if (it != mIDToLight.end())
 	{
 		return  it->second;
 	}

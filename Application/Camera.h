@@ -62,7 +62,7 @@ private:
     // intrinsic parameters
 
     // field of view
-    float mFoV;
+    float mFoV = 0.0f;
 
     // extrinsic parameters
     DirectX::XMVECTOR mEye;

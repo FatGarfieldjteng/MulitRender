@@ -51,6 +51,7 @@ set(HEADER_FILES
 	PipelineStateManager.h
 	TextureManager.h
 	LightManager.h
+	CameraManager.h
 	RenderPass.h
 	RenderGraph.h
 	ShadowPass.h
@@ -105,6 +106,7 @@ set(SOURCE_FILES
 	PipelineStateManager.cpp
 	TextureManager.cpp
 	LightManager.cpp
+	CameraManager.cpp
 	RenderPass.cpp
 	ShadowPass.cpp
 	BeautyPass.cpp

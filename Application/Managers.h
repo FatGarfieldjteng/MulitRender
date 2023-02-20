@@ -9,6 +9,7 @@ class RootSignatureManager;
 class PipelineStateManager;
 class TextureManager;
 class LightManager;
+class CameraManager;
 
 class Managers
 {
@@ -47,6 +48,16 @@ public:
         return mTextureManager;
     }
 
+    std::shared_ptr<LightManager> getLightManager()
+    {
+        return mLightManager;
+    }
+
+    std::shared_ptr<CameraManager> getCameraManager()
+    {
+        return mCameraManager;
+    }
+
 private:
     std::shared_ptr<Device> mDevice;
     std::shared_ptr<ShaderManager> mShaderManager;
@@ -55,4 +66,5 @@ private:
     std::shared_ptr<PipelineStateManager> mPipelineStateManager;
     std::shared_ptr<TextureManager> mTextureManager;
     std::shared_ptr<LightManager> mLightManager;
+    std::shared_ptr<CameraManager> mCameraManager;
 };

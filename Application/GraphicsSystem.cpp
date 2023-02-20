@@ -16,6 +16,9 @@
 #include "BeautyPass.h"
 #include "Managers.h"
 #include "TextureManager.h"
+#include "LightManager.h"
+#include "Light.h"
+#include "CameraManager.h"
 #include "TextureResource.h"
 #include <vector>
 #include <DirectXMath.h>
@@ -83,6 +86,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	resizeDepthBuffer(mWidth, mHeight);
 
 	createManagers();
+
+	createLightCamera();
 
 	createFrames();
 
@@ -359,6 +364,25 @@ void GraphicsSystem::createManagers()
 		std::string shadowFullName = shadowBaseName + std::to_string(frameIndex);
 		textureMan->addTexture(shadowFullName, shadowMap);
 	}
+}
+
+void GraphicsSystem::createLightCamera()
+{
+	std::shared_ptr<Light> light = mManagers->getLightManager()->getLight("SimpleLight0");
+
+	std::shared_ptr<Camera> camera = std::make_shared<Camera>();
+
+	const DirectX::XMVECTOR eye = XMLoadFloat4(&light->mPosition);
+	const DirectX::XMVECTOR target = DirectX::XMVectorAdd(eye, XMLoadFloat4(&light->mDirection));
+	const DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	camera->viewMaxtrix(eye, target, up);
+
+	// projection matrix.
+	float aspectRatio = mWidth / static_cast<float>(mHeight);
+	camera->projectionMaxtrix(aspectRatio, 0.1f, 100.0f);
+
+	mManagers->getCameraManager()->addCamera("Shadow0Camera", camera);
 }
 
 void GraphicsSystem::update()

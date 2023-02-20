@@ -3,7 +3,7 @@
 #include "helper.h"
 
 Camera::Camera()
-	:mFoV(45.0f)
+	:mFoV(90.0f)
 {
 
 }

@@ -6,6 +6,7 @@
 #include "PipelineStateManager.h"
 #include "TextureManager.h"
 #include "LightManager.h"
+#include "CameraManager.h"
 
 Managers::Managers(std::shared_ptr<Device> device)
 	:mDevice(device)
@@ -26,4 +27,5 @@ void Managers::createManagers()
 	mPipelineStateManager = std::make_shared<PipelineStateManager>(mDevice, mRootSignatureManager, mEffectManager);
 	mTextureManager = std::make_shared<TextureManager>();
 	mLightManager = std::make_shared<LightManager>();
+	mCameraManager = std::make_shared<CameraManager>();
 }

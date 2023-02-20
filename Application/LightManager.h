@@ -23,5 +23,5 @@ private:
     void createSimpleLight();
     
 private:
-    std::map<std::string, std::shared_ptr<Light> > mIDToLighht;
+    std::map<std::string, std::shared_ptr<Light> > mIDToLight;
 };
