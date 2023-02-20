@@ -37,8 +37,6 @@ public:
 
 protected:
     virtual void loadShader() {}
-    virtual void createRootSignature(std::shared_ptr<Device> device) {}
-    virtual void createPipelineStateObject(std::shared_ptr<Device> device) {}
 
 public:
     // vertex shader

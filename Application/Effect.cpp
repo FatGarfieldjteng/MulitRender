@@ -36,6 +36,4 @@ ComPtr<ID3DBlob> Effect::getPS()
 void Effect::build(std::shared_ptr<Device> device)
 {
 	loadShader();
-	createRootSignature(device);
-	createPipelineStateObject(device);
 }
