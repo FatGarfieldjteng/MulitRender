@@ -4,6 +4,8 @@
 #include "CommandList.h"
 #include "CommandQueue.h"
 #include "TextureResource.h"
+#include "Managers.h"
+#include "CameraManager.h"
 #include "Camera.h"
 #include "World.h"
 #include "Scene.h"
@@ -47,11 +49,11 @@ void ShadowPass::render(FrameData* frameData)
 	frameData->mclRender->IASetPrimitiveTopology();
 
 	// Update the MVP matrix
-	Camera* camera = frameData->mWorld->getCamera();
-	DirectX::XMMATRIX viewProjMatrix = camera->modelViewProjectionMatrix();
+	std::shared_ptr<Camera> camera = frameData->mManagers->getCameraManager()->getCamera("Light0Camera");
+	DirectX::XMMATRIX lightViewProjMatrix = camera->modelViewProjectionMatrix();
 	frameData->mclRender->setGraphicsRoot32BitConstants(0,
 		sizeof(DirectX::XMMATRIX) / 4,
-		&viewProjMatrix,
+		&lightViewProjMatrix,
 		0);
 
 	Scene* scene = frameData->mWorld->getScene();

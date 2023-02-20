@@ -304,8 +304,8 @@ void GraphicsSystem::createManagers()
 	CD3DX12_RESOURCE_DESC shadowTextureDesc(
 		D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		0,
-		static_cast<UINT>(mWidth),
-		static_cast<UINT>(mHeight),
+		static_cast<UINT>(1024),
+		static_cast<UINT>(1024),
 		1,
 		1,
 		DXGI_FORMAT_R32_TYPELESS,
@@ -382,7 +382,10 @@ void GraphicsSystem::createLightCamera()
 	float aspectRatio = mWidth / static_cast<float>(mHeight);
 	camera->projectionMaxtrix(aspectRatio, 0.1f, 100.0f);
 
-	mManagers->getCameraManager()->addCamera("Shadow0Camera", camera);
+	// not model matrix need to be involved
+	camera->computeViewProjectionMatrix();
+
+	mManagers->getCameraManager()->addCamera("Light0Camera", camera);
 }
 
 void GraphicsSystem::update()

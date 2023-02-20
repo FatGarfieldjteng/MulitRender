@@ -52,6 +52,11 @@ public:
         mModelViewProjectionMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixMultiply(mModelMatrix, mViewMatrix), mProjectionMatrix);
     }
 
+    void computeViewProjectionMatrix()
+    {
+        mModelViewProjectionMatrix = DirectX::XMMatrixMultiply(mViewMatrix, mProjectionMatrix);
+    }
+
     DirectX::XMMATRIX modelViewProjectionMatrix()
     {
         return mModelViewProjectionMatrix;
