@@ -10,6 +10,8 @@
 #include "Node.h"
 #include "Mesh.h"
 
+#include <cassert>
+
 ShadowPass::ShadowPass()
 {
 }
@@ -22,39 +24,22 @@ ShadowPass::~ShadowPass()
 void ShadowPass::render(FrameData* frameData)
 {
 	// begin render
-	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
-	{
-		InOutReource& outResource = mOutputResources[resourceIndex];
+	// check if there is a out resource that acts as shadow map
 
-		switch (outResource.type)
-		{
-		case ResourceType_BackBuffer:
-		{
+	assert(mOutputResources.size() == 1);
 
-		}
-		break;
-		case ResourceType_DepthStencil:
-		{
-			frameData->mclBeginFrame->clearDepth(outResource.resource->mDSV);
-		}
-		break;
-		default:
-			//error happens
-			break;
-		}
-	}
-
+	// clear shadow map
+	InOutReource& outResource = mOutputResources[0];
+	frameData->mclBeginFrame->clearDepth(outResource.resource->mDSV);
+	
 	// here, mclBeginFrame must be executed to ensure the order
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclBeginFrame->commandList().Get());
 
 	// render, this part should be multithreading
 	frameData->mclRender->RSSetViewports(&frameData->mViewport);
 	frameData->mclRender->RSSetScissorRects(&frameData->mScissorRect);
-
-	InOutReource& backBufferResource = mOutputResources[0];
-	InOutReource& depthStencilResource = mOutputResources[1];
-
-	frameData->mclRender->OMSetRenderTargets(&backBufferResource.resource->mRTV, &depthStencilResource.resource->mDSV);
+	
+	frameData->mclRender->OMSetRenderTargets(nullptr, &outResource.resource->mDSV, 0);
 
 	// multi-threading part
 	frameData->mclRender->setPipelineState(mPipelineState.Get());

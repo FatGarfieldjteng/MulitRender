@@ -8,6 +8,7 @@ class EffectManager;
 class RootSignatureManager;
 class PipelineStateManager;
 class TextureManager;
+class LightManager;
 
 class Managers
 {
@@ -53,5 +54,5 @@ private:
     std::shared_ptr<RootSignatureManager> mRootSignatureManager;
     std::shared_ptr<PipelineStateManager> mPipelineStateManager;
     std::shared_ptr<TextureManager> mTextureManager;
-
+    std::shared_ptr<LightManager> mLightManager;
 };

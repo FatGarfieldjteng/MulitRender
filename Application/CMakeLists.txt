@@ -16,6 +16,7 @@ set(HEADER_FILES
 	Node.h
 	CubeMesh.h
     Camera.h
+	Light.h
 	GraphicsResource.h
     BufferResource.h
 	VertexBuffer.h
@@ -49,6 +50,7 @@ set(HEADER_FILES
 	RootSignatureManager.h
 	PipelineStateManager.h
 	TextureManager.h
+	LightManager.h
 	RenderPass.h
 	RenderGraph.h
 	ShadowPass.h
@@ -69,6 +71,7 @@ set(SOURCE_FILES
 	Node.cpp
 	CubeMesh.cpp
 	Camera.cpp
+	Light.cpp
 	GraphicsResource.cpp
 	BufferResource.cpp
 	VertexBuffer.cpp
@@ -101,6 +104,7 @@ set(SOURCE_FILES
 	RootSignatureManager.cpp
 	PipelineStateManager.cpp
 	TextureManager.cpp
+	LightManager.cpp
 	RenderPass.cpp
 	ShadowPass.cpp
 	BeautyPass.cpp

@@ -5,6 +5,7 @@
 #include "RootSignatureManager.h"
 #include "PipelineStateManager.h"
 #include "TextureManager.h"
+#include "LightManager.h"
 
 Managers::Managers(std::shared_ptr<Device> device)
 	:mDevice(device)
@@ -24,4 +25,5 @@ void Managers::createManagers()
 	mRootSignatureManager = std::make_shared<RootSignatureManager>(mDevice);
 	mPipelineStateManager = std::make_shared<PipelineStateManager>(mDevice, mRootSignatureManager, mEffectManager);
 	mTextureManager = std::make_shared<TextureManager>();
+	mLightManager = std::make_shared<LightManager>();
 }
