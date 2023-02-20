@@ -20,15 +20,17 @@ struct VSInput
 
 struct VSOutput
 {
-    float4 Color    : COLOR;
     float4 Position : SV_Position;
+    float4 posWorld : POSITION;
+    float4 Color    : COLOR;
 };
 
 VSOutput main(VSInput Input)
 {
     VSOutput output;
 
-    //matrix ModelViewProjection = mul(ModelCB.M, ViewProjectionCB.VP);
+    output.posWorld = mul(ModelCB.M, float4(Input.Position, 1.0f));
+
     matrix ModelViewProjection = mul(ViewProjectionCB.VP, ModelCB.M);
 
     output.Position = mul(ModelViewProjection, float4(Input.Position, 1.0f));

@@ -75,24 +75,5 @@ void ShadowPass::render(FrameData* frameData)
 
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclRender->commandList());
 
-	// end render
-	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
-	{
-		InOutReource& outResource = mOutputResources[resourceIndex];
-
-		switch (outResource.type)
-		{
-		case ResourceType_BackBuffer:
-		{
-			frameData->mclEndFrame->transitionResource(outResource.resource->mResource,
-				D3D12_RESOURCE_STATE_RENDER_TARGET,
-				D3D12_RESOURCE_STATE_PRESENT);
-		}
-		break;
-		default:
-			break;
-		}
-	}
-
-	frameData->mDirectCommandQueue->executeCommandList(frameData->mclEndFrame->commandList());
+	// end render is not necessary, because no need to transit render target's state
 }

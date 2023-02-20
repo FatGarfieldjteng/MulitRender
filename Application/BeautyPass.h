@@ -14,8 +14,6 @@ public:
     ~BeautyPass();
 
 public:
-    
     // run tasks
     virtual void render(FrameData* frameData) override;
-
 };

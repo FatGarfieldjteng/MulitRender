@@ -46,13 +46,4 @@ public:
     
     // pixel shader
     ComPtr<ID3DBlob> mPixelShaderBlob;
-    
-    // input layout
-    D3D12_INPUT_ELEMENT_DESC* mInputLayout = nullptr;
-
-    // root signature
-    ComPtr<ID3D12RootSignature> mRootSignature;
-
-    // pipeline state object.
-    ComPtr<ID3D12PipelineState> mPipelineState;
 };
