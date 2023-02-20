@@ -59,6 +59,12 @@ public:
     void setPipelineState(ID3D12PipelineState* pPipelineState);
     void setGraphicsRootSignature(ID3D12RootSignature* pRootSignature);
 
+    void setDescriptorHeaps(UINT NumDescriptorHeaps,
+        ID3D12DescriptorHeap* const* ppDescriptorHeaps);
+
+    void setGraphicsRootDescriptorTable(UINT RootParameterIndex,
+        D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor);
+
     void RSSetViewports(const D3D12_VIEWPORT* pViewports, UINT NumViewports = 1);
     void RSSetScissorRects(const D3D12_RECT* pRects, UINT NumRects = 1);
 

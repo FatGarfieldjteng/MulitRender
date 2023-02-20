@@ -375,6 +375,18 @@ void CommandList::setGraphicsRootSignature(ID3D12RootSignature* pRootSignature)
     mCommandList->SetGraphicsRootSignature(pRootSignature);
 }
 
+void CommandList::setDescriptorHeaps(UINT NumDescriptorHeaps,
+    ID3D12DescriptorHeap* const* ppDescriptorHeaps)
+{
+    mCommandList->SetDescriptorHeaps(NumDescriptorHeaps, ppDescriptorHeaps);
+}
+
+void CommandList::setGraphicsRootDescriptorTable(UINT RootParameterIndex,
+    D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor)
+{
+    mCommandList->SetGraphicsRootDescriptorTable(RootParameterIndex, BaseDescriptor);
+}
+
 void CommandList::RSSetViewports(const D3D12_VIEWPORT* pViewports, UINT NumViewports)
 {
     mCommandList->RSSetViewports(NumViewports, pViewports);

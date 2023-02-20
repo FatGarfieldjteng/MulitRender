@@ -3,9 +3,11 @@
 #include "FrameData.h"
 #include "CommandList.h"
 #include "CommandQueue.h"
+#include "TextureManager.h"
 #include "TextureResource.h"
 #include "Managers.h"
 #include "CameraManager.h"
+#include "HeapManager.h"
 #include "Camera.h"
 #include "World.h"
 #include "Scene.h"
@@ -66,6 +68,27 @@ void BeautyPass::render(FrameData* frameData)
 	// multi-threading part
 	frameData->mclRender->setPipelineState(mPipelineState.Get());
 	frameData->mclRender->setGraphicsRootSignature(mRootSignature.Get());
+
+	// acquire two heaps
+	ComPtr<ID3D12DescriptorHeap> SRVHeap = frameData->mManagers->getHeapManager()->getHeap("MainSRVHeap");
+	ComPtr<ID3D12DescriptorHeap> samplerHeap = frameData->mManagers->getHeapManager()->getHeap("MainSamplerHeap");
+
+	ID3D12DescriptorHeap* ppHeaps[] = { SRVHeap.Get(), samplerHeap.Get() };
+	frameData->mclRender->setDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
+	// shadow map
+
+	// get proper shadow map GPU handle
+	std::string shadowBaseName("shadowMap");
+	std::string shadowFullName = shadowBaseName + std::to_string(frameData->mFrameIndex);
+
+	std::shared_ptr<TextureResource> shadowMap = frameData->mManagers->getTextureManager()->getTexture(shadowFullName);
+	frameData->mclRender->setGraphicsRootDescriptorTable(3, shadowMap->mSRV);
+
+	// point sampler
+	frameData->mclRender->setGraphicsRootDescriptorTable(4, samplerHeap->GetGPUDescriptorHandleForHeapStart());
+
+
 	frameData->mclRender->IASetPrimitiveTopology();
 
 	// Update the MVP matrix
@@ -83,8 +106,6 @@ void BeautyPass::render(FrameData* frameData)
 		sizeof(DirectX::XMMATRIX) / 4,
 		&lightViewProjMatrix,
 		0);
-
-	//frameData->mclRender->setGraphicsRootDescriptorTable(2, m_shadowDepthHandle);        // Set the shadow texture as an SRV.
 
 	Scene* scene = frameData->mWorld->getScene();
 	size_t meshCount = scene->nodeCount();
