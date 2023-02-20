@@ -11,6 +11,7 @@ ConstantBuffer<LightViewProjection> LightViewProjectionCB : register(b2);
 
 struct PSInput
 {
+    float4 Position : SV_Position;
     float4 posWorld : POSITION;
     float4 Color : COLOR;
 };

@@ -40,7 +40,7 @@ void RootSignatureManager::createSimpleRootSignature(std::shared_ptr<Device> dev
 	// A single 32-bit constant root parameter that is used by the vertex shader.
 	CD3DX12_ROOT_PARAMETER1 rootParameters[5] = {};
 
-	// objects' mode matrix
+	// objects' world matrix
 	rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	// camera's view-projection matrix
