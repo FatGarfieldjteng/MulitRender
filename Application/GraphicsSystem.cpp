@@ -19,10 +19,10 @@
 #include "LightManager.h"
 #include "Light.h"
 #include "CameraManager.h"
+#include "HeapManager.h"
 #include "TextureResource.h"
 #include <vector>
 #include <DirectXMath.h>
-
 
 GraphicsSystem::GraphicsSystem()
 {
@@ -64,6 +64,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createDSVHeap();
 
 	createSRVHeap();
+
+	createSamplerHeap();
 
 	createEventHandle();
 
@@ -135,6 +137,7 @@ void GraphicsSystem::createDSVHeap()
 	// 1 DSV view for depth stencil buffer
 	// FrameCount DSV views are for shadow map DSV views
 	mDSVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1 + FrameCount);
+	
 }
 
 void GraphicsSystem::createSRVHeap()
@@ -142,6 +145,29 @@ void GraphicsSystem::createSRVHeap()
 	mSRVHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		FrameCount,
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+}
+
+void GraphicsSystem::createSamplerHeap()
+{
+	mSamplerHeap = mDevice->createDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+		1, 
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+
+	D3D12_SAMPLER_DESC clampSamplerDesc = {};
+	clampSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+	clampSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	clampSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	clampSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	clampSamplerDesc.MipLODBias = 0.0f;
+	clampSamplerDesc.MaxAnisotropy = 1;
+	clampSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	clampSamplerDesc.BorderColor[0] = clampSamplerDesc.BorderColor[1] = clampSamplerDesc.BorderColor[2] = clampSamplerDesc.BorderColor[3] = 0;
+	clampSamplerDesc.MinLOD = 0;
+	clampSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+
+	// create point sampler for sample shdow map
+	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerHandle(mSamplerHeap->GetCPUDescriptorHandleForHeapStart());
+	mDevice->createSampler(&clampSamplerDesc, samplerHandle);
 }
 
 void GraphicsSystem::createEventHandle()
@@ -277,6 +303,14 @@ void GraphicsSystem::createCamera()
 void GraphicsSystem::createManagers()
 {
 	mManagers = std::make_shared<Managers>(mDevice);
+
+	// add heaps to heapManager
+	mManagers->getHeapManager()->addHeap("MainDSVHeap", mDSVHeap);
+
+	mManagers->getHeapManager()->addHeap("MainSRVHeap", mSRVHeap);
+
+	mManagers->getHeapManager()->addHeap("MainSamplerHeap", mSamplerHeap);
+
 	std::shared_ptr<TextureManager> textureMan = mManagers->getTextureManager();
 
 	// set backbuffer resource and backbuffer RTV view to texture manager

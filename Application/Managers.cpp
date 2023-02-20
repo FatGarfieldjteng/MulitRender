@@ -7,6 +7,7 @@
 #include "TextureManager.h"
 #include "LightManager.h"
 #include "CameraManager.h"
+#include "HeapManager.h"
 
 Managers::Managers(std::shared_ptr<Device> device)
 	:mDevice(device)
@@ -28,4 +29,5 @@ void Managers::createManagers()
 	mTextureManager = std::make_shared<TextureManager>();
 	mLightManager = std::make_shared<LightManager>();
 	mCameraManager = std::make_shared<CameraManager>();
+	mHeapManager = std::make_shared<HeapManager>();
 }

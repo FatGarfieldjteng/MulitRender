@@ -4,6 +4,8 @@
 #include "CommandList.h"
 #include "CommandQueue.h"
 #include "TextureResource.h"
+#include "Managers.h"
+#include "CameraManager.h"
 #include "Camera.h"
 #include "World.h"
 #include "Scene.h"
@@ -73,6 +75,16 @@ void BeautyPass::render(FrameData* frameData)
 		sizeof(DirectX::XMMATRIX) / 4,
 		&viewProjMatrix,
 		0);
+
+	// Update the MVP matrix for light camera
+	std::shared_ptr<Camera> lightCamera = frameData->mManagers->getCameraManager()->getCamera("Light0Camera");
+	DirectX::XMMATRIX lightViewProjMatrix = lightCamera->modelViewProjectionMatrix();
+	frameData->mclRender->setGraphicsRoot32BitConstants(2,
+		sizeof(DirectX::XMMATRIX) / 4,
+		&lightViewProjMatrix,
+		0);
+
+	//frameData->mclRender->setGraphicsRootDescriptorTable(2, m_shadowDepthHandle);        // Set the shadow texture as an SRV.
 
 	Scene* scene = frameData->mWorld->getScene();
 	size_t meshCount = scene->nodeCount();

@@ -10,6 +10,7 @@ class PipelineStateManager;
 class TextureManager;
 class LightManager;
 class CameraManager;
+class HeapManager;
 
 class Managers
 {
@@ -58,6 +59,11 @@ public:
         return mCameraManager;
     }
 
+    std::shared_ptr<HeapManager> getHeapManager()
+    {
+        return mHeapManager;
+    }
+
 private:
     std::shared_ptr<Device> mDevice;
     std::shared_ptr<ShaderManager> mShaderManager;
@@ -67,4 +73,5 @@ private:
     std::shared_ptr<TextureManager> mTextureManager;
     std::shared_ptr<LightManager> mLightManager;
     std::shared_ptr<CameraManager> mCameraManager;
+    std::shared_ptr<HeapManager> mHeapManager;
 };

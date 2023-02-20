@@ -63,6 +63,8 @@ protected:
 
 	void createSRVHeap();
 
+	void createSamplerHeap();
+
 	void createEventHandle();
 
 	void createFence();

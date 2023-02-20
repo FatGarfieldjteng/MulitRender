@@ -52,6 +52,7 @@ set(HEADER_FILES
 	TextureManager.h
 	LightManager.h
 	CameraManager.h
+	HeapManager.h
 	RenderPass.h
 	RenderGraph.h
 	ShadowPass.h
@@ -107,6 +108,7 @@ set(SOURCE_FILES
 	TextureManager.cpp
 	LightManager.cpp
 	CameraManager.cpp
+	HeapManager.cpp
 	RenderPass.cpp
 	ShadowPass.cpp
 	BeautyPass.cpp

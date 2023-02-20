@@ -48,9 +48,9 @@ void ShadowPass::render(FrameData* frameData)
 	frameData->mclRender->setGraphicsRootSignature(mRootSignature.Get());
 	frameData->mclRender->IASetPrimitiveTopology();
 
-	// Update the MVP matrix
-	std::shared_ptr<Camera> camera = frameData->mManagers->getCameraManager()->getCamera("Light0Camera");
-	DirectX::XMMATRIX lightViewProjMatrix = camera->modelViewProjectionMatrix();
+	// Update the MVP matrix for light camera
+	std::shared_ptr<Camera> lightCamera = frameData->mManagers->getCameraManager()->getCamera("Light0Camera");
+	DirectX::XMMATRIX lightViewProjMatrix = lightCamera->modelViewProjectionMatrix();
 	frameData->mclRender->setGraphicsRoot32BitConstants(0,
 		sizeof(DirectX::XMMATRIX) / 4,
 		&lightViewProjMatrix,
