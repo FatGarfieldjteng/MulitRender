@@ -73,12 +73,17 @@ FrameData* Frame::getFrameData()
 	return mFrameData;
 }
 
+void Frame::beginFrame()
+{
+	mFrameData->beginFrame();
+}
+
 void Frame::renderFrame()
 {
 	mFrameData->renderFrame();
 }
 
-void Frame::reset()
+void Frame::endFrame()
 {
-	mFrameData->reset();
+	mFrameData->endFrame();
 }

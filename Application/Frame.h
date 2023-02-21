@@ -37,8 +37,9 @@ public:
     FrameData* getFrameData();
 
 public:
+    void beginFrame();
     void renderFrame();
-    void reset();
+    void endFrame();
 
 protected:
     FrameData *mFrameData = nullptr;

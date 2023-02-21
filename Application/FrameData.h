@@ -30,11 +30,10 @@ public:
     void setScissorRect(const D3D12_RECT& scissorRect);
 
 public:
-
+    void resetCommandList();
+    void beginFrame();
     void renderFrame();
-
-    void reset();
-
+    void endFrame();
 public:
 
     std::shared_ptr<CommandQueue> mDirectCommandQueue;

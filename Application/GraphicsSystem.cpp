@@ -485,9 +485,13 @@ void GraphicsSystem::renderWorld()
 	// get current buffer index
 	UINT currentBackBufferIndex = mSwapChain->getCurrentBackBufferIndex();
 
+	mFrames[currentBackBufferIndex].beginFrame();
+
 	mFrames[currentBackBufferIndex].renderFrame();
 
-	mFrames[currentBackBufferIndex].reset();
+	mFrames[currentBackBufferIndex].endFrame();
+
+	//mFrames[currentBackBufferIndex].reset();
 
 	mSwapChain->present();
 

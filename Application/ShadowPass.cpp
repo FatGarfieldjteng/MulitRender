@@ -37,6 +37,8 @@ void ShadowPass::render(FrameData* frameData)
 	// here, mclBeginFrame must be executed to ensure the order
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclBeginFrame->commandList().Get());
 
+	frameData->mclBeginFrame->resetCommandList();
+
 	// render, this part should be multithreading
 	frameData->mclRender->RSSetViewports(&frameData->mViewport);
 	frameData->mclRender->RSSetScissorRects(&frameData->mScissorRect);
@@ -76,6 +78,7 @@ void ShadowPass::render(FrameData* frameData)
 	}
 
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclRender->commandList());
+	frameData->mclRender->resetCommandList();
 
 	// end render is not necessary, because no need to transit render target's state
 }

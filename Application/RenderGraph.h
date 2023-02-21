@@ -27,6 +27,7 @@ public:
         const std::string& dstPass,
         const std::string& resource);
     void compile();
+    
     void execute();
 
 private:

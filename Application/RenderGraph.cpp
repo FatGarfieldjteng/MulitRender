@@ -123,6 +123,8 @@ void RenderGraph::execute()
     // Run passes one by one
     for (std::shared_ptr <RenderPass> renderPass: mRenderPasses)
     {
+        
         renderPass->render(mFrameData);
+
     }
 }

@@ -72,15 +72,17 @@ void FrameData::setScissorRect(const D3D12_RECT& scissorRect)
 	mScissorRect = scissorRect;
 }
 
+void FrameData::beginFrame()
+{
+
+}
+
 void FrameData::renderFrame()
 {
 	mRenderGraph->execute();
 }
 
-void FrameData::reset()
+void FrameData::endFrame()
 {
-	for (CommandList* commandlist : mCommandLists)
-	{
-		commandlist->reset();
-	}
+
 }

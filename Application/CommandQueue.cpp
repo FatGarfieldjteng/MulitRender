@@ -61,6 +61,7 @@ void CommandQueue::executeCommandList(ComPtr<ID3D12GraphicsCommandList2> command
 
     mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
     uint64_t fenceValue = signal();
+
 }
 
 uint64_t CommandQueue::executeCommandListAndSignal(ComPtr<ID3D12GraphicsCommandList2> commandList)

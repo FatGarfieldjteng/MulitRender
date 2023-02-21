@@ -33,9 +33,21 @@ public:
         return mCommandList;
     }
 
-    void reset() const
+    void resetAll()
+    {
+        resetCommandList();
+       // resetCommandAllocator();
+        
+    }
+
+    void resetCommandList() const
     {
         mCommandList->Reset(mCommandAllocator.Get(), nullptr);
+    }
+
+    void resetCommandAllocator()
+    {
+        mCommandAllocator->Reset();
     }
 
     void descriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);

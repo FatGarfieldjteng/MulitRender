@@ -55,6 +55,7 @@ void BeautyPass::render(FrameData* frameData)
 
 	// here, mclBeginFrame must be executed to ensure the order
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclBeginFrame->commandList().Get());
+	frameData->mclBeginFrame->resetCommandList();
 
 	// render, this part should be multithreading
 	frameData->mclRender->RSSetViewports(&frameData->mViewport);
@@ -128,6 +129,8 @@ void BeautyPass::render(FrameData* frameData)
 
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclRender->commandList());
 
+	frameData->mclRender->resetCommandList();
+
 	// end render
 	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
 	{
@@ -148,4 +151,5 @@ void BeautyPass::render(FrameData* frameData)
 	}
 
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclEndFrame->commandList());
+	frameData->mclEndFrame->resetCommandList();
 }
