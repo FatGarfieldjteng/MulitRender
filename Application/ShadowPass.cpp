@@ -80,5 +80,11 @@ void ShadowPass::render(FrameData* frameData)
 	frameData->mDirectCommandQueue->executeCommandList(frameData->mclRender->commandList());
 	frameData->mclRender->resetCommandList();
 
-	// end render is not necessary, because no need to transit render target's state
+	// transit shadow map for beauty pass to sample
+	frameData->mclEndFrame->transitionResource(outResource.resource->mResource,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	frameData->mDirectCommandQueue->executeCommandList(frameData->mclEndFrame->commandList());
+	frameData->mclEndFrame->resetCommandList();
 }

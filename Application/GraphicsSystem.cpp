@@ -190,7 +190,7 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 	mWorld->setScene(mScene);
 	mWorld->setCamera(mCamera);
 
-	const int meshCount = 10;
+	const int meshCount = 10000;
 
 	// distribute meshes uniformally in space [-500, 500]^3
 	for (int meshIndex = 0; meshIndex < meshCount; ++meshIndex)
@@ -357,6 +357,10 @@ void GraphicsSystem::createManagers()
 	std::string shadowBaseName("shadowMap");
 	// descriptor size is vendor specific, thus it must be queried
 	const UINT dsvDescriptorSize = mDevice->getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	const UINT SrvDescriptorSize = mDevice->getDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE SRVCPUView(mSRVHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_GPU_DESCRIPTOR_HANDLE SRVGPUView(mSRVHeap->GetGPUDescriptorHandleForHeapStart());
 
 	for (int frameIndex = 0; frameIndex < FrameCount; ++frameIndex)
 	{
@@ -383,9 +387,6 @@ void GraphicsSystem::createManagers()
 		shadowMap->mDSV = shadowDSV;
 
 		// create SRV view
-		CD3DX12_CPU_DESCRIPTOR_HANDLE SRVCPUView(mSRVHeap->GetCPUDescriptorHandleForHeapStart());
-		CD3DX12_GPU_DESCRIPTOR_HANDLE SRVGPUView(mSRVHeap->GetGPUDescriptorHandleForHeapStart());
-
 		D3D12_SHADER_RESOURCE_VIEW_DESC shadowSRVDesc = {};
 		shadowSRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		shadowSRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -397,6 +398,9 @@ void GraphicsSystem::createManagers()
 
 		std::string shadowFullName = shadowBaseName + std::to_string(frameIndex);
 		textureMan->addTexture(shadowFullName, shadowMap);
+
+		SRVCPUView.Offset(SrvDescriptorSize);
+		SRVGPUView.Offset(SrvDescriptorSize);
 	}
 }
 
@@ -490,8 +494,6 @@ void GraphicsSystem::renderWorld()
 	mFrames[currentBackBufferIndex].renderFrame();
 
 	mFrames[currentBackBufferIndex].endFrame();
-
-	//mFrames[currentBackBufferIndex].reset();
 
 	mSwapChain->present();
 

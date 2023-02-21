@@ -80,11 +80,9 @@ void BeautyPass::render(FrameData* frameData)
 	// shadow map
 
 	// get proper shadow map GPU handle
-	std::string shadowBaseName("shadowMap");
-	std::string shadowFullName = shadowBaseName + std::to_string(frameData->mFrameIndex);
+	InOutReource& shadowMap = mInputResources[0];
 
-	std::shared_ptr<TextureResource> shadowMap = frameData->mManagers->getTextureManager()->getTexture(shadowFullName);
-	frameData->mclRender->setGraphicsRootDescriptorTable(3, shadowMap->mSRV);
+	frameData->mclRender->setGraphicsRootDescriptorTable(3, shadowMap.resource->mSRV);
 
 	// point sampler
 	frameData->mclRender->setGraphicsRootDescriptorTable(4, samplerHeap->GetGPUDescriptorHandleForHeapStart());
@@ -132,6 +130,12 @@ void BeautyPass::render(FrameData* frameData)
 	frameData->mclRender->resetCommandList();
 
 	// end render
+	// transit shadow map for shadow pass to write
+
+	frameData->mclEndFrame->transitionResource(shadowMap.resource->mResource,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
 	for (size_t resourceIndex = 0; resourceIndex < mOutputResources.size(); ++resourceIndex)
 	{
 		InOutReource& outResource = mOutputResources[resourceIndex];
