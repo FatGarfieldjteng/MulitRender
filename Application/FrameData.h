@@ -47,6 +47,8 @@ public:
 
     std::unique_ptr<CommandList>    mclRender;
 
+    std::vector<CommandList*>       mRenderCLs;
+
     D3D12_VIEWPORT                  mViewport;
     D3D12_RECT                      mScissorRect;
 

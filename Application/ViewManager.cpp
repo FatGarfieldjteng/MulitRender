@@ -134,103 +134,15 @@ ComPtr<ID3D12DescriptorHeap> ViewManager::createDescriptorHeap()
 	return descriptorHeap;
 }
 
-void ViewManager::commitDescriptorTables(CommandList& commandList,
-	std::function<void(ID3D12GraphicsCommandList*, 
-		UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc)
-{
-	// Compute the number of descriptors that need to be copied 
-	uint32_t numDescriptorsToCommit = computeStaleDescriptorCount();
-
-	if (numDescriptorsToCommit > 0)
-	{
-		auto dxcommandList = commandList.commandList().Get();
-		assert(dxcommandList != nullptr);
-
-		// if no descriptor heap can meet the requirement, acquire or create one
-		if (!mCurrentDescriptorHeap || mNumFreeHandles < numDescriptorsToCommit)
-		{
-			mCurrentDescriptorHeap = acquireDescriptorHeap();
-			mCurrentCPUDescriptorHandle = mCurrentDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			mCurrentGPUDescriptorHandle = mCurrentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-			mNumFreeHandles = mNumDescriptorsPerHeap;
-
-			commandList.descriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
-
-			// When updating the descriptor heap on the command list, all descriptor
-			// tables must be (re)recopied to the new descriptor heap (not just
-			// the stale descriptor tables).
-			mStaleDescriptorTableBitMask = mDescriptorTableBitMask;
-		}
-
-		DWORD rootIndex;
-		// Scan from LSB to MSB for a bit set in staleDescriptorsBitMask
-		while (_BitScanForward(&rootIndex, mStaleDescriptorTableBitMask))
-		{
-			UINT numSrcDescriptors = mCPUDescriptorTableCache[rootIndex].NumCPUDescriptors;
-			D3D12_CPU_DESCRIPTOR_HANDLE* pSrcDescriptorHandles = mCPUDescriptorTableCache[rootIndex].BaseCPUDescriptor;
-
-			D3D12_CPU_DESCRIPTOR_HANDLE pDestDescriptorRangeStarts[] =
-			{
-				mCurrentCPUDescriptorHandle
-			};
-			UINT pDestDescriptorRangeSizes[] =
-			{
-				numSrcDescriptors
-			};
-
-			// copy CPU handles to GPU visible heap
-			mDevice->copyDescriptors(1, pDestDescriptorRangeStarts, pDestDescriptorRangeSizes,
-				numSrcDescriptors, pSrcDescriptorHandles, nullptr, mDescriptorHeapType);
-
-			// Set the descriptors on the command list using the passed-in setter function.
-			setFunc(dxcommandList, rootIndex, mCurrentGPUDescriptorHandle);
-
-			// Offset current CPU and GPU descriptor handles.
-			mCurrentCPUDescriptorHandle.Offset(numSrcDescriptors, mDescriptorHandleIncrementSize);
-			mCurrentGPUDescriptorHandle.Offset(numSrcDescriptors, mDescriptorHandleIncrementSize);
-			mNumFreeHandles -= numSrcDescriptors;
-
-			// clear the bit to avoid _BitScanForward scan the same bit
-			mStaleDescriptorTableBitMask ^= (1 << rootIndex);
-		}
-	}
-}
-
 void ViewManager::commitStagedDescriptorsForDraw(CommandList& commandList)
 {
-	commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable);
+	//commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable);
 }
 
 void ViewManager::commitStagedDescriptorsForDispatch(CommandList& commandList)
 {
-	commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
+	//commitDescriptorTables(commandList, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
 }
-
-D3D12_GPU_DESCRIPTOR_HANDLE ViewManager::copyDescriptor(CommandList& comandList, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor)
-{
-	if (!mCurrentDescriptorHeap || mNumFreeHandles < 1)
-	{
-		mCurrentDescriptorHeap = acquireDescriptorHeap();
-		mCurrentCPUDescriptorHandle = mCurrentDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		mCurrentGPUDescriptorHandle = mCurrentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-		mNumFreeHandles = mNumDescriptorsPerHeap;
-
-		comandList.descriptorHeap(mDescriptorHeapType, mCurrentDescriptorHeap.Get());
-
-		mStaleDescriptorTableBitMask = mDescriptorTableBitMask;
-	}
-
-
-	D3D12_GPU_DESCRIPTOR_HANDLE hGPU = mCurrentGPUDescriptorHandle;
-	mDevice->copyDescriptorsSimple(1, mCurrentCPUDescriptorHandle, cpuDescriptor, mDescriptorHeapType);
-
-	mCurrentCPUDescriptorHandle.Offset(1, mDescriptorHandleIncrementSize);
-	mCurrentGPUDescriptorHandle.Offset(1, mDescriptorHandleIncrementSize);
-	mNumFreeHandles -= 1;
-
-	return hGPU;
-}
-
 void ViewManager::reset()
 {
 	mAvailableDescriptorHeaps = mDescriptorHeapPool;

@@ -227,10 +227,10 @@ void GraphicsSystem::createWorld(ComPtr<ID3D12GraphicsCommandList2> commandList)
 		// translate
 		float translateX, translateY, translateZ;
 
-		translateX = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
-		translateY = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
+		translateX = std::rand() * 1.0f / RAND_MAX * 15.0f - 7.5f;
+		translateY = std::rand() * 1.0f / RAND_MAX * 15.0f - 7.5f;
 
-		translateZ = std::rand() * 1.0f / RAND_MAX * 10.0f - 5.0f;
+		translateZ = std::rand() * 1.0f / RAND_MAX * 15.0f - 7.5f;
 
 		T = DirectX::XMMatrixTranslation(translateX, translateY, translateZ);
 
@@ -283,6 +283,15 @@ void GraphicsSystem::createFrames()
 		mFrames[frameIndex].setScissorRect(mScissorRect);
 		mFrames[frameIndex].setManagers(mManagers);
 	}
+}
+
+void GraphicsSystem::initTasks()
+{
+	mTaskScheduler.Initialize();
+	mThreads = mTaskScheduler.GetThreadNum();
+
+	// create commandList pools
+	
 }
 
 void GraphicsSystem::createCamera()

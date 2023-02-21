@@ -4,6 +4,8 @@
 
 // each RenderTask is in charge of drawing a set of meshes
 
+class FrameData;
+
 class RenderTask : public enki::ITaskSet
 {
 public:

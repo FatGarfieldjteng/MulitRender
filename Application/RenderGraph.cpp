@@ -107,8 +107,8 @@ void RenderGraph::linkRenderPass(const std::string& srcPass,
     const std::string& dstPass,
     const std::string& resource)
 {
+ 
     
-    //linkRenerPass(mIDToRenderPass["ShadowPass"], mIDToRenderPass["BeautyPass"], );
 }
 
 void RenderGraph::compile()

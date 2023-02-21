@@ -4,6 +4,7 @@
 #include <d3d12.h>
 #include "SwapChain.h"
 #include "Device.h"
+#include "../ThirdParty/enkiTS/src/TaskScheduler.h"
 #include <memory>
 #include <string>
 
@@ -83,6 +84,8 @@ protected:
 
 	void createFrames();
 
+	void initTasks();
+
 	void updateCamera(double elapsedTime);
 
 private:
@@ -132,6 +135,9 @@ private:
 	bool mGraphicsInitialized = false;
 
 	double mTotalElapsedSeconds = 0.0;
+
+	enki::TaskScheduler mTaskScheduler;
+	uint32_t mThreads;
 
 	Frame* mFrames = nullptr;
 };

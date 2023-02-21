@@ -23,10 +23,6 @@ public:
         uint32_t offset, uint32_t numCPUDescriptors, 
         const D3D12_CPU_DESCRIPTOR_HANDLE srcBaseCPUDescriptor);
 
-    void commitDescriptorTables(CommandList& commandList,
-        std::function<void(ID3D12GraphicsCommandList*, 
-            UINT, 
-            D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc);
     void commitStagedDescriptorsForDraw(CommandList& commandList);
     void commitStagedDescriptorsForDispatch(CommandList& commandList);
 
