@@ -24,6 +24,8 @@
 #include <vector>
 #include <DirectXMath.h>
 
+#include "../ThirdParty/enkiTS/src/TaskScheduler.h"
+
 GraphicsSystem::GraphicsSystem()
 {
 	
@@ -90,6 +92,8 @@ void GraphicsSystem::initGraphicsSystem(HWND hWnd,
 	createManagers();
 
 	createLightCamera();
+
+	initTasks();
 
 	createFrames();
 
@@ -265,6 +269,14 @@ void GraphicsSystem::createEffect()
 	mEffect->build(mDevice);
 }
 
+void GraphicsSystem::initTasks()
+{
+	mTaskScheduler = std::make_shared<enki::TaskScheduler>();
+
+	mTaskScheduler->Initialize();
+	
+}
+
 void GraphicsSystem::createFrames()
 {
 	// create Frame objects
@@ -277,22 +289,16 @@ void GraphicsSystem::createFrames()
 
 		// setup frame data
 		mFrames[frameIndex].setDirectCommandQueue(mDirectCommandQueue);
-		mFrames[frameIndex].createCommandList(mDevice);
 		mFrames[frameIndex].setWorld(mWorld);
 		mFrames[frameIndex].setViewport(mViewport);
 		mFrames[frameIndex].setScissorRect(mScissorRect);
 		mFrames[frameIndex].setManagers(mManagers);
+		mFrames[frameIndex].setTaskScheduler(mTaskScheduler);
+		mFrames[frameIndex].createCommandList(mDevice);
 	}
 }
 
-void GraphicsSystem::initTasks()
-{
-	mTaskScheduler.Initialize();
-	mThreads = mTaskScheduler.GetThreadNum();
 
-	// create commandList pools
-	
-}
 
 void GraphicsSystem::createCamera()
 {

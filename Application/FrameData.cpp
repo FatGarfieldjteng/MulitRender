@@ -12,6 +12,8 @@
 #include "RenderPass.h"
 #include "Managers.h"
 
+#include "../ThirdParty/enkiTS/src/TaskScheduler.h"
+
 FrameData::FrameData()
 {
 
@@ -40,6 +42,9 @@ void FrameData::createCommandList(std::shared_ptr<Device> device)
 	// render command list
 	mclRender = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	mCommandLists.push_back(mclRender.get());
+
+	mNumTasks = mTaskScheduler->GetNumTaskThreads();
+	mCompoundRenderCommandList = device->createUniqueCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT, mNumTasks);
 }
 
 void FrameData::setWorld(std::shared_ptr<World> world)
@@ -70,6 +75,11 @@ void FrameData::setViewport(const D3D12_VIEWPORT& viewport)
 void FrameData::setScissorRect(const D3D12_RECT& scissorRect)
 {
 	mScissorRect = scissorRect;
+}
+
+void FrameData::setTaskScheduler(std::shared_ptr<enki::TaskScheduler> taskScheduler)
+{
+	mTaskScheduler = taskScheduler;
 }
 
 void FrameData::beginFrame()

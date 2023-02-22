@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 class FrameData;
 class Device;
 class World;
@@ -7,7 +9,10 @@ class CommandQueue;
 class RenderGraph;
 class Managers;
 
-#include <vector>
+namespace enki
+{
+    class TaskScheduler;
+};
 
 class Frame
 {
@@ -32,7 +37,8 @@ public:
     void setRenderGraph(RenderGraph* renderGraph);
     void setManagers(std::shared_ptr<Managers> managers);
     void setViewport(const D3D12_VIEWPORT& viewport);
-    void setScissorRect(const D3D12_RECT& scissorRect);
+    void setScissorRect(const D3D12_RECT& scissorRect); 
+    void setTaskScheduler(std::shared_ptr<enki::TaskScheduler> taskScheduler);
 
     FrameData* getFrameData();
 

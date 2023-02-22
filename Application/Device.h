@@ -49,6 +49,8 @@ public:
 
     std::unique_ptr<CommandList> createUniqueCommandList(D3D12_COMMAND_LIST_TYPE type);
 
+    std::unique_ptr<CommandList> createUniqueCommandList(D3D12_COMMAND_LIST_TYPE type, uint32_t count);
+
     ComPtr<ID3D12Fence> Device::createFence();
 
 public:

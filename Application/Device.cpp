@@ -131,6 +131,11 @@ std::unique_ptr<CommandList> Device::createUniqueCommandList(D3D12_COMMAND_LIST_
     return std::make_unique<CommandList>(shared_from_this(), type);
 }
 
+std::unique_ptr<CommandList> Device::createUniqueCommandList(D3D12_COMMAND_LIST_TYPE type, uint32_t count)
+{
+    return std::make_unique<CommandList>(shared_from_this(), type, count);
+}
+
 ComPtr<ID3D12Fence> Device::createFence()
 {
     ComPtr<ID3D12Fence> fence;

@@ -68,6 +68,11 @@ void Frame::setScissorRect(const D3D12_RECT& scissorRect)
 	mFrameData->setScissorRect(scissorRect);
 }
 
+void Frame::setTaskScheduler(std::shared_ptr<enki::TaskScheduler> taskScheduler)
+{
+	mFrameData->setTaskScheduler(taskScheduler);
+}
+
 FrameData* Frame::getFrameData()
 {
 	return mFrameData;

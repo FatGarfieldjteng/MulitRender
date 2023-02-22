@@ -4,7 +4,6 @@
 #include <d3d12.h>
 #include "SwapChain.h"
 #include "Device.h"
-#include "../ThirdParty/enkiTS/src/TaskScheduler.h"
 #include <memory>
 #include <string>
 
@@ -17,6 +16,11 @@ class Frame;
 class World;
 class RenderGraph;
 class Managers;
+
+namespace enki
+{
+	class TaskScheduler;
+};
 
 class GraphicsSystem
 {
@@ -82,9 +86,9 @@ protected:
 
 	void createLightCamera();
 
-	void createFrames();
-
 	void initTasks();
+
+	void createFrames();
 
 	void updateCamera(double elapsedTime);
 
@@ -136,7 +140,7 @@ private:
 
 	double mTotalElapsedSeconds = 0.0;
 
-	enki::TaskScheduler mTaskScheduler;
+	std::shared_ptr<enki::TaskScheduler> mTaskScheduler;
 	uint32_t mThreads;
 
 	Frame* mFrames = nullptr;

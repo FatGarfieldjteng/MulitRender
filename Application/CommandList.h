@@ -113,10 +113,20 @@ private:
 
     std::unique_ptr<UploadBuffer> mUploadBuffer;
 
-    // command list, backend command allocator, command list type
     D3D12_COMMAND_LIST_TYPE mCommandListType;
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> mCommandList;
-    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator;
+
+    // single command allocator + command list or multiple command allocators and command lists
+    bool mSingle = true;
+
+    // single 
+    // command list, backend command allocator, command list type
+    ComPtr<ID3D12GraphicsCommandList2> mCommandList;
+    ComPtr<ID3D12CommandAllocator> mCommandAllocator;
+
+    // multiple
+    std::vector<ComPtr<ID3D12GraphicsCommandList2>> mCommandLists;
+    std::vector<ComPtr<ID3D12CommandAllocator> > mCommandAllocators;
+
 
     std::unique_ptr<ViewManager> mViewManagers[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
     ID3D12DescriptorHeap* mDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];

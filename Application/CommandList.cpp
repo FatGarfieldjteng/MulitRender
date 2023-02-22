@@ -24,11 +24,21 @@ CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE
     mCommandList = mDevice->createCommandList(mCommandAllocator, mCommandListType);
 
     mUploadBuffer = std::make_unique<UploadBuffer>(mDevice);
+
+    mSingle = true;
 }
 
 CommandList::CommandList(std::shared_ptr<Device> device, D3D12_COMMAND_LIST_TYPE type, int count)
+    : mDevice(device)
+    , mCommandListType(type)
 {
+    for (int i = 0; i < count; ++i)
+    {
+        ComPtr<ID3D12CommandAllocator> commandAllocator = mCommandAllocators.emplace_back(mDevice->createCommandAllocator(mCommandListType));
+        mCommandLists.emplace_back(mDevice->createCommandList(commandAllocator, mCommandListType));
+    }
 
+    mSingle = false;
 }
 
 CommandList::~CommandList()

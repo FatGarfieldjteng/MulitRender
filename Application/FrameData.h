@@ -10,6 +10,11 @@ class CommandQueue;
 class RenderGraph;
 class Managers;
 
+namespace enki
+{
+    class TaskScheduler;
+};
+
 class FrameData
 {
 public:
@@ -28,6 +33,7 @@ public:
     void setDirectCommandQueue(std::shared_ptr<CommandQueue> directCommandQueue);
     void setViewport(const D3D12_VIEWPORT& viewport);
     void setScissorRect(const D3D12_RECT& scissorRect);
+    void setTaskScheduler(std::shared_ptr<enki::TaskScheduler> taskScheduler);
 
 public:
     void resetCommandList();
@@ -47,7 +53,7 @@ public:
 
     std::unique_ptr<CommandList>    mclRender;
 
-    std::vector<CommandList*>       mRenderCLs;
+    std::unique_ptr<CommandList>    mCompoundRenderCommandList;
 
     D3D12_VIEWPORT                  mViewport;
     D3D12_RECT                      mScissorRect;
@@ -58,6 +64,9 @@ public:
     std::shared_ptr<Managers>       mManagers;
 
     std::vector< CommandList*>      mCommandLists;
+
+    std::shared_ptr<enki::TaskScheduler> mTaskScheduler;
+    uint32_t                        mNumTasks = 0;
 
     unsigned int                    mFrameIndex = 0;
 
